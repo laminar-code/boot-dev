@@ -1,0 +1,42 @@
+version: "3"
+
+
+services:
+  dev-foundation:
+    container_name: ubuntu-nix-foundation
+    hostname: ubuntu-nix-foundation
+    build:
+      context: ./ubuntu-nix-foundation
+      dockerfile: Dockerfile
+
+
+  dev:
+    environment:
+        - UBUNTU_WITH_NIX_DEV
+    container_name: ubuntu-nix-dev
+    hostname: ubuntu-nix-dev
+    privileged: true
+    build:
+      context: ./ubuntu-nix-dev
+      args:
+        username: ${USERNAME} 
+        git_bearer_token: ${GIT_BEARER_TOKEN}
+        git_utils_repo: ${GIT_UTILS_REPO}
+      dockerfile: Dockerfile 
+    command: /root/.nix-profile/bin/nix-daemon 
+    volumes:
+      - home:/home
+      - nix:/nix
+      - host:/var/local/host
+    depends_on:
+      - dev-foundation
+
+
+volumes:
+  home:
+  nix:
+  host:
+    driver_opts:
+      o: bind
+      device: [insert host path here]/docker-host
+

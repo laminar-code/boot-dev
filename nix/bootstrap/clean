@@ -1,0 +1,7 @@
+#!/bin/sh
+
+docker container rm -f ubuntu-nix-dev ubuntu-nix-foundation
+docker image     rm -f bootstrap-dev bootstrap-dev-foundation 
+docker volume    rm -f bootstrap_nix bootstrap_home
+docker builder   prune --all --force
+

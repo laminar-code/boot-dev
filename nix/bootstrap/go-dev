@@ -1,0 +1,4 @@
+#!/bin/sh
+
+clear; docker exec -it --user [insert username here] ubuntu-nix-dev /bin/bash
+
