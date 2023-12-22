@@ -1,4 +1,5 @@
 #!/bin/sh
 
-git clone -c http.extraHeader='Authorization: Bearer [insert bearer token here]' $1
+source ../.env
+git clone -c http.extraHeader="Authorization: Bearer $GIT_BEARER_TOKEN" $1
 

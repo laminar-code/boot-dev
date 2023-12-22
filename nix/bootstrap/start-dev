@@ -1,3 +1,6 @@
 #!/bin/bash
-docker run --rm -ti --name ubuntu-nix-dev --mount source=home,target=/home --mount source=nix,target=/nix bootstrap-dev
+
+clear
+source .env
+docker run --rm -it --user $USERNAME --name ubuntu-nix-dev --mount source=home,target=/home --mount source=nix,target=/nix bootstrap-dev
 

@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
-clear; docker exec -it --user [insert username here] ubuntu-nix-dev /bin/bash
+clear
+source .env
+echo "Starting session as "$USERNAME
+docker exec -it --user $USERNAME ubuntu-nix-dev-local /bin/bash
 

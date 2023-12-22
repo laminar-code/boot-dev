@@ -1,4 +1,6 @@
 #!/bin/bash
 
+export LOCAL_DIRECTORY="$HOME/container-host"
+
 docker compose up
 

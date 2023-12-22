@@ -1,7 +1,18 @@
 #!/bin/sh
 
-docker container rm -f ubuntu-nix-dev ubuntu-nix-foundation
-docker image     rm -f bootstrap-dev bootstrap-dev-foundation 
-docker volume    rm -f bootstrap_nix bootstrap_home
+echo "Removing containers..."
+docker container rm -f ubuntu-nix-dev-local   2> /dev/null || true
+docker container rm -f ubuntu-nix-foundation  2> /dev/null || true
+
+echo "Removing images..."
+docker image     rm -f ubuntu-nix-dev         2> /dev/null || true
+docker image     rm -f ubuntu-nix-foundation  2> /dev/null || true
+
+echo "Removing volumes..."
+docker volume    rm -f bootstrap_nix          2> /dev/null || true
+docker volume    rm -f bootstrap_home         2> /dev/null || true
+docker volume    rm -f bootstrap_host         2> /dev/null || true
+
+echo "Pruning..."
 docker builder   prune --all --force
 

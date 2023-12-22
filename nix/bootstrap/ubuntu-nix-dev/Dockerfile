@@ -1,26 +1,31 @@
-FROM bootstrap-dev-foundation
-RUN apt-get update -y
+FROM ubuntu-nix-foundation
+
+# Set PATH in environment
 ENV PATH="${PATH}:/nix/var/nix/profiles/default/bin"
 
-
+# Declare args
 ARG username
 ARG git_bearer_token
 ARG git_utils_repo
 
-
+# Set up local user and add to sudoers w/o password requirement
 RUN adduser --shell /usr/bin/bash ${username}
 ARG username=${username}
 RUN addgroup ${username} sudo
-ARG username=${username}
-RUN addgroup ${username} sudo
 RUN echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
+
+# Set LANG and USER in user environment
 USER ${username}
 ENV LANG en_US.utf8
 ENV USER ${username}
-RUN echo "${git_bearer_token}"
-RUN echo "${git_utils_repo}"
+
+# Clone repos for dev config
 USER ${username}
 RUN mkdir /home/${username}/git && cd /home/${username}/git && git clone -c "http.extraHeader=Authorization: Bearer ${git_bearer_token}" ${git_utils_repo}
+USER ${username}
+RUN cd /home/${username}/git && git clone https://github.com/laminar-code/boot-dev.git 
+
+# Link config dot files with dev config repos
 USER ${username}
 RUN mkdir -p /home/${username}/.config/home-manager && ln -s /home/${username}/git/utils/nix/flakes/home.nix /home/${username}/.config/home-manager/home.nix
 USER ${username}
@@ -28,8 +33,16 @@ RUN mkdir -p /home/${username}/.config/tmux && ln -s /home/${username}/git/utils
 USER ${username}
 RUN mkdir -p /home/${username}/.config/nvim && ln -s /home/${username}/git/utils/nvim/init.lua /home/${username}/.config/nvim/init.lua
 USER ${username}
+
+# Copy in .env
+USER ${username}
+COPY --chown=${username}:${username} .env /home/${username}/git/utils/nix/bootstrap
+
+# Update permissions on nix store to prevent podman error message
 RUN sudo chown --recursive ${username} /nix
 USER ${username}
+
+# Configure and install home-manager and run initial home-manager switch
 RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 & nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
 USER ${username}
 RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 & nix-channel --update
@@ -38,7 +51,7 @@ RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 & mv /home/${username}/.bas
 USER ${username} 
 RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 & USER=${username} /home/${username}/.nix-profile/bin/home-manager switch -b backup
 
-
-USER ${USERNAME}
+# Set workdir to start shell in home directory
+USER ${username}
 WORKDIR /home/${username}
 
