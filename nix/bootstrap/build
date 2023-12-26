@@ -1,4 +1,5 @@
 #!/bin/bash
+set -u
 
 if [ -f ./.env ];
 then
@@ -11,43 +12,43 @@ else
   exit 1
 fi
 
-if [ ! -v USERNAME ]; then
+if [ -z $USERNAME ]; then
   echo "ERROR: Environment variable USERNAME does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ ! -v GIT_UTILS_REPO ]; then
+if [ -z GIT_UTILS_REPO ]; then
   echo "ERROR: Environment variable GIT_UTILS_REPO does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ ! -v GIT_UTILS_REPO_RAW ]; then
+if [ -z GIT_UTILS_REPO_RAW ]; then
   echo "ERROR: Environment variable GIT_UTILS_REPO_RAW does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ ! -v GIT_BEARER_TOKEN ]; then
+if [ -z GIT_BEARER_TOKEN ]; then
   echo "ERROR: Environment variable GIT_BEARER_TOKEN does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ ! -v GIT_USER_NAME ]; then
+if [ -z GIT_USER_NAME ]; then
   echo "ERROR: Environment variable GIT_USER_NAME does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ ! -v GIT_USER_EMAIL ]; then
+if [ -z GIT_USER_EMAIL ]; then
   echo "ERROR: Environment variable GIT_USER_EMAIL does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ ! -v HOME_NIX ]; then
+if [ -z HOME_NIX ]; then
   echo "ERROR: Environment variable HOME_NIX does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
