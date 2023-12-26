@@ -36,7 +36,7 @@ USER ${username}
 
 # Copy in .env
 USER ${username}
-COPY --chown=${username}:${username} .env /home/${username}/git/utils/nix/bootstrap
+COPY --chown=${username}:${username} .env /home/${username}/.env.boot-dev
 
 # Update permissions on nix store to prevent podman error message
 RUN sudo chown --recursive ${username} /nix
