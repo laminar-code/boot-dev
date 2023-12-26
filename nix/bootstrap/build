@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [ -z "./.env" ];
+if [ -f "./.env" ];
 then
   . ./.env
-elif [ -z "~/.env.boot-dev" ];
+elif [ -f "$HOME/.env.boot-dev" ];
 then
   . ~/.env.boot-dev
 else
@@ -16,7 +16,7 @@ mkdir -p $LOCAL_DIRECTORY
 
 PODMAN=$(which podman)
 
-if [ -z PODMAN ];
+if [ -f PODMAN ];
 then
   podman compose --no-cache build
 else
