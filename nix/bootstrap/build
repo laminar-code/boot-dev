@@ -18,37 +18,37 @@ if [ -z $USERNAME ]; then
   exit 2
 fi
 
-if [ -z GIT_UTILS_REPO ]; then
+if [ -z $GIT_UTILS_REPO ]; then
   echo "ERROR: Environment variable GIT_UTILS_REPO does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ -z GIT_UTILS_REPO_RAW ]; then
+if [ -z $GIT_UTILS_REPO_RAW ]; then
   echo "ERROR: Environment variable GIT_UTILS_REPO_RAW does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ -z GIT_BEARER_TOKEN ]; then
+if [ -z $GIT_BEARER_TOKEN ]; then
   echo "ERROR: Environment variable GIT_BEARER_TOKEN does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ -z GIT_USER_NAME ]; then
+if [ -z $GIT_USER_NAME ]; then
   echo "ERROR: Environment variable GIT_USER_NAME does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ -z GIT_USER_EMAIL ]; then
+if [ -z $GIT_USER_EMAIL ]; then
   echo "ERROR: Environment variable GIT_USER_EMAIL does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
 fi
 
-if [ -z HOME_NIX ]; then
+if [ -z $HOME_NIX ]; then
   echo "ERROR: Environment variable HOME_NIX does not have a value."
   echo "Review .env.README for .env file format."
   exit 2
@@ -64,10 +64,10 @@ mkdir -p $LOCAL_DIRECTORY
 
 PODMAN=$(which podman)
 
-if [ -f PODMAN ];
-then
-  podman compose --no-cache build
-else
-  docker compose build --no-cache
-fi
+#if [ -f PODMAN ];
+#then
+#  podman compose --no-cache build
+#else
+#  docker compose build --no-cache
+#fi
 
