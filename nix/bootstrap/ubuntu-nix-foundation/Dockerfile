@@ -1,12 +1,12 @@
 FROM ubuntu:latest
 
 # Update apt package lists and upgrade current packages
-RUN apt -y update
-RUN apt -y upgrade
+RUN apt-get -yqq update
+RUN apt-get -yqq upgrade
 
 # Install nala for parallel downloads and updates
 # then install base level required packages
-RUN apt -y install nala
+RUN apt-get -yqq install nala
 RUN nala install locales sudo curl git slirp4netns uidmap buildah xz-utils -y
 
 # Configure locales
