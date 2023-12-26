@@ -1,5 +1,16 @@
 #!/bin/bash
 
+if [ -z "./.env" ];
+then
+  . ./.env
+elif [ -z "~/.env.boot-dev" ];
+then
+  . ~/.env.boot-dev
+else
+  echo "ERROR: No .env file exists."
+  exit 1
+fi
+
 export LOCAL_DIRECTORY="$HOME/container-host"
 mkdir -p $LOCAL_DIRECTORY
 
