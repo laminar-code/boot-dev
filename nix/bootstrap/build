@@ -53,6 +53,11 @@ if [ ! -v HOME_NIX ]; then
   exit 2
 fi
 
+if [ ! -f ./.env ];
+then
+  cp -p $HOME/.env.boot-dev ./.env
+fi
+
 export LOCAL_DIRECTORY="$HOME/container-host"
 mkdir -p $LOCAL_DIRECTORY
 
