@@ -60,8 +60,8 @@ PODMAN=$(which podman)
 
 if [ -f PODMAN ];
 then
- podman compose build --no-cache
+  podman compose --no-cache build
 else
- docker compose --no-cache build
+  docker compose build --no-cache
 fi
 
