@@ -32,7 +32,12 @@ USER ${username}
 RUN mkdir -p /home/${username}/.config/tmux && ln -s /home/${username}/git/boot-dev/tmux/tmux.conf /home/${username}/.config/tmux/tmux.conf
 USER ${username}
 RUN mkdir -p /home/${username}/.config/nvim && ln -s /home/${username}/git/boot-dev/nvim/init.lua /home/${username}/.config/nvim/init.lua
+
+# Link ~/bin files with dev config repos
 USER ${username}
+RUN ln -s /home/${username}/git/boot-dev/git/clone /home/${username}/bin/clone
+USER ${username}
+RUN ln -s /home/${username}/git/boot-dev/git/clone-files-only /home/${username}/bin/clone-files-only
 
 # Copy in .env
 USER ${username}
