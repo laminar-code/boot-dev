@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [[ $# -ne 3 ]]; then
+    echo "Illegal number of arguments: " >&2
+    echo "Please provide a URL and a target directory only."
+    exit 1
+fi
+
+git clone --separate-git-dir=$(mktemp -u) --depth=1 $1 $2 && rm $2/.git
+
