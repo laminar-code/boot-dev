@@ -32,6 +32,8 @@ USER ${username}
 RUN mkdir -p /home/${username}/.config/tmux && ln -s /home/${username}/git/boot-dev/tmux/tmux.conf /home/${username}/.config/tmux/tmux.conf
 USER ${username}
 RUN mkdir -p /home/${username}/.config/nvim && ln -s /home/${username}/git/boot-dev/nvim/init.lua /home/${username}/.config/nvim/init.lua
+USER ${username}
+RUN mkdir -p /home/${username}/.config/nix && ln -s /home/${username}/git/boot-dev/nix/nix.conf /home/${username}/.config/nix/nix.conf
 
 # Link ~/bin files with dev config repos
 USER ${username}
