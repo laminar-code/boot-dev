@@ -10,12 +10,12 @@
   };
 
   outputs = { nixpkgs, home-manager, ... }: let
-    arch = "aarch64-darwin";
+    arch = "aarch64-linux";
   in {
     defaultPackage.${arch} =
       home-manager.defaultPackage.${arch};
 
-    homeConfigurations.jcroft = # REPLACE ME
+    homeConfigurations.jcroft = 
       home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.${arch};
         modules = [ ./home.nix ];
