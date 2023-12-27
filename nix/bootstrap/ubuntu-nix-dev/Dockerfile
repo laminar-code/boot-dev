@@ -27,13 +27,13 @@ RUN cd /home/${username}/git && git clone https://github.com/laminar-code/boot-d
 
 # Link config dot files with dev config repos
 USER ${username}
+RUN mkdir -p /home/${username}/.config/nix &&          ln -s /home/${username}/git/boot-dev/nix/config/nix.conf /home/${username}/.config/nix/nix.conf
+USER ${username}
 RUN mkdir -p /home/${username}/.config/home-manager && ln -s /home/${username}/git/boot-dev/nix/flakes/home.nix /home/${username}/.config/home-manager/home.nix
 USER ${username}
-RUN mkdir -p /home/${username}/.config/tmux && ln -s /home/${username}/git/boot-dev/tmux/tmux.conf /home/${username}/.config/tmux/tmux.conf
+RUN mkdir -p /home/${username}/.config/tmux &&         ln -s /home/${username}/git/boot-dev/tmux/tmux.conf /home/${username}/.config/tmux/tmux.conf
 USER ${username}
-RUN mkdir -p /home/${username}/.config/nvim && ln -s /home/${username}/git/boot-dev/nvim/init.lua /home/${username}/.config/nvim/init.lua
-USER ${username}
-RUN mkdir -p /home/${username}/.config/nix && ln -s /home/${username}/git/boot-dev/nix/nix.conf /home/${username}/.config/nix/nix.conf
+RUN mkdir -p /home/${username}/.config/nvim &&         ln -s /home/${username}/git/boot-dev/nvim/init.lua /home/${username}/.config/nvim/init.lua
 
 # Link ~/bin files with dev config repos
 USER ${username}
