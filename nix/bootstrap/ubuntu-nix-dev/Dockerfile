@@ -35,6 +35,8 @@ RUN mkdir -p /home/${username}/.config/nvim && ln -s /home/${username}/git/boot-
 
 # Link ~/bin files with dev config repos
 USER ${username}
+RUN mkdir /home/${username}/bin
+USER ${username}
 RUN ln -s /home/${username}/git/boot-dev/git/clone /home/${username}/bin/clone
 USER ${username}
 RUN ln -s /home/${username}/git/boot-dev/git/clone-files-only /home/${username}/bin/clone-files-only
