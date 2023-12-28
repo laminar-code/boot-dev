@@ -2,7 +2,6 @@
   home.username = "jcroft"; 
   home.homeDirectory = "/home/jcroft";
   home.stateVersion = "23.11";
-  programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
     # # Adds the 'hello' command to your environment. It prints a friendly
@@ -38,5 +37,49 @@
     #   echo "Hello, ${config.home.username}!"
     # '')
   ];
+
+  home.file = {
+    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
+    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
+    # # symlink to the Nix store copy.
+    # ".screenrc".source = dotfiles/screenrc;
+
+    # # You can also set the file content immediately.
+    # ".gradle/gradle.properties".text = ''
+    #   org.gradle.console=verbose
+    #   org.gradle.daemon.idletimeout=3600000
+    # '';
+
+    "bin/docker".source = config.lib.file.mkOutOfStoreSymlink "/home/jcroft/.nix-profile/bin/podman";
+  };
+
+  home.sessionVariables = {
+    EDITOR = "nvim";
+  };
+
+  home.sessionPath = [ "/home/jcroft/bin" ];
+
+  programs = {
+    home-manager.enable = true;
+    bash = {
+      enable = true;
+      shellAliases = {
+        cls = "clear";
+        vi = "nvim";
+        vim = "nvim";
+      };
+      initExtra = ''
+        . "/home/jcroft/.nix-profile/etc/profile.d/hm-session-vars.sh"
+      '';
+    };
+    git = {
+      enable = true;
+      userName = "John Croft";
+      userEmail = "john.croft@finra.org";
+      extraConfig = {
+        pull.rebase = false;
+      };
+    };
+  };
 }
 
