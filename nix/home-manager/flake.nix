@@ -12,7 +12,6 @@
 
   outputs = { self, nixpkgs, flake-utils, home-manager, ... } : 
   let
-    arch = "aarch64-linux";
     allSystems = [ "x86_64-linux" "aarch64-linux" ];
     forAllSystems = f: nixpkgs.lib.genAttrs allSystems (system: f {
       pkgs = import nixpkgs { inherit system; };
