@@ -20,8 +20,8 @@ ENV LANG en_US.utf8
 ENV USER ${username}
 
 # Clone repos for dev config
-USER ${username}
-RUN mkdir /home/${username}/git && cd /home/${username}/git && git clone -c "http.extraHeader=Authorization: Bearer ${git_bearer_token}" ${git_utils_repo}
+# USER ${username}
+# RUN mkdir /home/${username}/git && cd /home/${username}/git && git clone -c "http.extraHeader=Authorization: Bearer ${git_bearer_token}" ${git_utils_repo}
 USER ${username}
 RUN cd /home/${username}/git && git clone https://github.com/laminar-code/boot-dev.git 
 
