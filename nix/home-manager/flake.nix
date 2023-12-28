@@ -10,18 +10,23 @@
     };
   };
 
-  outputs = { nixpkgs, flake-utils, home-manager, ... }: let
+  outputs = inputs@{ self, nixpkgs, flake-utils, home-manager, ... } : 
+  let
     arch = "aarch64-linux";
   in {
-    defaultPackage.${arch} =
-      home-manager.defaultPackage.${arch};
 
-    homeConfigurations.jcroft = 
-      home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${arch};
-        modules = [ ./home.nix ];
-      };
+    homeConfigurations = {
+      jcroft = 
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.${arch};
+          modules = [ ./home.nix ];
+        };
     };
+  
+    jcroft = self.homeConfigurations.jcroft.activationPackage;
+    defaultPackage.${arch} = self.jcroft;
+
+  };
 
 #  outputs = { self, nixpkgs, flake-utils, home-manager, ... }:
 #    # calling a function from `flake-utils` that takes a lambda
