@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ config, pkgs, ... }: {
   home.username = "jcroft"; 
   home.homeDirectory = "/home/jcroft";
   home.stateVersion = "23.11";
@@ -50,7 +50,7 @@
     #   org.gradle.daemon.idletimeout=3600000
     # '';
 
-    "bin/docker".source = config.lib.file.mkOutOfStoreSymlink "/home/jcroft/.nix-profile/bin/podman";
+    # "bin/docker".source = config.lib.file.mkOutOfStoreSymlink "/home/jcroft/.nix-profile/bin/podman";
   };
 
   home.sessionVariables = {
@@ -75,7 +75,7 @@
     git = {
       enable = true;
       userName = "John Croft";
-      userEmail = "john.croft@finra.org";
+      userEmail = "jcroft@coderz.io";
       extraConfig = {
         pull.rebase = false;
       };
