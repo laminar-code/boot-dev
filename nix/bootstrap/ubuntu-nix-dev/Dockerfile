@@ -52,6 +52,12 @@ COPY --chown=${username}:${username} .env /home/${username}/.env.boot-dev
 # Update permissions on nix store to prevent podman error message
 RUN sudo chown --recursive ${username} /nix
 
+# Move .profile and .bashrc out of the way
+USER ${username}
+RUN mv /home/${username}/.profile /home/${username}/.profile.orig
+USER ${username}
+RUN mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
+
 # Configure and install home-manager and run initial home-manager switch
 USER ${username} 
 RUN { sudo /root/.nix-profile/bin/nix-daemon & } && sleep 1 && cd /home/${username}/.config/home-manager && nix run . switch
