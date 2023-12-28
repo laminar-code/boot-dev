@@ -27,15 +27,15 @@ RUN cd /home/${username}/git && git clone https://github.com/laminar-code/boot-d
 
 # Link config dot files with dev config repos
 USER ${username}
-RUN mkdir -p /home/${username}/.config/nix &&          ln -s /home/${username}/git/boot-dev/nix/config/nix.conf /home/${username}/.config/nix/nix.conf
+RUN mkdir -p /home/${username}/.config/nix &&  ln -s /home/${username}/git/boot-dev/nix/config/nix.conf /home/${username}/.config/nix/nix.conf
 USER ${username}
-RUN mkdir -p /home/${username}/.config/nixpkgs &&      ln -s /home/${username}/git/boot-dev/nix/nixpkgs /home/${username}/.config/nixpkgs
-# USER ${username}
-# RUN mkdir -p /home/${username}/.config/home-manager && ln -s /home/${username}/git/boot-dev/nix/flakes/home.nix /home/${username}/.config/home-manager/home.nix
+RUN mkdir -p /home/${username}/.config &&      ln -s /home/${username}/git/boot-dev/nix/nixpkgs /home/${username}/.config/nixpkgs
 USER ${username}
-RUN mkdir -p /home/${username}/.config/tmux &&         ln -s /home/${username}/git/boot-dev/tmux/tmux.conf /home/${username}/.config/tmux/tmux.conf
+RUN mkdir -p /home/${username}/.config &&      ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
 USER ${username}
-RUN mkdir -p /home/${username}/.config/nvim &&         ln -s /home/${username}/git/boot-dev/nvim/init.lua /home/${username}/.config/nvim/init.lua
+RUN mkdir -p /home/${username}/.config/tmux && ln -s /home/${username}/git/boot-dev/tmux/tmux.conf /home/${username}/.config/tmux/tmux.conf
+USER ${username}
+RUN mkdir -p /home/${username}/.config/nvim && ln -s /home/${username}/git/boot-dev/nvim/init.lua /home/${username}/.config/nvim/init.lua
 
 # Link ~/bin files with dev config repos
 USER ${username}
@@ -54,15 +54,15 @@ RUN sudo chown --recursive ${username} /nix
 USER ${username}
 
 # Configure and install home-manager and run initial home-manager switch
-# RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 & nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+# RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 && nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
 # USER ${username}
-# RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 & nix-channel --update
+# RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 && nix-channel --update
 # USER ${username}
-# RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 & mv /home/${username}/.bashrc /home/${username}/.bashrc.orig & mv /home/${username}/.profile /home/${username}/.profile.orig & USER=${username} nix-shell '<home-manager>' -A install
+# RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 && mv /home/${username}/.bashrc /home/${username}/.bashrc.orig && mv /home/${username}/.profile /home/${username}/.profile.orig && USER=${username} nix-shell '<home-manager>' -A install
 # USER ${username} 
-# RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 & USER=${username} /home/${username}/.nix-profile/bin/home-manager switch -b backup
+# RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 && USER=${username} /home/${username}/.nix-profile/bin/home-manager switch -b backup
 USER ${username} 
-RUN sudo /root/.nix-profile/bin/nix-daemon & sleep 1 & cd /home/${username}/.config/nixpkgs & nix run . switch
+RUN { sudo /root/.nix-profile/bin/nix-daemon & } && sleep 1 && cd /home/${username}/.config/home-manager && nix run . switch
 
 # Set workdir to start shell in home directory
 USER ${username}
