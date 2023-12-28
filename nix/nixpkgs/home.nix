@@ -1,6 +1,6 @@
 { pkgs, ... }: {
-  home.username = "jcroft"; # REPLACE ME
-  home.homeDirectory = "/home/jcoft"; # REPLACE ME
+  home.username = "jcroft"; 
+  home.homeDirectory = "/home/jcoft";
   home.stateVersion = "23.11";
   programs.home-manager.enable = true;
 }
