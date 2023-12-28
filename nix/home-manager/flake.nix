@@ -30,13 +30,8 @@
     jcroft = self.homeConfigurations.jcroft.activationPackage;
     
     packages = forAllSystems ({ pkgs }: {
-      #default = {
-        # Package definition
-      #};
       default = self.jcroft;
     });
-
-    #packages.${arch}.default = self.jcroft;
   };
 }
 
