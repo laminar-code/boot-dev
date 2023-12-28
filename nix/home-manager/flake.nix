@@ -26,9 +26,17 @@
           modules = [ ./home.nix ];
         };
     };
-  
+ 
     jcroft = self.homeConfigurations.jcroft.activationPackage;
-    packages.${arch}.default = self.jcroft;
+    
+    packages = forAllSystems ({ pkgs }: {
+      #default = {
+        # Package definition
+      #};
+      default = self.jcroft;
+    });
+
+    #packages.${arch}.default = self.jcroft;
   };
 }
 
