@@ -19,18 +19,21 @@
     });
   in {
 
-    homeConfigurations = {
-      jcroft = 
-        home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.${arch};
-          modules = [ ./home.nix ];
-        };
-    };
+    packages = forAllSystems ({  pkgs } : 
+    let
+      homeConfigurations = {
+        jcroft = 
+          home-manager.lib.homeManagerConfiguration {
+            inherit pkgs;
+            modules = [ ./home.nix ];
+          };
+      };
  
-    jcroft = self.homeConfigurations.jcroft.activationPackage;
-    
-    packages = forAllSystems ({ pkgs }: {
-      default = self.jcroft;
+      jcroft = homeConfigurations.jcroft.activationPackage;
+    in {
+      
+      default = jcroft;
+
     });
   };
 }
