@@ -11,7 +11,7 @@ ARG git_utils_repo
 # Set up local user and add to sudoers w/o password requirement
 RUN adduser --shell /usr/bin/bash ${username}
 ARG username=${username}
-RUN addgroup ${username} sudo
+RUN adduser ${username} sudo
 RUN echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
 
 # Set LANG and USER in user environment
@@ -20,8 +20,8 @@ ENV LANG en_US.utf8
 ENV USER ${username}
 
 # Clone repos for dev config
-# USER ${username}
-# RUN mkdir /home/${username}/git && cd /home/${username}/git && git clone -c "http.extraHeader=Authorization: Bearer ${git_bearer_token}" ${git_utils_repo}
+USER ${username}
+RUN mkdir /home/${username}/git # && cd /home/${username}/git && git clone -c "http.extraHeader=Authorization: Bearer ${git_bearer_token}" ${git_utils_repo}
 USER ${username}
 RUN cd /home/${username}/git && git clone https://github.com/laminar-code/boot-dev.git 
 
