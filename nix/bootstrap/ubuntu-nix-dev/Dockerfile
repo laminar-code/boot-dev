@@ -62,6 +62,9 @@ RUN mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 USER ${username} 
 RUN { sudo /root/.nix-profile/bin/nix-daemon & } && sleep 1 && cd /home/${username}/.config/home-manager && nix run . switch
 
+USER ${username}
+RUN nvim --headless "+Lazy! sync" +qa
+
 # Set workdir to start shell in home directory
 USER ${username}
 WORKDIR /home/${username}
