@@ -27,15 +27,15 @@ RUN cd /home/${username}/git && git clone https://github.com/laminar-code/boot-d
 
 # Link config dot files with dev config repos
 USER ${username}
-RUN mkdir -p /home/${username}/.config/nix &&  ln -s /home/${username}/git/boot-dev/nix/config/nix.conf /home/${username}/.config/nix/nix.conf
+RUN mkdir -p /home/${username}/.config/nix  && ln -s /home/${username}/git/boot-dev/nix/config/nix.conf /home/${username}/.config/nix/nix.conf
 USER ${username}
-RUN mkdir -p /home/${username}/.config &&      ln -s /home/${username}/git/boot-dev/nix/nixpkgs /home/${username}/.config/nixpkgs
+RUN mkdir -p /home/${username}/.config      && ln -s /home/${username}/git/boot-dev/nix/nixpkgs /home/${username}/.config/nixpkgs
 USER ${username}
-RUN mkdir -p /home/${username}/.config &&      ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
+RUN mkdir -p /home/${username}/.config      && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
 USER ${username}
 RUN mkdir -p /home/${username}/.config/tmux && ln -s /home/${username}/git/boot-dev/tmux/tmux.conf /home/${username}/.config/tmux/tmux.conf
 USER ${username}
-RUN mkdir -p /home/${username}/.config/nvim && ln -s /home/${username}/git/boot-dev/nvim /home/${username}/.config/nvim
+RUN mkdir -p /home/${username}/.config      && ln -s /home/${username}/git/boot-dev/nvim /home/${username}/.config/nvim
 
 # Link ~/bin files with dev config repos
 USER ${username}
