@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:24.04
 
 # Update apt package lists and upgrade current packages
 RUN apt-get -yqq update
