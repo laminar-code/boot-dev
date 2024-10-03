@@ -7,7 +7,7 @@ RUN apt-get -yqq upgrade
 # Install nala for parallel downloads and updates
 # then install base level required packages
 RUN apt-get -yqq install nala
-RUN nala install locales sudo make curl git slirp4netns uidmap buildah xz-utils -y
+RUN nala install locales sudo make curl git slirp4netns uidmap buildah xz-utils neovim -y
 
 # Configure locales
 RUN locale-gen en_US

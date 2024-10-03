@@ -33,7 +33,6 @@
     gitui
     tmux
     gcc
-    neovim
 
     podman
     podman-compose
