@@ -1,6 +1,8 @@
 #!/bin/bash
 
-export LOCAL_DIRECTORY="$HOME/container-host"
+source .env
+
+export LOCAL_DIRECTORY
 
 DOCKER=$(which docker)
 DOCKER_COMPOSE=$(which docker-compose)
