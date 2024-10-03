@@ -2,5 +2,11 @@
 
 export LOCAL_DIRECTORY="$HOME/container-host"
 
-docker compose up
+DOCKER=$(which docker)
+DOCKER_COMPOSE=$(which docker-compose)
 
+if [ -f $DOCKER_COMPOSE ]; then
+  $DOCKER_COMPOSE up
+else
+  $DOCKER compose up
+fi
