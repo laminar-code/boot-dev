@@ -61,13 +61,14 @@ mkdir -p $LOCAL_DIRECTORY
 
 DOCKER_COMPOSE=$(which docker-compose)
 PODMAN=$(which podman)
+DOCKER=$(which docker)
 
-if [ -f DOCKER_COMPOSE ]; then
-  docker-compose build --no-cache
+if [ -f $DOCKER_COMPOSE ]; then
+  $DOCKER_COMPOSE build --no-cache
 else
-  if [ -f PODMAN ]; then
-    podman compose --no-cache build
+  if [ -f $PODMAN ]; then
+    $PODMAN compose --no-cache build
   else
-    docker compose build --no-cache
+    $DOCKER compose build --no-cache
   fi
 fi
