@@ -10,26 +10,33 @@
 
     iputils
 
-    btop
+    babashka
     bat
+    btop
     fd
     fzf
     ripgrep
     rsync
 
+    unzip
+    wget
+    zip
+
     git
     gitui
     lazygit
     tmux
-    gcc
 
+    clojure
+    gcc
     lua
     nodejs_18
+    python39
+    zulu
 
+    clojure-lsp
     luarocks
     tree-sitter
-
-    zip
 
     podman
     podman-compose
