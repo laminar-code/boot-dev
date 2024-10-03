@@ -12,13 +12,24 @@
 
     btop
     bat
+    fd
     fzf
+    ripgrep
     rsync
 
     git
     gitui
+    lazygit
     tmux
     gcc
+
+    lua
+    nodejs_18
+
+    luarocks
+    tree-sitter
+
+    zip
 
     podman
     podman-compose
