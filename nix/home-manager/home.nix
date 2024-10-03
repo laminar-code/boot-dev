@@ -37,6 +37,7 @@
     clojure-lsp
     luarocks
     tree-sitter
+    nodePackages.neovim
 
     podman
     podman-compose
