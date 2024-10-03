@@ -1,11 +1,9 @@
 #!/bin/bash
 set -u
 
-if [ -f ./.env ];
-then
+if [ -f ./.env ]; then
   . ./.env
-elif [ -f $HOME/.env.boot-dev ];
-then
+elif [ -f $HOME/.env.boot-dev ]; then
   . $HOME/.env.boot-dev
 else
   echo "ERROR: No .env file exists."
@@ -54,20 +52,22 @@ if [ -z $HOME_NIX ]; then
   exit 2
 fi
 
-if [ ! -f ./.env ];
-then
+if [ ! -f ./.env ]; then
   cp -p $HOME/.env.boot-dev ./.env
 fi
 
 export LOCAL_DIRECTORY="$HOME/container-host"
 mkdir -p $LOCAL_DIRECTORY
 
+DOCKER_COMPOSE=$(which docker-compose)
 PODMAN=$(which podman)
 
-if [ -f PODMAN ];
-then
-  podman compose --no-cache build
+if [ -f DOCKER_COMPOSE ]; then
+  docker-compose build --no-cache
 else
-  docker compose build --no-cache
+  if [ -f PODMAN ]; then
+    podman compose --no-cache build
+  else
+    docker compose build --no-cache
+  fi
 fi
-
