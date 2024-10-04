@@ -27,7 +27,7 @@ services:
     volumes:
       - home:/home
       - nix:/nix
-      - host:/var/local/host
+      - host:/mnt/host
     depends_on:
       - dev-foundation
 
