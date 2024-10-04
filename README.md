@@ -14,3 +14,15 @@ start-dev was intended to start up the development container after it was built,
 
 go-dev logs you into the running dev container.
 
+## Installed tooling
+
+Nix for package management.
+
+LazyVim distribution of NeoVim.
+
+Podman for containerization.
+
+Git of course.
+
+Tmux for session/window management.
+
