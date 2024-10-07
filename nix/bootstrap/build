@@ -68,13 +68,24 @@ if [ ! -f $LOCAL_DIRECTORY ]; then
 fi
 
 DOCKER_COMPOSE=$(which docker-compose)
-PODMAN=$(which podman)
-DOCKER=$(which docker)
+if [ $? -ne 0 ]; then
+  DOCKER_COMPOSE = ""
+fi
 
-if [ -f $DOCKER_COMPOSE ]; then
+PODMAN=$(which podman)
+if [ $? -ne 0 ]; then
+  PODMAN = ""
+fi
+
+DOCKER=$(which docker)
+if [ $? -ne 0 ]; then
+  DOCKER = ""
+fi
+
+if [ -f DOCKER_COMPOSE ]; then
   $DOCKER_COMPOSE build --no-cache
 else
-  if [ -f $PODMAN ]; then
+  if [ -f PODMAN ]; then
     $PODMAN compose --no-cache build
   else
     $DOCKER compose build --no-cache

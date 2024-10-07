@@ -4,11 +4,27 @@ source .env
 
 export LOCAL_DIRECTORY
 
-DOCKER=$(which docker)
 DOCKER_COMPOSE=$(which docker-compose)
+if [ $? -ne 0 ]; then
+  DOCKER_COMPOSE = ""
+fi
 
-if [ -f $DOCKER_COMPOSE ]; then
+PODMAN=$(which docker)
+if [ $? -ne 0 ]; then
+  PODMAN = ""
+fi
+
+DOCKER=$(which docker)
+if [ $? -ne 0 ]; then
+  DOCKER = ""
+fi
+
+if [ -f DOCKER_COMPOSE ]; then
   $DOCKER_COMPOSE up
 else
-  $DOCKER compose up
+  if [ -f PODMAN ]; then
+    $PODMAN compose up
+  else
+    $DOCKER compose up
+  fi
 fi
