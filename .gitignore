@@ -1,3 +1,5 @@
 # nix output
 result
 
+*.pem
+
