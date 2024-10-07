@@ -23,7 +23,8 @@ services:
         git_bearer_token: ${GIT_BEARER_TOKEN}
         git_utils_repo: ${GIT_UTILS_REPO}
       dockerfile: ubuntu-nix-dev/Dockerfile 
-    command: sudo /root/.nix-profile/bin/nix-daemon 
+    command: /bin/bash -c "echo 'Ubuntu Development Container'; sleep infinity"
+    # command: sudo /root/.nix-profile/bin/nix-daemon 
     volumes:
       - home:/home
       - nix:/nix
