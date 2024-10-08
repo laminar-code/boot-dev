@@ -16,7 +16,7 @@ USER ${username}
 ENV LANG en_US.utf8
 ENV USER ${username}
 
-# Set up nix
+# Set up nix and install home-manager
 USER ${username}
 RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
 ENV  PATH=${PATH}:/home/${username}/.nix-profile/bin
@@ -24,6 +24,8 @@ USER ${username}
 RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
 USER ${username}
 RUN  nix-channel --update
+USER ${username}
+RUN  cp -rp /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config
 USER ${username}
 RUN  nix-shell '<home-manager>' -A install
 
@@ -38,8 +40,8 @@ USER ${username}
 RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/config /home/${username}/.config/nix
 # USER ${username}
 # RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/nixpkgs /home/${username}/.config/nixpkgs
-USER ${username}
-RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
+# USER ${username}
+# RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
 USER ${username}
 RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/tmux /home/${username}/.config/tmux
 USER ${username}
@@ -64,10 +66,10 @@ USER ${username}
 RUN mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 
 # Configure and install home-manager and run initial home-manager switch
-USER ${username} 
-RUN cd /home/${username}/.config/home-manager; nix run . -- build --flake .
-USER ${username} 
-RUN cd /home/${username}/.config/home-manager; nix run . -- switch --flake .
+# USER ${username} 
+# RUN cd /home/${username}/.config/home-manager; nix run . -- build --flake .
+# USER ${username} 
+# RUN cd /home/${username}/.config/home-manager; nix run . -- switch --flake .
 
 # Initialize Neovim plugins
 USER ${username}
