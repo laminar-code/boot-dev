@@ -18,12 +18,14 @@ ENV USER ${username}
 
 # Set up nix
 USER ${username}
-RUN curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-ENV PATH=${PATH}:/home/${username}/.nix-profile/bin
+RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+ENV  PATH=${PATH}:/home/${username}/.nix-profile/bin
 USER ${username}
-RUN nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
+RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
 USER ${username}
-RUN nix-channel --update
+RUN  nix-channel --update
+USER ${username}
+RUN  nix-shell '<home-manager>' -A install
 
 # Clone repos for dev config
 USER ${username}
