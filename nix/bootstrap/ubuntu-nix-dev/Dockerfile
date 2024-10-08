@@ -16,19 +16,6 @@ USER ${username}
 ENV LANG en_US.utf8
 ENV USER ${username}
 
-# Set up nix and install home-manager
-USER ${username}
-RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-ENV  PATH=${PATH}:/home/${username}/.nix-profile/bin
-USER ${username}
-RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
-USER ${username}
-RUN  nix-channel --update
-USER ${username}
-RUN  cp -rp /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config
-USER ${username}
-RUN  nix-shell '<home-manager>' -A install
-
 # Clone repos for dev config
 USER ${username}
 RUN mkdir /home/${username}/git # && cd /home/${username}/git && git clone -c "http.extraHeader=Authorization: Bearer ${git_bearer_token}" ${git_utils_repo}
@@ -64,6 +51,19 @@ USER ${username}
 RUN mv /home/${username}/.profile /home/${username}/.profile.orig
 USER ${username}
 RUN mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
+
+# Set up nix and install home-manager
+USER ${username}
+RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+ENV  PATH=${PATH}:/home/${username}/.nix-profile/bin
+USER ${username}
+RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
+USER ${username}
+RUN  nix-channel --update
+USER ${username}
+RUN  cp -rp /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config
+USER ${username}
+RUN  nix-shell '<home-manager>' -A install
 
 # Configure and install home-manager and run initial home-manager switch
 # USER ${username} 
