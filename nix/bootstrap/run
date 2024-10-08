@@ -6,17 +6,17 @@ export LOCAL_DIRECTORY
 
 DOCKER_COMPOSE=$(which docker-compose)
 if [ $? -ne 0 ]; then
-  DOCKER_COMPOSE = ""
+  DOCKER_COMPOSE=""
 fi
 
 PODMAN=$(which docker)
 if [ $? -ne 0 ]; then
-  PODMAN = ""
+  PODMAN=""
 fi
 
 DOCKER=$(which docker)
 if [ $? -ne 0 ]; then
-  DOCKER = ""
+  DOCKER=""
 fi
 
 if [ -f DOCKER_COMPOSE ]; then
