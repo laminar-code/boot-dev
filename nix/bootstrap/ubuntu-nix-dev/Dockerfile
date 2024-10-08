@@ -21,7 +21,7 @@ USER ${username}
 RUN curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
 ENV PATH=${PATH}:/home/${username}/.nix-profile/bin
 USER ${username}
-RUN nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+RUN nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
 USER ${username}
 RUN nix-channel --update
 
@@ -63,9 +63,9 @@ RUN mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 
 # Configure and install home-manager and run initial home-manager switch
 USER ${username} 
-RUN cd /home/${username}/.config/home-manager; nix --extra-experimental-features nix-command run . -- build --flake .
+RUN cd /home/${username}/.config/home-manager; nix run . -- build --flake .
 USER ${username} 
-RUN cd /home/${username}/.config/home-manager; nix --extra-experimental-features nix-command run . -- switch --flake .
+RUN cd /home/${username}/.config/home-manager; nix run . -- switch --flake .
 
 # Initialize Neovim plugins
 USER ${username}
