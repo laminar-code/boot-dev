@@ -1,39 +1,26 @@
+
 {
-  description = "Home Manager Flake";
-  
+  description = "Home Manager configuration";
+
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/release-24.05";
-    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:nixos/nixpkgs/release-24.05";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, ... } : 
-  let
-    allSystems = [ "x86_64-linux" "aarch64-linux" ];
-    forAllSystems = f: nixpkgs.lib.genAttrs allSystems (system: f {
-      pkgs = import nixpkgs { inherit system; };
-    });
+  outputs = { nixpkgs, home-manager, ... }: let
+    arch = "aarch64-linux";
   in {
+    defaultPackage.${arch} =
+      home-manager.defaultPackage.${arch};
 
-    packages = forAllSystems ({  pkgs } : 
-    let
-      homeConfigurations = {
-        jcroft = 
-          home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;
-            modules = [ ./home.nix ];
-          };
+    homeConfigurations.jcroft = 
+      home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.${arch};
+        modules = [ ./home.nix ];
       };
- 
-      jcroft = homeConfigurations.jcroft.activationPackage;
-    in {
-      
-      default = jcroft;
-
-    });
-  };
+    };
 }
 
