@@ -14,6 +14,14 @@ start-dev was intended to start up the development container after it was built,
 
 go-dev logs you into the running dev container.
 
+## Certificates
+
+Any certificates that need to be installed into the ca bundle need to be stored in PEM format in ubuntu-nix-foundation/certs. They will be ignored by git, but will be copied into the new image and bundled with the system ca certs. 
+
+## home-manager
+
+Home Manager is installed by default as a flake. The current version is hard-coded to aarch64 and will need to be updated for other platforms.
+
 ## Installed tooling
 
 Nix for package management.
