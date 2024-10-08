@@ -1,8 +1,5 @@
 FROM ubuntu-nix-foundation
 
-# Set PATH in environment
-ENV PATH="${PATH}:/nix/var/nix/profiles/default/bin"
-
 # Declare args
 ARG username
 ARG git_bearer_token
@@ -19,6 +16,15 @@ USER ${username}
 ENV LANG en_US.utf8
 ENV USER ${username}
 
+# Set up nix
+USER ${username}
+RUN curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+ENV PATH=${PATH}:/home/${username}/.nix-profile/bin
+USER ${username}
+RUN nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+USER ${username}
+RUN nix-channel --update
+
 # Clone repos for dev config
 USER ${username}
 RUN mkdir /home/${username}/git # && cd /home/${username}/git && git clone -c "http.extraHeader=Authorization: Bearer ${git_bearer_token}" ${git_utils_repo}
@@ -27,15 +33,15 @@ RUN cd /home/${username}/git && git clone https://github.com/laminar-code/boot-d
 
 # Link config dot files with dev config repos
 USER ${username}
-RUN mkdir -p /home/${username}/.config/nix  && ln -s /home/${username}/git/boot-dev/nix/config/nix.conf /home/${username}/.config/nix/nix.conf
+RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/config /home/${username}/.config/nix
 USER ${username}
-RUN mkdir -p /home/${username}/.config      && ln -s /home/${username}/git/boot-dev/nix/nixpkgs /home/${username}/.config/nixpkgs
+RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/nixpkgs /home/${username}/.config/nixpkgs
 USER ${username}
-RUN mkdir -p /home/${username}/.config      && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
+RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
 USER ${username}
-RUN mkdir -p /home/${username}/.config/tmux && ln -s /home/${username}/git/boot-dev/tmux/tmux.conf /home/${username}/.config/tmux/tmux.conf
+RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/tmux /home/${username}/.config/tmux
 USER ${username}
-RUN mkdir -p /home/${username}/.config      && ln -s /home/${username}/git/boot-dev/nvim /home/${username}/.config/nvim
+RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nvim /home/${username}/.config/nvim
 
 # Link ~/bin files with dev config repos
 USER ${username}
@@ -49,9 +55,6 @@ RUN ln -s /home/${username}/git/boot-dev/git/clone-files-only /home/${username}/
 USER ${username}
 COPY --chown=${username}:${username} .env /home/${username}/.env.boot-dev
 
-# Update permissions on nix store to prevent podman error message
-RUN sudo chown --recursive ${username} /nix
-
 # Move .profile and .bashrc out of the way
 USER ${username}
 RUN mv /home/${username}/.profile /home/${username}/.profile.orig
@@ -60,8 +63,11 @@ RUN mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 
 # Configure and install home-manager and run initial home-manager switch
 USER ${username} 
-RUN { sudo /root/.nix-profile/bin/nix-daemon & } && sleep 1 && cd /home/${username}/.config/home-manager && nix run . switch
+RUN cd /home/${username}/.config/home-manager; nix --extra-experimental-features nix-command run . -- build --flake .
+USER ${username} 
+RUN cd /home/${username}/.config/home-manager; nix --extra-experimental-features nix-command run . -- switch --flake .
 
+# Initialize Neovim plugins
 USER ${username}
 RUN nvim --headless "+Lazy! sync" +qa
 
