@@ -20,7 +20,7 @@ Any certificates that need to be installed into the ca bundle need to be stored 
 
 ## home-manager
 
-Home Manager is installed by default as a flake. The current version is hard-coded to aarch64 and will need to be updated for other platforms.
+Home Manager is installed by default as a flake. The current version is hard-coded to aarch64 and will need to be updated for other platforms. A new flake to handle all systems is in progress but still doesn't generically work with the home-manager switch command.
 
 ## Installed tooling
 
