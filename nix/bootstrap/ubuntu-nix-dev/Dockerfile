@@ -34,8 +34,8 @@ RUN cd /home/${username}/git && git clone https://github.com/laminar-code/boot-d
 # Link config dot files with dev config repos
 USER ${username}
 RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/config /home/${username}/.config/nix
-USER ${username}
-RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/nixpkgs /home/${username}/.config/nixpkgs
+# USER ${username}
+# RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/nixpkgs /home/${username}/.config/nixpkgs
 USER ${username}
 RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
 USER ${username}
