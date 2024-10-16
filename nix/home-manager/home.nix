@@ -30,7 +30,7 @@
     clojure
     gcc
     lua
-    nodejs_18
+    nodejs_22
     python39
     zulu
 
