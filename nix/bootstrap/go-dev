@@ -2,6 +2,20 @@
 
 clear
 source .env
+
+# iTerm2 shell integration
+test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
+
+# iTerm2 tab titles
+function title {
+  if [ "$1" ]; then
+    export PROMPT_COMMAND='__bp_precmd_invoke_cmd'
+    echo -ne "\033]0;${*}\007"
+  else
+    export PROMPT_COMMAND='echo -ne "\033]0;${PWD/#$HOME/\~}\007";__bp_precmd_invoke_cmd'
+  fi
+}
+
+title "Dev Container"
 echo "Starting session as "$USERNAME
 docker exec -it --user $USERNAME ubuntu-nix-dev-local /bin/bash
-
