@@ -1,6 +1,10 @@
 # nix output
 result
 
+.build
+
+.ssh
+
 *.pem
 *.crt
 
