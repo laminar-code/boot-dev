@@ -11,6 +11,11 @@ ARG username=${username}
 RUN adduser ${username} sudo
 RUN echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
 
+# Add .ssh config to user
+COPY .ssh/* /home/${username}/.ssh/
+RUN chown -R ${username}:${username} /home/${username}/.ssh
+RUN chmod -R 600 /home/${username}/.ssh
+
 # Set LANG and USER in user environment
 USER ${username}
 ENV LANG en_US.utf8
