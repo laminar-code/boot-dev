@@ -18,8 +18,8 @@ RUN update-locale LANG="en_US.UTF-8" LANGUAGE="en_US"
 ENV LANG en_US.UTF-8
 
 # Configure certs
-COPY certs/*.pem certs/*.crt /usr/share/ca-certificates/local/
-RUN cd /usr/share/ca-certificates; ls -1 local/*.pem | sudo tee -a /etc/ca-certificates.conf
+COPY certs/*.crt /usr/local/share/ca-certificates/
+# RUN cd /usr/share/ca-certificates; ls -1 local/*.pem | sudo tee -a /etc/ca-certificates.conf
 RUN update-ca-certificates
 
 # Startup at the command line
