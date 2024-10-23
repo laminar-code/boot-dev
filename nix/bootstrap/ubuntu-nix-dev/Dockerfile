@@ -19,8 +19,8 @@ RUN chmod -R 600 /home/${username}/.ssh/*
 
 # Set LANG and USER in user environment
 USER ${username}
-ENV LANG en_US.utf8
-ENV USER ${username}
+ENV LANG=en_US.utf8
+ENV USER=${username}
 
 # Clone repos for dev config
 USER ${username}
