@@ -47,6 +47,10 @@ RUN ln -s /home/${username}/git/boot-dev/git/clone /home/${username}/bin/clone
 USER ${username}
 RUN ln -s /home/${username}/git/boot-dev/git/clone-files-only /home/${username}/bin/clone-files-only
 
+# Create link for /mnt/host
+USER ${username}
+RUN ln -s /mnt/host /home/${username}/host
+
 # Copy in .env
 USER ${username}
 COPY --chown=${username}:${username} .env /home/${username}/.env.boot-dev
