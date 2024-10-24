@@ -62,7 +62,7 @@ RUN mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 USER ${username}
 RUN curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh
 RUN chmod +x /home/${username}/nix-installer.sh
-RUN /home/${username}/nix-installer.sh install linux --init none
+RUN /home/${username}/nix-installer.sh install linux --init none --no-confirm
 RUN chown ${username}:${username} /nix/* -R
 
 # RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
