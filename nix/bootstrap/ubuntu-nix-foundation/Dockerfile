@@ -16,10 +16,10 @@ RUN dpkg-reconfigure locales
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 RUN update-locale LANG="en_US.UTF-8" LANGUAGE="en_US"
 ENV LANG en_US.UTF-8
+ENV LANGUAGE="en_US"
 
 # Configure certs
 COPY certs/*.crt /usr/local/share/ca-certificates/
-# RUN cd /usr/share/ca-certificates; ls -1 local/*.pem | sudo tee -a /etc/ca-certificates.conf
 RUN update-ca-certificates
 
 # Startup at the command line
