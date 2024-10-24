@@ -31,10 +31,6 @@ RUN cd /home/${username}/git && git clone https://github.com/laminar-code/boot-d
 # Link config dot files with dev config repos
 USER ${username}
 RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/config /home/${username}/.config/nix
-# USER ${username}
-# RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/nixpkgs /home/${username}/.config/nixpkgs
-# USER ${username}
-# RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
 USER ${username}
 RUN mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/tmux /home/${username}/.config/tmux
 USER ${username}
@@ -64,16 +60,21 @@ RUN mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 
 # Set up nix and install home-manager
 USER ${username}
-RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-ENV  PATH=${PATH}:/home/${username}/.nix-profile/bin
-USER ${username}
-RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
-USER ${username}
-RUN  nix-channel --update
-USER ${username}
-RUN  cp -rp /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config
-USER ${username}
-RUN  nix-shell '<home-manager>' -A install
+RUN curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh
+RUN chmod +x /home/${username}/nix-installer.sh
+RUN /home/${username}/nix-installer.sh install linux --init none
+RUN chown ${username}:${username} /nix/* -R
+
+# RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+# ENV  PATH=${PATH}:/home/${username}/.nix-profile/bin
+# USER ${username}
+# RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
+# USER ${username}
+# RUN  nix-channel --update
+# USER ${username}
+# RUN  cp -rp /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config
+# USER ${username}
+# RUN  nix-shell '<home-manager>' -A install
 
 # Configure and install home-manager and run initial home-manager switch
 # USER ${username} 
