@@ -116,6 +116,10 @@
       enable = true;
       userName = "John Croft";
       userEmail = "jcroft@coderz.io";
+      includes = [{
+        condition = "gitdir:~/host/";
+        path = "~/host/git/.gitconfig-work";
+      }];
       extraConfig = {
         pull.rebase = false;
       };
