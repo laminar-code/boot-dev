@@ -117,7 +117,7 @@
       userName = "John Croft";
       userEmail = "jcroft@coderz.io";
       includes = [{
-        condition = "gitdir:~/host/";
+        condition = "gitdir:~/host/*/";
         path = "~/host/git/.gitconfig-work";
       }];
       extraConfig = {
