@@ -36,7 +36,7 @@ RUN  mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/
 USER ${username}
 RUN  mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nvim /home/${username}/.config/nvim
 USER ${username}
-RUN  mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/bootstrap/home-manager /home/${username}/.config/home-manager
+RUN  mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
 
 # Link ~/bin files with dev config repos
 USER ${username}
