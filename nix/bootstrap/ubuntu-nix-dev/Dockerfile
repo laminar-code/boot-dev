@@ -66,11 +66,11 @@ RUN  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems
 RUN  chmod +x /home/${username}/nix-installer.sh
 RUN  /home/${username}/nix-installer.sh install linux --init none --no-confirm
 RUN  sudo chown ${username}:${username} /nix/* -R
-ENV  PATH=${PATH}:/home/${username}/.nix-profile/bin
+ENV  PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${username}/.nix-profile/bin
 USER ${username}
-# RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/release-24.05.tar.gz nixpkgs 
-# RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
-# RUN  nix-channel --update
+RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/release-24.05.tar.gz nixpkgs 
+RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
+RUN  nix-channel --update
 
 # RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
 # ENV  PATH=${PATH}:/home/${username}/.nix-profile/bin
