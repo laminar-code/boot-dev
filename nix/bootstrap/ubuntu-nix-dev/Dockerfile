@@ -59,7 +59,7 @@ USER ${username}
 RUN  mv /home/${username}/.profile /home/${username}/.profile.orig
 USER ${username}
 RUN  mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
-:
+
 # Set up nix and install home-manager
 USER ${username}
 RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
