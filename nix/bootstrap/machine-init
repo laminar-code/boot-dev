@@ -1,1 +1,44 @@
 #!/bin/sh
+# Machine init to enable boot-dev build and execution
+
+sudo apt-get -yqq update
+sudo apt-get -yqq upgrade
+
+# Install nala for parallel downloads and updates
+# then install base level required packages
+sudo apt-get -yqq install nala
+sudo nala install locales sudo make curl git slirp4netns uidmap buildah xz-utils neovim gcc -y
+
+# Configure certs
+# Place any local certs into ~/certs
+mkdir ~/certs
+# sudo copy ~/certs/*.crt /usr/local/share/ca-certificates/
+# sudo update-ca-certificates
+
+# Clone repos for dev config
+mkdir /home/${USER}/git
+cd /home/${USER}/git && git clone https://github.com/laminar-code/boot-dev.git
+
+# Set up some local git scripts
+mkdir /home/${USER}/bin
+ln -s /home/${USER}/git/boot-dev/git/clone /home/${USER}/bin/clone
+ln -s /home/${USER}/git/boot-dev/git/clone-files-only /home/${USER}/bin/clone-files-only
+
+# Link base config directories to boot-dev
+mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nix/config /home/${USER}/.config/nix
+mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/tmux /home/${USER}/.config/tmux
+mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nvim /home/${USER}/.config/nvim
+mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nix/home-manager /home/${USER}/.config/home-manager
+
+# Install nix
+curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+sudo chown ${USER}:${USER} /nix/* -R
+export PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${USER}/.nix-profile/bin
+
+# Configure and install home-manager and run initial home-manager switch
+nix-channel --add https://github.com/nixos/nixpkgs/archive/release-24.05.tar.gz nixpkgs
+nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
+nix-channel --update
+cd /home/${USER}/.config/home-manager
+nix run . -- build --flake .
+nix run . -- switch --flake .
