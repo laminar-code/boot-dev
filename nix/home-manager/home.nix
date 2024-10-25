@@ -9,21 +9,26 @@
     hello
 
     # Networking Tools
-    iputils
+    iputils       # Need that ping
+    nc            # Netcat
 
     # General CLI Tools
-    bat
-    btop
-    fd
-    fzf
-    ripgrep
-    rsync
-    unzip
-    wget
-    zip
+    bat           # Much improved cat
+    btop          # Much improved top
+    fd            # Quick and easy find
+    fzf           # Fuzzy finder
+    jid           # Handy json digger
+    jq            # Handy json parser
+    pv            # Pipe viewer, watch that data flow
+    ripgrep       # Grep tuned for git directories
+    rsync         # The OG remote sync
+    unzip         # Decompression for the masses
+    vd            # Visualize data
+    wget          # Get that HTTP stuff
+    zip           # Compression for the masses
 
     # Base NeoVim Development
-    # Packages
+    # Packages for Full LazyVim
     clojure-lsp
     lazygit
     lua
@@ -33,7 +38,7 @@
     tree-sitter
 
     # CLI Environment Tools
-    tmux
+    tmux          # Terminal multiplexer
     
     # Java/Clojure
     # babashka
