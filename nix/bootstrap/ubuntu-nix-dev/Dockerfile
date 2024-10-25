@@ -63,7 +63,7 @@ RUN  mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 # Set up nix and install home-manager
 USER ${username}
 RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-# Paused use of Determinate Systems installer
+# Paused use of Determinate Systems installer for quicker, more visible installation 
 # RUN  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh
 # RUN  chmod +x /home/${username}/nix-installer.sh
 # RUN  /home/${username}/nix-installer.sh install linux --init none --no-confirm
@@ -75,6 +75,7 @@ RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/rel
 RUN  nix-channel --update
 
 # Configure and install home-manager and run initial home-manager switch
+# This is retained for future but causes some warnings due to a release mismatch
 # USER ${username}
 # RUN  nix-shell '<home-manager>' -A install
 
