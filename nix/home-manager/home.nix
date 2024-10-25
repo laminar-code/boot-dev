@@ -4,41 +4,46 @@
   home.stateVersion = "24.05";
 
   home.packages = with pkgs; [
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
+    # Adds the 'hello' command to your environment. It prints a friendly
+    # "Hello, world!" when run.
     hello
 
+    # Networking Tools
     iputils
 
-    babashka
+    # General CLI Tools
     bat
     btop
     fd
     fzf
     ripgrep
     rsync
-
     unzip
     wget
     zip
 
-    git
-    gitui
-    lazygit
-    tmux
-
-    clojure
-    gcc
-    lua
-    nodejs_22
-    python39
-    zulu
-
+    # Base NeoVim Development
+    # Packages
     clojure-lsp
+    lazygit
+    lua
     luarocks
-    tree-sitter
+    nodejs_22
     nodePackages.neovim
+    tree-sitter
 
+    # CLI Environment Tools
+    tmux
+    
+    # Java/Clojure
+    # babashka
+    # clojure
+    # zulu
+
+    # Python
+    # python39
+   
+    # Container Tools
     podman
     podman-compose
 
