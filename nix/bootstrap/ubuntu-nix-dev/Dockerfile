@@ -62,6 +62,7 @@ RUN  mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 
 # Set up nix and install home-manager
 USER ${username}
+# RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
 RUN  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh
 RUN  chmod +x /home/${username}/nix-installer.sh
 RUN  /home/${username}/nix-installer.sh install linux --init none --no-confirm
@@ -72,18 +73,10 @@ RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/release-24.05.ta
 RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
 RUN  nix-channel --update
 
-# RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-# ENV  PATH=${PATH}:/home/${username}/.nix-profile/bin
-# USER ${username}
-# RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
-# USER ${username}
-# RUN  nix-channel --update
-# USER ${username}
-# RUN  cp -rp /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config
+# Configure and install home-manager and run initial home-manager switch
 # USER ${username}
 # RUN  nix-shell '<home-manager>' -A install
 
-# Configure and install home-manager and run initial home-manager switch
 # USER ${username} 
 # RUN cd /home/${username}/.config/home-manager; nix run . -- build --flake .
 # USER ${username} 
