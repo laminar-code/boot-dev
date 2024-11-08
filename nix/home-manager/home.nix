@@ -1,6 +1,6 @@
 { config, pkgs, ... }: {
-  home.username = "jcroft"; 
-  home.homeDirectory = "/home/jcroft";
+  home.username = "operator"; 
+  home.homeDirectory = "/home/operator";
   home.stateVersion = "24.05";
 
   home.packages = with pkgs; [
@@ -10,11 +10,12 @@
 
     # Networking Tools
     iputils       # Need that ping
-    nc            # Netcat
+    netcat        # Netcat
 
     # General CLI Tools
     bat           # Much improved cat
     btop          # Much improved top
+    eza           # Expanded ls
     fd            # Quick and easy find
     fzf           # Fuzzy finder
     jid           # Handy json digger
@@ -23,7 +24,7 @@
     ripgrep       # Grep tuned for git directories
     rsync         # The OG remote sync
     unzip         # Decompression for the masses
-    vd            # Visualize data
+    visidata      # Visualize data
     wget          # Get that HTTP stuff
     zip           # Compression for the masses
 
