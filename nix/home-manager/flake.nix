@@ -12,7 +12,7 @@
 
   outputs = { self, nixpkgs, home-manager, ... } : let
     system = "aarch64-linux";
-    user = "jcroft";
+    user = "operator";
     pkgs = import nixpkgs { inherit system; };
   in {
     defaultPackage.${system} =
