@@ -17,7 +17,16 @@ mkdir ~/certs
 
 # Clone repos for dev config
 mkdir /home/${USER}/git
-cd /home/${USER}/git && git clone https://github.com/laminar-code/boot-dev.git
+cd /home/${USER}/git 
+
+# Boot dev
+git clone https://github.com/laminar-code/boot-dev.git
+
+# Nerd fonts
+git clone --depth 1 https://github.com/ryanoasis/nerd-fonts.git
+
+# Intstall IBMPlexMono
+cd nerd-fonts/ && ./install.sh IBMPlexMono && cd ~
 
 # Set up some local git scripts
 mkdir /home/${USER}/bin
