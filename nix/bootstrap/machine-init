@@ -26,7 +26,7 @@ git clone https://github.com/laminar-code/boot-dev.git
 git clone --depth 1 https://github.com/ryanoasis/nerd-fonts.git
 
 # Intstall IBMPlexMono
-cd nerd-fonts/ && ./install.sh IBMPlexMono && cd ~
+cd nerd-fonts/ && ./install.sh 
 
 # Set up some local git scripts
 mkdir /home/${USER}/bin
