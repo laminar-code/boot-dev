@@ -98,6 +98,7 @@
         vim = "nvim";
       };
       initExtra = ''
+        . "/home/devx/.nix-profile/etc/profile.d/nix.sh"
         . "/home/devx/.nix-profile/etc/profile.d/hm-session-vars.sh"
 
         SSH_ENV="$HOME/.ssh/agent-environment"
