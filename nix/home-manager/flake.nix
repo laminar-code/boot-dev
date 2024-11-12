@@ -11,8 +11,8 @@
   };
 
   outputs = { self, nixpkgs, home-manager, ... } : let
-    system = "aarch64-linux";
-    user = "operator";
+    system = "x86_64-linux";
+    user = "devx";
     pkgs = import nixpkgs { inherit system; };
   in {
     defaultPackage.${system} =

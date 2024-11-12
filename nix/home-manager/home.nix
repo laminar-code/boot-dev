@@ -1,6 +1,6 @@
 { config, pkgs, ... }: {
-  home.username = "operator"; 
-  home.homeDirectory = "/home/operator";
+  home.username = "devx"; 
+  home.homeDirectory = "/home/devx";
   home.stateVersion = "24.05";
 
   home.packages = with pkgs; [
@@ -86,7 +86,7 @@
     EDITOR = "nvim";
   };
 
-  home.sessionPath = [ "/home/jcroft/bin" ];
+  home.sessionPath = [ "/home/devx/bin" ];
 
   programs = {
     home-manager.enable = true;
@@ -125,8 +125,8 @@
     };
     git = {
       enable = true;
-      userName = "John Croft";
-      userEmail = "jcroft@coderz.io";
+      userName = "Thomas Coffee";
+      userEmail = "thms@coffee.io";
       includes = [{
         condition = "gitdir:~/host/*/";
         path = "~/host/git/.gitconfig-work";
