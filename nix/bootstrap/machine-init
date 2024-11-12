@@ -50,4 +50,6 @@ nix-channel --add https://github.com/nix-community/home-manager/archive/release-
 nix-channel --update
 cd /home/${USER}/.config/home-manager
 nix run . -- build --flake .
+mv ~/.profile ~/.profile.orig
+mv ~/.bashrc  ~/.bashrc.orig
 nix run . -- switch --flake .
