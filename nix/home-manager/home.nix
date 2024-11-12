@@ -79,7 +79,7 @@
     #   org.gradle.daemon.idletimeout=3600000
     # '';
 
-    # "bin/docker".source = config.lib.file.mkOutOfStoreSymlink "/home/jcroft/.nix-profile/bin/podman";
+    # "bin/docker".source = config.lib.file.mkOutOfStoreSymlink "/home/$USER/.nix-profile/bin/podman";
   };
 
   home.sessionVariables = {
@@ -98,7 +98,7 @@
         vim = "nvim";
       };
       initExtra = ''
-        . "/home/jcroft/.nix-profile/etc/profile.d/hm-session-vars.sh"
+        . "/home/devx/.nix-profile/etc/profile.d/hm-session-vars.sh"
 
         SSH_ENV="$HOME/.ssh/agent-environment"
 
