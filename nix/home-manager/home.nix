@@ -9,6 +9,7 @@
     hello
 
     # Networking Tools
+    dnsutils
     iputils       # Need that ping
     netcat        # Netcat
 
@@ -23,10 +24,18 @@
     pv            # Pipe viewer, watch that data flow
     ripgrep       # Grep tuned for git directories
     rsync         # The OG remote sync
+    time          # Get time and timing of events
     unzip         # Decompression for the masses
     visidata      # Visualize data
     wget          # Get that HTTP stuff
     zip           # Compression for the masses
+
+    # CLI Image and PDF Tools
+    imagemagick
+    inotify-tools
+    pandoc
+    qpdf
+    tectonic
 
     # Base NeoVim Development
     # Packages for Full LazyVim
@@ -40,7 +49,10 @@
 
     # CLI Environment Tools
     tmux          # Terminal multiplexer
-    
+
+    # Go
+    go
+
     # Java/Clojure
     # babashka
     # clojure
