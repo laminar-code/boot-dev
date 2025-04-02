@@ -1,7 +1,7 @@
 { config, pkgs, ... }: {
   home.username = "devx"; 
   home.homeDirectory = "/home/devx";
-  home.stateVersion = "24.05";
+  home.stateVersion = "24.11";
 
   home.packages = with pkgs; [
     # Adds the 'hello' command to your environment. It prints a friendly
@@ -10,7 +10,9 @@
 
     # Networking Tools
     iputils       # Need that ping
-    netcat        # Netcat
+    inetutils     # whois, traceroute, et al. 
+    netcat        # nc general network utility
+    nettools      # More networking ifconfig, route, netstat et al.
 
     # General CLI Tools
     bat           # Much improved cat
@@ -28,6 +30,12 @@
     wget          # Get that HTTP stuff
     zip           # Compression for the masses
 
+    # CLI Image and PDF Tools
+    imagemagick
+    pandoc
+    qpdf
+    tectonic
+
     # Base NeoVim Development
     # Packages for Full LazyVim
     clojure-lsp
@@ -40,14 +48,29 @@
 
     # CLI Environment Tools
     tmux          # Terminal multiplexer
-    
+    zellij        # Enhanced terminal multiplexer
+
+    # Databases
+    # NIXPKGS_ALLOW_UNFREE=1 home-manager --impure switch
+    oracle-instantclient
+
+    # Go
+    go
+
     # Java/Clojure
-    # babashka
-    # clojure
-    # zulu
+    babashka
+    clojure
+    zulu
+
+    #JavaScript
+    bun
+    pnpm
 
     # Python
-    # python39
+    (python3.withPackages (ps: with ps; [
+      pip
+      setuptools
+    ]))
    
     # Container Tools
     podman
@@ -79,7 +102,7 @@
     #   org.gradle.daemon.idletimeout=3600000
     # '';
 
-    # "bin/docker".source = config.lib.file.mkOutOfStoreSymlink "/home/$USER/.nix-profile/bin/podman";
+    "bin/docker".source = config.lib.file.mkOutOfStoreSymlink "/home/$USER/.nix-profile/bin/podman";
   };
 
   home.sessionVariables = {
