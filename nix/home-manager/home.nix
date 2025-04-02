@@ -9,6 +9,7 @@
     hello
 
     # Networking Tools
+    dnsutils
     iputils       # Need that ping
     inetutils     # whois, traceroute, et al. 
     netcat        # nc general network utility
@@ -25,6 +26,7 @@
     pv            # Pipe viewer, watch that data flow
     ripgrep       # Grep tuned for git directories
     rsync         # The OG remote sync
+    time          # Get time and timing of events
     unzip         # Decompression for the masses
     visidata      # Visualize data
     wget          # Get that HTTP stuff
@@ -52,7 +54,7 @@
 
     # Databases
     # NIXPKGS_ALLOW_UNFREE=1 home-manager --impure switch
-    oracle-instantclient
+    # oracle-instantclient
 
     # Go
     go
