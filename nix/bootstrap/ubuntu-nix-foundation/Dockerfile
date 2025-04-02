@@ -1,5 +1,7 @@
 FROM ubuntu:24.04
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 # Update apt package lists and upgrade current packages
 RUN apt-get -yqq update
 RUN apt-get -yqq upgrade
@@ -19,7 +21,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE="en_US"
 
 # Configure certs
-COPY certs/*.crt /usr/local/share/ca-certificates/
+COPY ubuntu-nix-foundation/certs/.placeholder ubuntu-nix-foundation/certs/*.crt /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 # Startup at the command line
