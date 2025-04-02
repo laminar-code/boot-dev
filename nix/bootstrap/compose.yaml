@@ -23,6 +23,8 @@ services:
       dockerfile: ubuntu-nix-dev/Dockerfile
     ports:
       - "3000:3000"
+      - "3001:3001"
+      - "3030:3030"
       - "5000:5000"
       - "8080:8080"
       - "8443:8443"
