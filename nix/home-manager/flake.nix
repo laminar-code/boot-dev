@@ -11,7 +11,7 @@
   };
 
   outputs = { self, nixpkgs, home-manager, ... } : let
-    system = builtins.currentSystem;
+    system = "x86_64-linux";
     user = "devx";
     pkgs = import nixpkgs { inherit system; };
   in {
