@@ -85,9 +85,9 @@ RUN  nix-channel --update
 # RUN  nix-shell '<home-manager>' -A install
 
 USER ${username} 
-RUN cd /home/${username}/.config/home-manager; nix run . -- build --flake .
+RUN cd /home/${username}/.config/home-manager; nix run . -- build --impure --flake .
 USER ${username} 
-RUN cd /home/${username}/.config/home-manager; nix run . -- switch --flake .
+RUN cd /home/${username}/.config/home-manager; nix run . -- switch --impure --flake .
 
 # Initialize Neovim plugins
 USER ${username}
