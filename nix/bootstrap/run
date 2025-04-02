@@ -19,10 +19,10 @@ if [ $? -ne 0 ]; then
   DOCKER=""
 fi
 
-if [ -f DOCKER_COMPOSE ]; then
+if [ -f "$DOCKER_COMPOSE" ]; then
   $DOCKER_COMPOSE up
 else
-  if [ -f PODMAN ]; then
+  if [ -f "$PODMAN" ]; then
     $PODMAN compose up
   else
     $DOCKER compose up
