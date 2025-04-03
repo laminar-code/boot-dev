@@ -15,8 +15,8 @@
     user = "devx";
     pkgs = import nixpkgs { inherit system; };
   in {
-    defaultPackage.${system} =
-      home-manager.defaultPackage.${system};
+    # defaultPackage.${system} =
+    #   home-manager.defaultPackage.${system};
 
     homeConfigurations = {
       ${user} = home-manager.lib.homeManagerConfiguration {
