@@ -40,6 +40,7 @@
 
     # Base NeoVim Development
     # Packages for Full LazyVim
+    neovim
     clojure-lsp
     lazygit
     lua
