@@ -91,8 +91,8 @@ RUN  nix-channel --update
 # RUN cd /home/${username}/.config/home-manager; nix run . -- switch --impure --flake .
 
 # Initialize Neovim plugins
-USER ${username}
-RUN  nvim --headless "+Lazy! sync" +qa
+# USER ${username}
+# RUN  nvim --headless "+Lazy! sync" +qa
 
 # Set workdir to start shell in home directory
 USER    ${username}
