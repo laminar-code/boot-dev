@@ -82,17 +82,19 @@ RUN  nix-channel --update
 
 # Configure and install home-manager and run initial home-manager switch
 # This is retained for future but causes some warnings due to a release mismatch
-# USER ${username}
-# RUN  nix-shell '<home-manager>' -A install
+USER ${username}
+RUN  nix-shell '<home-manager>' -A install
 
+# Flake based configuration
+# Could be more robust, currently problematic
 # USER ${username} 
 # RUN cd /home/${username}/.config/home-manager; nix run . -- build --impure --flake .
 # USER ${username} 
 # RUN cd /home/${username}/.config/home-manager; nix run . -- switch --impure --flake .
 
 # Initialize Neovim plugins
-# USER ${username}
-# RUN  nvim --headless "+Lazy! sync" +qa
+USER ${username}
+RUN  nvim --headless "+Lazy! sync" +qa
 
 # Set workdir to start shell in home directory
 USER    ${username}
