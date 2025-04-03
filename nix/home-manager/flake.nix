@@ -15,12 +15,14 @@
     user = "devx";
     pkgs = import nixpkgs { inherit system; };
   in {
-    # defaultPackage.${system} =
-    #   home-manager.defaultPackage.${system};
+    defaultPackage.${system} =
+      home-manager.defaultPackage.${system};
 
     homeConfigurations = {
       ${user} = home-manager.lib.homeManagerConfiguration {
-        pkgs = pkgs;
+        home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
+        # pkgs = pkgs;
         modules = [ ./home.nix ];
       };
     };
