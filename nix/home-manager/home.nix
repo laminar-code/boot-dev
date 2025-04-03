@@ -1,7 +1,7 @@
 { config, pkgs, ... }: {
   home.username = "devx"; 
   home.homeDirectory = "/home/devx";
-  home.stateVersion = "24.11";
+  home.stateVersion = "25.05";
 
   home.packages = with pkgs; [
     # Adds the 'hello' command to your environment. It prints a friendly
