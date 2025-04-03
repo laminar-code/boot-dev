@@ -5,6 +5,7 @@ ARG username
 ARG git_bearer_token
 ARG git_utils_repo
 ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Set up local user and add to sudoers w/o password requirement
 RUN  adduser --shell /usr/bin/bash ${username}
