@@ -157,8 +157,6 @@
       includes = [{
         condition = "gitdir:~/host/*/";
         path = "/mnt/host/git/.gitconfig-work";
-      }];
-      includes = [{
         condition = "gitdir:~/host/*/";
         path = "~/host/git/.gitconfig-work";
       }];
