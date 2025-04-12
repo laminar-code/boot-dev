@@ -39,6 +39,8 @@ USER ${username}
 RUN  mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nvim /home/${username}/.config/nvim
 USER ${username}
 RUN  mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager
+USER ${username}
+RUN  mkdir -p /home/${username}/.config && ln -s /home/${username}/git/boot-dev/lazygit /home/${username}/.config/lazygit
 
 # Link ~/bin files with dev config repos
 USER ${username}
