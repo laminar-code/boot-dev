@@ -25,6 +25,8 @@ ENV USER=${username}
 
 # Clone repos for dev config
 USER ${username}
+RUN  mkdir /home/${username}/git
+USER ${username}
 RUN  cd /home/${username}/git && git clone https://github.com/laminar-code/boot-dev.git
 
 # Link config dot files with dev config repos
