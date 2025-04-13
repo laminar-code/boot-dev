@@ -1,0 +1,9 @@
+Add any required certs to .build/certs.
+Add any required ssh keys or config to .build/.ssh.
+
+Run build script to create docker dev container.
+
+Run run script to start up docker dev container.
+
+Run go-dev script to log into docker dev container.
+
