@@ -17,8 +17,6 @@ COPY .build/.ssh/.placeholder .build/.ssh/ /home/${username}/.ssh/
 RUN  chown -R ${username}:${username} /home/${username}/.ssh
 RUN  find /home/${username}/.ssh -type f -exec chmod 600 {} +
 RUN  find /home/${username}/.ssh -type d -exec chmod 700 {} +
-# RUN  chmod -R 600 /home/${username}/.ssh
-# RUN  chmod 700 /home/${username}/.ssh
 
 # Set LANG and USER in user environment
 USER ${username}
@@ -27,9 +25,7 @@ ENV USER=${username}
 
 # Clone repos for dev config
 USER ${username}
-RUN  mkdir /home/${username}/git # && cd /home/${username}/git && git clone -c "http.extraHeader=Authorization: Bearer ${git_bearer_token}" ${git_utils_repo}
-USER ${username}
-RUN  cd /home/${username}/git && git clone git@github.com:laminar-code/boot-dev.git
+RUN  cd /home/${username}/git && git clone https://github.com/laminar-code/boot-dev.git
 
 # Link config dot files with dev config repos
 USER ${username}
