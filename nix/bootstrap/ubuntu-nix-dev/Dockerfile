@@ -5,7 +5,6 @@ ARG username
 ARG git_bearer_token
 ARG git_utils_repo
 ARG DEBIAN_FRONTEND=noninteractive
-ENV DEBIAN_FRONTEND=noninteractive
 
 # Set up local user and add to sudoers w/o password requirement
 RUN  adduser --shell /usr/bin/bash ${username}
@@ -14,7 +13,7 @@ RUN  adduser ${username} sudo
 RUN  echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
 
 # Add .ssh config to user
-COPY .build/.ssh/.placeholder .build/.ssh/* /home/${username}/.ssh/
+COPY .build/.ssh/.placeholder .build/.ssh/ /home/${username}/.ssh/
 RUN  chown -R ${username}:${username} /home/${username}/.ssh
 RUN  chmod -R 600 /home/${username}/.ssh
 RUN  chmod 700 /home/${username}/.ssh
