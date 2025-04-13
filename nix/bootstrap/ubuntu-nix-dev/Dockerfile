@@ -14,7 +14,7 @@ RUN  adduser ${username} sudo
 RUN  echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
 
 # Add .ssh config to user
-COPY ubuntu-nix-dev/.ssh/.placeholder ubuntu-nix-dev/.ssh/* /home/${username}/.ssh/
+COPY .build/.ssh/.placeholder .build/.ssh/* /home/${username}/.ssh/
 RUN  chown -R ${username}:${username} /home/${username}/.ssh
 RUN  chmod -R 600 /home/${username}/.ssh
 RUN  chmod 700 /home/${username}/.ssh

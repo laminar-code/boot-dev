@@ -6,7 +6,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE="en_US"
 
 # Configure certs
-COPY ubuntu-nix-foundation/certs/.placeholder ubuntu-nix-foundation/certs/*.crt /usr/local/share/ca-certificates/
+COPY .build/certs/.placeholder .build/certs/*.crt /usr/local/share/ca-certificates/
 
 # Update certs then update apt package lists and upgrade current packages
 # Install nala for parallel downloads and updates
