@@ -63,17 +63,17 @@
     # Java/Clojure
     babashka
     clojure
-    zulu
+    # zulu
 
     #JavaScript
     bun
     pnpm
 
     # Python
-    (python3.withPackages (ps: with ps; [
-      pip
-      setuptools
-    ]))
+    # (python3.withPackages (ps: with ps; [
+    #  pip
+    #  setuptools
+    # ]))
    
     # Container Tools
     podman
