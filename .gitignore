@@ -1,6 +1,8 @@
 # nix output
 result
 
+.env
+
 .build
 
 .ssh
