@@ -15,8 +15,10 @@ RUN  echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
 # Add .ssh config to user
 COPY .build/.ssh/.placeholder .build/.ssh/ /home/${username}/.ssh/
 RUN  chown -R ${username}:${username} /home/${username}/.ssh
-RUN  chmod -R 600 /home/${username}/.ssh
-RUN  chmod 700 /home/${username}/.ssh
+RUN  find /home/${username}/.ssh -type f -exec chmod 600 {} +
+RUN  find /home/${username}/.ssh -type d -exec chmod 700 {} +
+# RUN  chmod -R 600 /home/${username}/.ssh
+# RUN  chmod 700 /home/${username}/.ssh
 
 # Set LANG and USER in user environment
 USER ${username}
