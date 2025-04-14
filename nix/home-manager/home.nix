@@ -155,7 +155,7 @@
       userName = "Thomas Coffee";
       userEmail = "thms@coffee.io";
       includes = [{
-        condition = "gitdir:~/host/*/";
+        condition = "gitdir:/mnt/host/*/";
         path = "/mnt/host/git/.gitconfig-work";
       }
       {
