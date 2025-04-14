@@ -15,6 +15,9 @@
     netcat        # nc general network utility
     nettools      # More networking ifconfig, route, netstat et al.
 
+    # Shell Tools
+    direnv        # Manage environment variables per directory
+
     # General CLI Tools
     bat           # Much improved cat
     btop          # Much improved top
