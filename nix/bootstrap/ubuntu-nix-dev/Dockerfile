@@ -88,7 +88,7 @@ RUN  nix-shell '<home-manager>' -A install
 
 # Link to devenv flake
 USER ${username}
-RUN mkdir -p /home/${username}/devenv && ln -s /home/${username}/git/boot-dev/nix/devenv/flake.nix /home/${username}/devenv/flake.nix
+RUN mkdir -p /home/${username}/devenv && ln -s /home/${username}/git/boot-dev/nix/devenv /home/${username}/devenv
 
 # Initialize Neovim plugins
 USER ${username}
