@@ -35,7 +35,7 @@
               babashka
 
               # database drivers
-              postgresql-jdbc
+              postgresql_jdbc
               sqlite-jdbc
               oracle-instantclient
             ];
