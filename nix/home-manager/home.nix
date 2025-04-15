@@ -113,8 +113,6 @@
     #   org.gradle.console=verbose
     #   org.gradle.daemon.idletimeout=3600000
     # '';
-
-    "bin/docker".source = config.lib.file.mkOutOfStoreSymlink "/home/$USER/.nix-profile/bin/podman";
   };
 
   home.sessionVariables = {
@@ -131,6 +129,8 @@
         cls = "clear";
         vi = "nvim";
         vim = "nvim";
+        docker = "podman";
+        docker-compose = "podman-compose";
       };
       initExtra = ''
         . "/home/devx/.nix-profile/etc/profile.d/nix.sh"
