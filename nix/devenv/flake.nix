@@ -28,6 +28,8 @@
           ({ pkgs, config, ... }: {
             packages = with pkgs; [ 
               zulu
+              clojure
+              babashka
             ];
             enterShell = ''
               echo Java shell...
@@ -39,22 +41,46 @@
       python = devenv.lib.mkShell {
         inherit inputs pkgs;
         modules = [
-          {
+          ({ pkgs, config, ... }: {
+            packages = with pkgs; [ 
+              (python3.withPackages (ps: with ps; [
+                pip
+                setuptools
+              ]))
+            ];
             enterShell = ''
               echo Python shell...
             '';
-          }
+          })
         ];
       };
 
-      node = devenv.lib.mkShell {
+      javascript = devenv.lib.mkShell {
         inherit inputs pkgs;
         modules = [
-          {
+          ({ pkgs, config, ... }: {
+            packages = with pkgs; [ 
+              bun
+              pnpm
+            ];
             enterShell = ''
-              echo Node shell...
+              echo JavaScript shell...
             '';
-          }
+          })
+        ];
+      };
+
+      go = devenv.lib.mkShell {
+        inherit inputs pkgs;
+        modules = [
+          ({ pkgs, config, ... }: {
+            packages = with pkgs; [ 
+              go
+            ];
+            enterShell = ''
+              echo Go shell...
+            '';
+          })
         ];
       };
     };

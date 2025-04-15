@@ -63,18 +63,22 @@
     # oracle-instantclient
 
     # Go
-    go
+    # Moved to devenv flake
+    # go
 
     # Java/Clojure
-    babashka
-    clojure
+    # Moved to devenv flake
+    # babashka
+    # clojure
     # zulu
 
-    #JavaScript
-    bun
-    pnpm
+    # JavaScript
+    # Moved to devenv flake
+    # bun
+    # pnpm
 
     # Python
+    # Moved to devenv flake
     # (python3.withPackages (ps: with ps; [
     #  pip
     #  setuptools
