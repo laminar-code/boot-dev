@@ -1,0 +1,4 @@
+#!/bin/sh
+
+NIXPKGS_ALLOW_UNFREE=1 nix develop --no-pure-eval ~/devenv#"$1"
+
