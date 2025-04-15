@@ -28,10 +28,16 @@
         inherit inputs pkgs;
         modules = [
           ({ pkgs, config, ... }: {
-            packages = with pkgs; [ 
+            packages = with pkgs; [
+              # language packages
               zulu
               clojure
               babashka
+
+              # database drivers
+              postgresql-jdbc
+              sqlite-jdbc
+              oracle-instantclient
             ];
             enterShell = ''
               echo Java shell...
