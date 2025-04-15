@@ -18,6 +18,7 @@
     # Shell Tools
     direnv        # Manage environment variables per directory
     devenv        # Manage development environments
+    starship      # Command prompt
 
     # General CLI Tools
     bat           # Much improved cat
@@ -132,6 +133,7 @@
         . "/home/devx/.nix-profile/etc/profile.d/hm-session-vars.sh"
 
         eval "$(direnv hook bash)"
+        eval "$(starship init bash)"
 
         SSH_ENV="$HOME/.ssh/agent-environment"
 
