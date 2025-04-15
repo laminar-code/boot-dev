@@ -130,6 +130,8 @@
         . "/home/devx/.nix-profile/etc/profile.d/nix.sh"
         . "/home/devx/.nix-profile/etc/profile.d/hm-session-vars.sh"
 
+        eval "$(direnv hook bash)"
+
         SSH_ENV="$HOME/.ssh/agent-environment"
 
         function start_agent {
@@ -163,7 +165,7 @@
       }
       {
         condition = "gitdir:~/host/*/";
-        path = "~/host/git/.gitconfig-work";
+        path = "/mnt/host/git/.gitconfig-work";
       }];
       extraConfig = {
         pull.rebase = false;
