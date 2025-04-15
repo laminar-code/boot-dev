@@ -6,7 +6,9 @@
 
   outputs = { self, nixpkgs, devenv, ... }@inputs:
   let
-    system = "x86_64-linux";
+    # system = "x86_64-linux";
+    # The following line requires --no-pure-eval to work
+    system = builtins.currentSystem;
     pkgs = nixpkgs.legacyPackages.${system};
   in
   {
