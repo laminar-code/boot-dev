@@ -86,12 +86,9 @@ RUN  nix-channel --update
 USER ${username}
 RUN  nix-shell '<home-manager>' -A install
 
-# Flake based configuration
-# Could be more robust, currently problematic
-# USER ${username} 
-# RUN cd /home/${username}/.config/home-manager; nix run . -- build --impure --flake .
-# USER ${username} 
-# RUN cd /home/${username}/.config/home-manager; nix run . -- switch --impure --flake .
+# Link to devenv flake
+USER ${username}
+RUN mkdir -p /home/${username}/devenv && ln -s /home/${username}/git/boot-dev/nix/devenv/flake.nix /home/${username}/devenv/flake.nix
 
 # Initialize Neovim plugins
 USER ${username}

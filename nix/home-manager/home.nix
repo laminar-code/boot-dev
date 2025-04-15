@@ -17,6 +17,7 @@
 
     # Shell Tools
     direnv        # Manage environment variables per directory
+    devenv        # Manage development environments
 
     # General CLI Tools
     bat           # Much improved cat
