@@ -11,31 +11,45 @@
   in
   {
     packages.${system} = {
-      projectA-devenv-up = self.devShells.${system}.projectA.config.procfileScript;
-      projectA-devenv-test = self.devShells.${system}.projectA.config.test;
+      java-devenv-up = self.devShells.${system}.java.config.procfileScript;
+      java-devenv-test = self.devShells.${system}.java.config.test;
 
-      projectB-devenv-up = self.devShells.${system}.projectB.config.procfileScript;
-      projectB-devenv-test = self.devShells.${system}.projectB.config.test;
+      python-devenv-up = self.devShells.${system}.python.config.procfileScript;
+      python-devenv-test = self.devShells.${system}.python.config.test;
+      
+      node-devenv-up = self.devShells.${system}.node.config.procfileScript;
+      node-devenv-test = self.devShells.${system}.node.config.test;
     };
 
     devShells.${system} = {
-      projectA = devenv.lib.mkShell {
+      java = devenv.lib.mkShell {
         inherit inputs pkgs;
         modules = [
           {
             enterShell = ''
-              echo this is project A
+              echo Java shell...
             '';
           }
         ];
       };
 
-      projectB = devenv.lib.mkShell {
+      python = devenv.lib.mkShell {
         inherit inputs pkgs;
         modules = [
           {
             enterShell = ''
-              echo this is project B
+              echo Python shell...
+            '';
+          }
+        ];
+      };
+
+      node = devenv.lib.mkShell {
+        inherit inputs pkgs;
+        modules = [
+          {
+            enterShell = ''
+              echo Node shell...
             '';
           }
         ];
