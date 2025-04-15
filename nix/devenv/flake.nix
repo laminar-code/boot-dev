@@ -25,11 +25,14 @@
       java = devenv.lib.mkShell {
         inherit inputs pkgs;
         modules = [
-          {
+          ({ pkgs, config, ... }: {
+            packages = with pkgs; [ 
+              zulu
+            ];
             enterShell = ''
               echo Java shell...
             '';
-          }
+          })
         ];
       };
 
