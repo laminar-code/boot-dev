@@ -51,7 +51,7 @@ RUN  ln -s /home/${username}/git/boot-dev/git/clone-files-only /home/${username}
 USER ${username}
 RUN  ln -s /home/${username}/git/boot-dev/git/switch-origin /home/${username}/bin/switch-origin
 USER ${username}
-RUN  ln -s /home/${username}/nix/bin/dev /home/${username}/bin/dev
+RUN  ln -s /home/${username}/git/boot-dev/nix/bin/dev /home/${username}/bin/dev
 
 # Create link for /mnt/host
 USER ${username}
