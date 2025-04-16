@@ -51,18 +51,56 @@
         modules = [
           ({ pkgs, config, ... }: {
             packages = with pkgs; [ 
+              gcc
+              stdenv.cc.cc
               (python3.withPackages (ps: with ps; [
                 pip
                 setuptools
+                virtualenv
               ]))
             ];
             enterShell = ''
               echo Python shell...
+              export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [
+                pkgs.stdenv.cc.cc
+              ]}
+              virtualenv --quiet pylocal
+              pip install --quiet --upgrade pip
+              source ./venv/bin/activate > /dev/null
             '';
           })
         ];
       };
 
+      keeper = devenv.lib.mkShell {
+        inherit inputs pkgs;
+        modules = [
+          ({ pkgs, config, ... }: {
+            packages = with pkgs; [ 
+              gcc
+              stdenv.cc.cc
+              (python3.withPackages (ps: with ps; [
+                pip
+                setuptools
+                virtualenv
+              ]))
+            ];
+            enterShell = ''
+              echo Keeper shell...
+              export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [
+                pkgs.stdenv.cc.cc
+              ]}
+              virtualenv --quiet pylocal
+              source ./pylocal/bin/activate > /dev/null
+              pip install --quiet --upgrade pip
+              pip3 install --quiet keepercommander
+              pip3 install --quiet --upgrade keepercommander
+              keeper shell
+            '';
+          })
+        ];
+      };
+      
       javascript = devenv.lib.mkShell {
         inherit inputs pkgs;
         modules = [
