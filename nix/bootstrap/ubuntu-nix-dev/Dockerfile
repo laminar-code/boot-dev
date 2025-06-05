@@ -8,7 +8,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Set up local user and add to sudoers w/o password requirement
 RUN  adduser --shell /usr/bin/bash ${username}
-ARG  username=${username}
+RUN  groupadd -g 9999 devs
+# ARG  username=${username}
+RUN  usermod -a -G devs ${username}
 RUN  adduser ${username} sudo
 RUN  echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
 

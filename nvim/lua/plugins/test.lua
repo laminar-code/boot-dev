@@ -1,7 +1,6 @@
 return {
   {
     "nvim-neotest/neotest",
-    -- adapters = { "neotest-jest" },
     dependencies = {
       "nvim-neotest/neotest-jest",
       "nvim-treesitter/nvim-treesitter",
@@ -10,7 +9,9 @@ return {
       table.insert(
         opts.adapters,
         require("neotest-jest")({
-          jestCommand = "npm test --",
+          jestCommand = "npx jest --detectOpenHandles",
+          -- jestCommand = "npm test --",
+          jestConfigFile = "jest.config.mjs",
           env = { CI = true },
           cwd = function()
             return vim.fn.getcwd()

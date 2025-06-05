@@ -22,13 +22,13 @@ services:
         git_utils_repo: ${GIT_UTILS_REPO}
       dockerfile: ubuntu-nix-dev/Dockerfile
     ports:
-      - "3000:3000"
-      - "3001:3001"
-      - "3030:3030"
-      - "3301:3301"
-      - "5000:5000"
-      - "8080:8080"
-      - "8443:8443"
+      - ${NODE_WEBAPP_DEFAULT:-51232:51232}
+      - ${NODE_WEBAPP_ALT:-51233:51233}
+      - ${NODE_WEBAPP_ALT2:-51234:51234}
+      - ${NODE_GRAPHQL_DEFAULT:-51235:51235}
+      - ${NODE_WEBSVC_DEFAULT:-51236:51236}
+      - ${HTTP_ALT:-51237:51237}
+      - ${HTTPS_ALT:-51238:51238}
     command: /bin/bash -c "echo 'Ubuntu Development Container'; sleep infinity"
     volumes:
       - home:/home
