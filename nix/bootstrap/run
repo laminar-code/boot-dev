@@ -20,11 +20,11 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ -f "$DOCKER_COMPOSE" ]; then
-  $DOCKER_COMPOSE up
+  $DOCKER_COMPOSE up -d
 else
   if [ -f "$PODMAN" ]; then
-    $PODMAN compose up
+    $PODMAN compose up -d
   else
-    $DOCKER compose up
+    $DOCKER compose up -d
   fi
 fi
