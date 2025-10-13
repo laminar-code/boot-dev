@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+echo $PWD
+
+USERNAME=root
+
+docker run -it --user $USERNAME ubuntu-nix-foundation /bin/bash
