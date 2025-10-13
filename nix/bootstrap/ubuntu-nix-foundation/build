@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -e
+
+save_pwd=$PWD
+echo $PWD
+
+FILE=.env
+if [ -f "$FILE" ]; then
+  echo "$FILE exists."
+else
+  echo "$FILE file is missing please check the main readme for details."
+  notify-send "$FILE file is missing please check the main readme for details."
+  exit 1
+fi
+
+image=ubuntu-nix-foundation
+
+cd ../../..
+source label-container-with-repo-info
+cd $save_pwd
+
+mkdir -p .build/certs
+touch .build/certs/.placeholder
+
+docker build \
+  --build-arg OCI_TITLE_LABEL="$OCI_TITLE_LABEL" \
+  --build-arg OCI_TITLE_VALUE="$OCI_TITLE_VALUE" \
+  --build-arg OCI_DESCRIPTION_LABEL="$OCI_DESCRIPTION_LABEL" \
+  --build-arg OCI_DESCRIPTION_VALUE="$OCI_DESCRIPTION_VALUE" \
+  --build-arg OCI_CREATED_LABEL="$OCI_CREATED_LABEL" \
+  --build-arg OCI_CREATED_VALUE="$OCI_CREATED_VALUE" \
+  --build-arg OCI_AUTHORS_LABEL="$OCI_AUTHORS_LABEL" \
+  --build-arg OCI_AUTHORS_VALUE="$OCI_AUTHORS_VALUE" \
+  --build-arg OCI_VENDOR_LABEL="$OCI_VENDOR_LABEL" \
+  --build-arg OCI_VENDOR_VALUE="$OCI_VENDOR_VALUE" \
+  --build-arg OCI_LICENSE_LABEL="$OCI_LICENSE_LABEL" \
+  --build-arg OCI_LICENSE_VALUE="$OCI_LICENSE_VALUE" \
+  --build-arg OCI_SOURCE_LABEL="$OCI_SOURCE_LABEL" \
+  --build-arg OCI_SOURCE_VALUE="$OCI_SOURCE_VALUE" \
+  --build-arg OCI_URL_LABEL="$OCI_URL_LABEL" \
+  --build-arg OCI_URL_VALUE="$OCI_URL_VALUE" \
+  --build-arg OCI_DOCS_LABEL="$OCI_DOCS_LABEL" \
+  --build-arg OCI_DOCS_VALUE="$OCI_DOCS_VALUE" \
+  --build-arg OCI_VERSION_LABEL="$OCI_VERSION_LABEL" \
+  --build-arg OCI_VERSION_VALUE="$OCI_VERSION_VALUE" \
+  --build-arg OCI_REVISION_LABEL="$OCI_REVISION_LABEL" \
+  --build-arg OCI_REVISION_VALUE="$OCI_REVISION_VALUE" \
+  --build-arg OCI_REFNAME_LABEL="$OCI_REFNAME_LABEL" \
+  --build-arg OCI_REFNAME_VALUE="$OCI_REFNAME_VALUE" \
+  --no-cache -t "$image":"$OCI_REFNAME_VALUE" .
+
+docker tag "$image":"$OCI_REFNAME_VALUE" "$image":latest

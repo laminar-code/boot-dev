@@ -1,0 +1,12 @@
+#!/bin/sh
+# Cleans containers and images
+# Preserves volumes
+
+echo "Removing containers..."
+docker container rm -f ubuntu-nix-foundation-local 2>/dev/null || true
+
+echo "Removing images..."
+docker image rm -f ubuntu-nix-foundation 2>/dev/null || true
+
+echo "Pruning..."
+docker builder prune --all --force
