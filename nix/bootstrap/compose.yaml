@@ -21,6 +21,8 @@ services:
         git_bearer_token: ${GIT_BEARER_TOKEN}
         git_utils_repo: ${GIT_UTILS_REPO}
       dockerfile: ubuntu-nix-dev/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - ${NODE_WEBAPP_DEFAULT:-51232:51232}
       - ${NODE_WEBAPP_ALT:-51233:51233}
