@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 set -e
-echo $PWD
 
 USERNAME=devx
 
-docker run -it --user $USERNAME registry.digitalocean.com/laminar-registry/boot-dev:1 /bin/bash
+docker volume create boot-dev-home >/dev/null
+docker volume create boot-dev-nix >/dev/null
+
+docker start dev 2>/dev/null || docker run --detach \
+  --name development \
+  --volume boot-dev-home,target=/home/"$USERNAME" \
+  --volume boot-dev-nix,target=/nix \
+  --mount type=bind,source="$HOME",target=/home/"$USERNAME"/host \
+  --user $USERNAME registry.digitalocean.com/laminar-registry/boot-dev:1 \
+  /bin/bash -c "echo 'Ubuntu Nix Development Container'; sleep infinity" \
+  >/dev/null
+
+docker exec -it --user $USERNAME dev /bin/bash
