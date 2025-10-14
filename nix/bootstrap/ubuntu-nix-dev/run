@@ -6,7 +6,7 @@ USERNAME=devx
 docker volume create boot-dev-home >/dev/null
 docker volume create boot-dev-nix >/dev/null
 
-docker start dev 2>/dev/null || docker run --detach \
+docker start development 2>/dev/null || docker run --detach \
   --name development \
   --volume boot-dev-home,target=/home/"$USERNAME" \
   --volume boot-dev-nix,target=/nix \
