@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+set -e
+
+save_pwd=$PWD
+echo $PWD
+
+FILE=.env
+if [ -f "$FILE" ]; then
+  echo "$FILE exists."
+  source ./.env
+else
+  echo "$FILE file is missing please check the main readme for details."
+  notify-send "$FILE file is missing please check the main readme for details."
+  exit 1
+fi
+
+if [ -z $USERNAME ]; then
+  echo "ERROR: Environment variable USERNAME does not have a value."
+  echo "Review .env.README for .env file format."
+  exit 2
+fi
+
+if [ -z $GIT_UTILS_REPO ]; then
+  echo "ERROR: Environment variable GIT_UTILS_REPO does not have a value."
+  echo "Review .env.README for .env file format."
+  exit 2
+fi
+
+if [ -z $GIT_UTILS_REPO_RAW ]; then
+  echo "ERROR: Environment variable GIT_UTILS_REPO_RAW does not have a value."
+  echo "Review .env.README for .env file format."
+  exit 2
+fi
+
+if [ -z $GIT_BEARER_TOKEN ]; then
+  echo "ERROR: Environment variable GIT_BEARER_TOKEN does not have a value."
+  echo "Review .env.README for .env file format."
+  exit 2
+fi
+
+if [ -z "$GIT_USER_NAME" ]; then
+  echo "ERROR: Environment variable GIT_USER_NAME does not have a value."
+  echo "Review .env.README for .env file format."
+  exit 2
+fi
+
+if [ -z $GIT_USER_EMAIL ]; then
+  echo "ERROR: Environment variable GIT_USER_EMAIL does not have a value."
+  echo "Review .env.README for .env file format."
+  exit 2
+fi
+
+if [ -z $HOME_NIX ]; then
+  echo "ERROR: Environment variable HOME_NIX does not have a value."
+  echo "Review .env.README for .env file format."
+  exit 2
+fi
+
+if [ -z $LOCAL_DIRECTORY ]; then
+  echo "ERROR: Environment variable LOCAL_DIRECTORY does not have a value."
+  echo "Review .env.README for .env file format."
+  exit 2
+fi
+
+if [ ! -f ./.env ]; then
+  cp -p $HOME/.env.boot-dev ./.env
+fi
+image=boot-dev
+
+cd ../../..
+source label-container-with-repo-info
+cd $save_pwd
+
+mkdir -p .build/certs
+touch .build/certs/.placeholder
+mkdir -p .build/.ssh
+touch .build/.ssh/.placeholder
+
+docker build \
+  --build-arg username="$USERNAME" \
+  --build-arg GIT_UTILS_REPO="$GIT_UTILS_REPO" \
+  --build-arg GIT_UTILS_REPO_RAW="$GIT_UTILS_REPO_RAW" \
+  --build-arg GIT_BEARER_TOKEN="$GIT_BEARER_TOKEN" \
+  --build-arg GIT_USER_NAME="$GIT_USER_NAME" \
+  --build-arg GIT_USER_EMAIL="$GIT_USER_EMAIL" \
+  --build-arg HOME_NIX="$HOME_NIX " \
+  --build-arg LOCAL_DIRECTORY="$LOCAL_DIRECTORY" \
+  --build-arg OCI_TITLE_LABEL="$OCI_TITLE_LABEL" \
+  --build-arg OCI_TITLE_VALUE="$OCI_TITLE_VALUE" \
+  --build-arg OCI_DESCRIPTION_LABEL="$OCI_DESCRIPTION_LABEL" \
+  --build-arg OCI_DESCRIPTION_VALUE="$OCI_DESCRIPTION_VALUE" \
+  --build-arg OCI_CREATED_LABEL="$OCI_CREATED_LABEL" \
+  --build-arg OCI_CREATED_VALUE="$OCI_CREATED_VALUE" \
+  --build-arg OCI_AUTHORS_LABEL="$OCI_AUTHORS_LABEL" \
+  --build-arg OCI_AUTHORS_VALUE="$OCI_AUTHORS_VALUE" \
+  --build-arg OCI_VENDOR_LABEL="$OCI_VENDOR_LABEL" \
+  --build-arg OCI_VENDOR_VALUE="$OCI_VENDOR_VALUE" \
+  --build-arg OCI_LICENSE_LABEL="$OCI_LICENSE_LABEL" \
+  --build-arg OCI_LICENSE_VALUE="$OCI_LICENSE_VALUE" \
+  --build-arg OCI_SOURCE_LABEL="$OCI_SOURCE_LABEL" \
+  --build-arg OCI_SOURCE_VALUE="$OCI_SOURCE_VALUE" \
+  --build-arg OCI_URL_LABEL="$OCI_URL_LABEL" \
+  --build-arg OCI_URL_VALUE="$OCI_URL_VALUE" \
+  --build-arg OCI_DOCS_LABEL="$OCI_DOCS_LABEL" \
+  --build-arg OCI_DOCS_VALUE="$OCI_DOCS_VALUE" \
+  --build-arg OCI_VERSION_LABEL="$OCI_VERSION_LABEL" \
+  --build-arg OCI_VERSION_VALUE="$OCI_VERSION_VALUE" \
+  --build-arg OCI_REVISION_LABEL="$OCI_REVISION_LABEL" \
+  --build-arg OCI_REVISION_VALUE="$OCI_REVISION_VALUE" \
+  --build-arg OCI_REFNAME_LABEL="$OCI_REFNAME_LABEL" \
+  --build-arg OCI_REFNAME_VALUE="$OCI_REFNAME_VALUE" \
+  --no-cache -t "$image":"$OCI_REFNAME_VALUE" .
+
+docker tag "$image":"$OCI_REFNAME_VALUE" "$image":latest

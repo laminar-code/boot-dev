@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+save_pwd=$PWD
+echo $PWD
+
+date
+if [ $# -eq 0 ]; then
+  echo "No arguments provided. Image name required."
+  exit 1
+fi
+
+image=$1
+
+if test -f "./clean"; then
+  ./clean
+fi
+
+if test -f "./build"; then
+  ./build
+fi
+
+cd ../../..
+source label-container-with-repo-info
+cd $save_pwd
+
+# tag and push docker image to DigitalOcean
+docker tag "$image":"$OCI_REFNAME_VALUE" registry.digitalocean.com/laminar-registry/"$image":latest
+docker tag "$image":"$OCI_REFNAME_VALUE" registry.digitalocean.com/laminar-registry/"$image":"$OCI_REFNAME_VALUE"
+docker --config ~ image push --all-tags registry.digitalocean.com/laminar-registry/"$image"
+
+date

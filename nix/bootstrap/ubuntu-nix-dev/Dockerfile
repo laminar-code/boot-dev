@@ -1,10 +1,48 @@
-FROM ubuntu-nix-foundation
+FROM ubuntu-nix-foundation:1
 
 # Declare args
 ARG username
 ARG git_bearer_token
 ARG git_utils_repo
 ARG DEBIAN_FRONTEND=noninteractive
+
+ARG OCI_TITLE_LABEL=org.opencontainers.image.title
+ARG OCI_TITLE_VALUE=ERROR
+ARG OCI_DESCRIPTION_LABEL=org.opencontainers.image.description
+ARG OCI_DESCRIPTION_VALUE=ERROR
+ARG OCI_CREATED_LABEL=org.opencontainers.image.created
+ARG OCI_CREATED_VALUE=ERROR
+ARG OCI_AUTHORS_LABEL=org.opencontainers.image.authors
+ARG OCI_AUTHORS_VALUE=ERROR
+ARG OCI_VENDOR_LABEL=org.opencontainers.image.vendor
+ARG OCI_VENDOR_VALUE=ERROR
+ARG OCI_LICENSE_LABEL=org.opencontainers.image.licenses
+ARG OCI_LICENSE_VALUE=ERROR
+ARG OCI_SOURCE_LABEL=org.opencontainers.image.source
+ARG OCI_SOURCE_VALUE=ERROR
+ARG OCI_URL_LABEL=org.opencontainers.image.url
+ARG OCI_URL_VALUE=ERROR
+ARG OCI_DOCS_LABEL=org.opencontainers.image.documentation
+ARG OCI_DOCS_VALUE=ERROR
+ARG OCI_VERSION_LABEL=org.opencontainers.image.version
+ARG OCI_VERSION_VALUE=ERROR
+ARG OCI_REVISION_LABEL=org.opencontainers.image.revision
+ARG OCI_REVISION_VALUE=ERROR
+ARG OCI_REFNAME_LABEL=org.opencontainers.image.ref.name
+ARG OCI_REFNAME_VALUE=ERROR
+
+LABEL ${OCI_TITLE_LABEL}=${OCI_TITLE_VALUE}
+LABEL ${OCI_DESCRIPTION_LABEL}=${OCI_DESCRIPTION_VALUE}
+LABEL ${OCI_CREATED_LABEL}=${OCI_CREATED_VALUE}
+LABEL ${OCI_AUTHORS_LABEL}=${OCI_AUTHORS_VALUE}
+LABEL ${OCI_VENDOR_LABEL}=${OCI_VENDOR_VALUE}
+LABEL ${OCI_LICENSE_LABEL}=${OCI_LICENSE_VALUE}
+LABEL ${OCI_SOURCE_LABEL}=${OCI_SOURCE_VALUE}
+LABEL ${OCI_URL_LABEL}=${OCI_URL_VALUE}
+LABEL ${OCI_DOCS_LABEL}=${OCI_DOCS_VALUE}
+LABEL ${OCI_VERSION_LABEL}=${OCI_VERSION_VALUE}
+LABEL ${OCI_REVISION_LABEL}=${OCI_REVISION_VALUE}
+LABEL ${OCI_REFNAME_LABEL}=${OCI_REFNAME_VALUE}
 
 # Set up local user and add to sudoers w/o password requirement
 RUN  adduser --shell /usr/bin/bash ${username}

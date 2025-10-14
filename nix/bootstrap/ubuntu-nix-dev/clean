@@ -1,0 +1,12 @@
+#!/bin/sh
+# Cleans containers and images
+# Preserves volumes
+
+echo "Removing containers..."
+docker container rm -f boot-dev 2>/dev/null || true
+
+echo "Removing images..."
+docker image rm -f boot-dev 2>/dev/null || true
+
+echo "Pruning..."
+docker builder prune --all --force

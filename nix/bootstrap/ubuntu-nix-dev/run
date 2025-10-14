@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+echo $PWD
+
+USERNAME=devx
+
+docker run -it --user $USERNAME registry.digitalocean.com/laminar-registry/boot-dev:1 /bin/bash
