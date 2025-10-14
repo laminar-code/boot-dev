@@ -15,4 +15,4 @@ docker start dev 2>/dev/null || docker run --detach \
   /bin/bash -c "echo 'Ubuntu Nix Development Container'; sleep infinity" \
   >/dev/null
 
-docker exec -it --user $USERNAME dev /bin/bash
+docker exec -it --user $USERNAME development /bin/bash
