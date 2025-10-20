@@ -76,7 +76,9 @@ touch .build/certs/.placeholder
 mkdir -p .build/.ssh
 touch .build/.ssh/.placeholder
 
-docker build \
+docker buildx build \
+  --no-cache \
+  --platform linux/amd64,linux/arm64/v8 \
   --build-arg username="$USERNAME" \
   --build-arg GIT_UTILS_REPO="$GIT_UTILS_REPO" \
   --build-arg GIT_UTILS_REPO_RAW="$GIT_UTILS_REPO_RAW" \
@@ -109,6 +111,6 @@ docker build \
   --build-arg OCI_REVISION_VALUE="$OCI_REVISION_VALUE" \
   --build-arg OCI_REFNAME_LABEL="$OCI_REFNAME_LABEL" \
   --build-arg OCI_REFNAME_VALUE="$OCI_REFNAME_VALUE" \
-  --no-cache -t "$image":"$OCI_REFNAME_VALUE" .
+  --push -t "registry.digitalocean.com/laminar-registry/$image:$OCI_REFNAME_VALUE" .
 
 docker tag "$image":"$OCI_REFNAME_VALUE" "$image":latest
