@@ -129,9 +129,9 @@ RUN  nix-channel --update
 
 # Configure and install home-manager and run initial home-manager switch
 # This is retained for future but causes some warnings due to a release mismatch
-USER ${username}
-RUN  nix-shell '<home-manager>' -A install
-
+# USER ${username}
+# RUN  nix-shell '<home-manager>' -A install
+# 
 # # Link to devenv flake
 # USER ${username}
 # RUN ln -s /home/${username}/git/boot-dev/nix/devenv /home/${username}/devenv
