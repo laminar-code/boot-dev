@@ -2,7 +2,7 @@ FROM registry.digitalocean.com/laminar-registry/ubuntu-nix-foundation:1
 
 # Declare args
 ARG username
-ARG git_bearer_token
+# ARG git_bearer_token
 ARG git_utils_repo
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -107,36 +107,36 @@ RUN  mv /home/${username}/.profile /home/${username}/.profile.orig
 USER ${username}
 RUN  mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 
-# Set up nix and install home-manager
-USER ${username}
-RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-
-# Paused use of Determinate Systems installer for quicker, more visible installation 
-# RUN  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh
-# RUN  chmod +x /home/${username}/nix-installer.sh
-# RUN  /home/${username}/nix-installer.sh install linux --init none --no-confirm
-
-# Following line is not required when running single user (--no-daemon)
-# RUN  sudo chown ${username}:${username} /nix/* -R
-
-ENV  PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${username}/.nix-profile/bin
-USER ${username}
-RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/nixpkgs-unstable.tar.gz nixpkgs 
-RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-RUN  nix-channel --update
-
-# Configure and install home-manager and run initial home-manager switch
-# This is retained for future but causes some warnings due to a release mismatch
-USER ${username}
-RUN  nix-shell '<home-manager>' -A install
-
-# Link to devenv flake
-USER ${username}
-RUN ln -s /home/${username}/git/boot-dev/nix/devenv /home/${username}/devenv
-
-# Initialize Neovim plugins
-USER ${username}
-RUN  nvim --headless "+Lazy! sync" +qa
+# # Set up nix and install home-manager
+# USER ${username}
+# RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+# 
+# # Paused use of Determinate Systems installer for quicker, more visible installation 
+# # RUN  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh
+# # RUN  chmod +x /home/${username}/nix-installer.sh
+# # RUN  /home/${username}/nix-installer.sh install linux --init none --no-confirm
+# 
+# # Following line is not required when running single user (--no-daemon)
+# # RUN  sudo chown ${username}:${username} /nix/* -R
+# 
+# ENV  PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${username}/.nix-profile/bin
+# USER ${username}
+# RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/nixpkgs-unstable.tar.gz nixpkgs 
+# RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+# RUN  nix-channel --update
+# 
+# # Configure and install home-manager and run initial home-manager switch
+# # This is retained for future but causes some warnings due to a release mismatch
+# USER ${username}
+# RUN  nix-shell '<home-manager>' -A install
+# 
+# # Link to devenv flake
+# USER ${username}
+# RUN ln -s /home/${username}/git/boot-dev/nix/devenv /home/${username}/devenv
+# 
+# # Initialize Neovim plugins
+# USER ${username}
+# RUN  nvim --headless "+Lazy! sync" +qa
 
 # Set workdir to start shell in home directory
 USER    ${username}
