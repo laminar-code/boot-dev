@@ -1,4 +1,4 @@
-FROM ubuntu-nix-foundation:1
+FROM registry.digitalocean.com/laminar-registry/ubuntu-nix-foundation:1
 
 # Declare args
 ARG username

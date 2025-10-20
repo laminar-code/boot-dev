@@ -51,4 +51,4 @@ docker buildx build \
   --build-arg OCI_REFNAME_VALUE="$OCI_REFNAME_VALUE" \
   --push -t "registry.digitalocean.com/laminar-registry/$image:$OCI_REFNAME_VALUE" .
 
-docker tag "$image":"$OCI_REFNAME_VALUE" "$image":latest
+docker tag "registry.digitalocean.com/laminar-registry/$image:$OCI_REFNAME_VALUE" "registry.digitalocean.com/laminar-registry/$image":latest
