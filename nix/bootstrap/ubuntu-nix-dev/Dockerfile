@@ -73,7 +73,7 @@ RUN apt-get -yqq update \
   && mkdir -m 0755 /nix \
   && curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > nix-installer.sh \
   && chmod +x nix-installer.sh \
-  && nix-installer.sh install linux --init none --no-confirm --extra-conf "filter-syscalls = false" \
+  && ./nix-installer.sh install linux --init none --no-confirm --extra-conf "filter-syscalls = false" \
   && chown ${username}:${username} /nix -R
 
 USER ${username}
