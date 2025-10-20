@@ -66,11 +66,9 @@ ENV USER=${username}
 USER ${username}
 RUN  mkdir /home/${username}/git \
   && cd /home/${username}/git \
-  && git clone https://github.com/laminar-code/boot-dev.git
-
-# Link config dot files with dev config repos
-USER ${username}
-RUN  mkdir -p /home/${username}/.config \
+  && git clone https://github.com/laminar-code/boot-dev.git \
+  # Link config dot files with dev config repos
+  && mkdir -p /home/${username}/.config \
   && ln -s /home/${username}/git/boot-dev/nix/config /home/${username}/.config/nix \
   && mkdir -p /home/${username}/.config \
   && ln -s /home/${username}/git/boot-dev/tmux /home/${username}/.config/tmux \
@@ -99,20 +97,18 @@ COPY --chown=${username}:${username} .env /home/${username}/.env.boot-dev
 
 # Move .profile and .bashrc out of the way
 USER ${username}
-RUN  mv /home/${username}/.profile /home/${username}/.profile.orig
-USER ${username}
-RUN  mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
+RUN  mv /home/${username}/.profile /home/${username}/.profile.orig \
+  && mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 
-# # Set up nix and install home-manager
-USER root
-RUN mkdir -m 0755 /nix
+# Set up nix and install home-manager
 
-USER ${username}
+# Resumed use of determinate systems installer
+# USER ${username}
 # RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --extra-conf "filter-syscalls = false"
-# 
 
 USER root
-RUN  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh \
+RUN  mkdir -m 0755 /nix \
+  && curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh \
   && chmod +x /home/${username}/nix-installer.sh \
   && /home/${username}/nix-installer.sh install linux --init none --no-confirm --extra-conf "filter-syscalls = false" \
   && chown ${username}:${username} /nix -R
