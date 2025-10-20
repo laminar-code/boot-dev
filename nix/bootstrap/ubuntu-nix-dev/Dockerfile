@@ -127,11 +127,11 @@ RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/nixpkgs-unstable
 RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
 RUN  nix-channel --update
 
-# # Configure and install home-manager and run initial home-manager switch
-# # This is retained for future but causes some warnings due to a release mismatch
-# USER ${username}
-# RUN  nix-shell '<home-manager>' -A install
-# 
+# Configure and install home-manager and run initial home-manager switch
+# This is retained for future but causes some warnings due to a release mismatch
+USER ${username}
+RUN  nix-shell '<home-manager>' -A install
+
 # # Link to devenv flake
 # USER ${username}
 # RUN ln -s /home/${username}/git/boot-dev/nix/devenv /home/${username}/devenv
