@@ -121,10 +121,10 @@ RUN  /home/${username}/nix-installer.sh install linux --init none --no-confirm -
 
 ENV  PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${username}/.nix-profile/bin
 USER ${username}
-# RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/nixpkgs-unstable.tar.gz nixpkgs
-# RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-# RUN  nix-channel --update
-# 
+RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/nixpkgs-unstable.tar.gz nixpkgs
+RUN  nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+RUN  nix-channel --update
+
 # # Configure and install home-manager and run initial home-manager switch
 # # This is retained for future but causes some warnings due to a release mismatch
 # USER ${username}
