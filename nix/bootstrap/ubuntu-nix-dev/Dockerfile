@@ -117,6 +117,7 @@ USER ${username}
 # # Paused use of Determinate Systems installer for quicker, more visible installation 
 RUN  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh
 RUN  chmod +x /home/${username}/nix-installer.sh
+USER root
 RUN  /home/${username}/nix-installer.sh install linux --init none --no-confirm --extra-conf "filter-syscalls = false"
 
 ENV  PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${username}/.nix-profile/bin
