@@ -51,20 +51,20 @@ RUN  adduser --shell /usr/bin/bash ${username} \
   && adduser ${username} sudo \
   && echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
 
-# Add .ssh config to user
-COPY .build/.ssh/.placeholder .build/.ssh/ /home/${username}/.ssh/
-RUN  chown -R ${username}:${username} /home/${username}/.ssh \
-  && find /home/${username}/.ssh -type f -exec chmod 600 {} + \
-  && find /home/${username}/.ssh -type d -exec chmod 700 {} +
-
-# Set LANG and USER in user environment
 USER ${username}
+# Set LANG and USER in user environment
 ENV LANG=en_US.utf8
 ENV USER=${username}
+# Add .ssh config to user
+COPY .build/.ssh/.placeholder .build/.ssh/ /home/${username}/.ssh/
+# Copy in .env
+COPY --chown=${username}:${username} .env /home/${username}/.env.boot-dev
 
-# Clone repos for dev config
-USER ${username}
-RUN  mkdir /home/${username}/git \
+RUN  chown -R ${username}:${username} /home/${username}/.ssh \
+  && find /home/${username}/.ssh -type f -exec chmod 600 {} + \
+  && find /home/${username}/.ssh -type d -exec chmod 700 {} + \
+  # Clone repos for dev config
+  && mkdir /home/${username}/git \
   && cd /home/${username}/git \
   && git clone https://github.com/laminar-code/boot-dev.git \
   # Link config dot files with dev config repos
@@ -77,27 +77,17 @@ RUN  mkdir /home/${username}/git \
   && mkdir -p /home/${username}/.config \
   && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager \
   && mkdir -p /home/${username}/.config \
-  && ln -s /home/${username}/git/boot-dev/lazygit /home/${username}/.config/lazygit
-
-# Link ~/bin files with dev config repos
-USER ${username}
-RUN  mkdir /home/${username}/bin \
+  && ln -s /home/${username}/git/boot-dev/lazygit /home/${username}/.config/lazygit \
+  # Link ~/bin files with dev config repos
+  && mkdir /home/${username}/bin \
   && ln -s /home/${username}/git/boot-dev/git/clone /home/${username}/bin/clone \
   && ln -s /home/${username}/git/boot-dev/git/clone-files-only /home/${username}/bin/clone-files-only \
   && ln -s /home/${username}/git/boot-dev/git/switch-origin /home/${username}/bin/switch-origin \
-  && ln -s /home/${username}/git/boot-dev/nix/bin/dev /home/${username}/bin/dev
-
-# Create link for /mnt/host
-USER ${username}
-RUN  ln -s /mnt/host /home/${username}/host
-
-# Copy in .env
-USER ${username}
-COPY --chown=${username}:${username} .env /home/${username}/.env.boot-dev
-
-# Move .profile and .bashrc out of the way
-USER ${username}
-RUN  mv /home/${username}/.profile /home/${username}/.profile.orig \
+  && ln -s /home/${username}/git/boot-dev/nix/bin/dev /home/${username}/bin/dev \
+  # Create link for /mnt/host
+  &&  ln -s /mnt/host /home/${username}/host \
+  # Move .profile and .bashrc out of the way
+  &&  mv /home/${username}/.profile /home/${username}/.profile.orig \
   && mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 
 # Set up nix and install home-manager
