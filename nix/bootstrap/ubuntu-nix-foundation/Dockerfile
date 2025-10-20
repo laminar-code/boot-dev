@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ENV LANG en_US.UTF-8
+ENV LANG=en_US.UTF-8
 ENV LANGUAGE="en_US"
 
 ARG OCI_TITLE_LABEL=org.opencontainers.image.title
@@ -58,5 +58,5 @@ RUN apt-get -yqq update; apt-get -yqq upgrade; \
   update-locale LANG="en_US.UTF-8" LANGUAGE="en_US"
 
 # Startup at the command line
-CMD /usr/bin/bash 
+CMD ["/usr/bin/bash"]
 
