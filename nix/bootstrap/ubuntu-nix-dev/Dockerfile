@@ -1,9 +1,12 @@
 FROM ubuntu:24.04
 # FROM registry.digitalocean.com/laminar-registry/ubuntu-nix-foundation:1
 
+# Set LANG in user environment
+ENV LANG=en_US.utf8
+ENV LANGUAGE="en_US"
+
 # Declare args
 ARG username
-# ARG git_bearer_token
 ARG git_utils_repo
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -65,15 +68,17 @@ RUN apt-get -yqq update \
   && groupadd -g 9999 devs \
   && usermod -a -G devs ${username} \
   && adduser ${username} sudo \
-  && echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
-
-# Startup at the command line
-CMD ["/usr/bin/bash"]
+  && echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username} \
+  # Install nix
+  && mkdir -m 0755 /nix \
+  && curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > nix-installer.sh \
+  && chmod +x nix-installer.sh \
+  && nix-installer.sh install linux --init none --no-confirm --extra-conf "filter-syscalls = false" \
+  && chown ${username}:${username} /nix -R
 
 USER ${username}
-# Set LANG and USER in user environment
-ENV LANG=en_US.utf8
-ENV USER=${username}
+ENV  USER=${username}
+ENV  PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${username}/.nix-profile/bin
 # Add .ssh config to user
 COPY --chown=${username}:${username} .build/.ssh/.placeholder .build/.ssh/ /home/${username}/.ssh/
 # Copy in .env
@@ -87,38 +92,27 @@ RUN  find ./.ssh -type f -exec chmod 600 {} + \
   && git clone https://github.com/laminar-code/boot-dev.git git/boot-dev \
   # Link config dot files with dev config repos
   && mkdir -p ./.config \
-  && ln -s /home/${username}/git/boot-dev/nix/config /home/${username}/.config/nix \
-  && ln -s /home/${username}/git/boot-dev/tmux /home/${username}/.config/tmux \
-  && ln -s /home/${username}/git/boot-dev/nvim /home/${username}/.config/nvim \
-  && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager \
-  && ln -s /home/${username}/git/boot-dev/lazygit /home/${username}/.config/lazygit \
+  && ln -s git/boot-dev/nix/config        .config/nix \
+  && ln -s git/boot-dev/tmux              .config/tmux \
+  && ln -s git/boot-dev/nvim              .config/nvim \
+  && ln -s git/boot-dev/nix/home-manager  .config/home-manager \
+  && ln -s git/boot-dev/lazygit           .config/lazygit \
   # Link ~/bin files with dev config repos
   && mkdir bin \
-  && ln -s /home/${username}/git/boot-dev/git/clone /home/${username}/bin/clone \
-  && ln -s /home/${username}/git/boot-dev/git/clone-files-only /home/${username}/bin/clone-files-only \
-  && ln -s /home/${username}/git/boot-dev/git/switch-origin /home/${username}/bin/switch-origin \
-  && ln -s /home/${username}/git/boot-dev/nix/bin/dev /home/${username}/bin/dev \
+  && ln -s git/boot-dev/git/clone             bin/clone \
+  && ln -s git/boot-dev/git/clone-files-only  bin/clone-files-only \
+  && ln -s git/boot-dev/git/switch-origin     bin/switch-origin \
+  && ln -s git/boot-dev/nix/bin/dev           bin/dev \
   # Create link for /mnt/host
-  && ln -s /mnt/host /home/${username}/host \
+  && ln -s /mnt/host host \
   # Move .profile and .bashrc out of the way
   && mv .profile .profile.orig \
   && mv .bashrc .bashrc.orig
-
-# Set up nix and install home-manager
 
 # Resumed use of determinate systems installer
 # USER ${username}
 # RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --extra-conf "filter-syscalls = false"
 
-USER root
-RUN  mkdir -m 0755 /nix \
-  && curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh \
-  && chmod +x /home/${username}/nix-installer.sh \
-  && /home/${username}/nix-installer.sh install linux --init none --no-confirm --extra-conf "filter-syscalls = false" \
-  && chown ${username}:${username} /nix -R
-
-ENV  PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${username}/.nix-profile/bin
-USER ${username}
 RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/nixpkgs-unstable.tar.gz nixpkgs \
   && nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager \
   && nix-channel --update
@@ -139,4 +133,7 @@ RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/nixpkgs-unstable
 # Set workdir to start shell in home directory
 USER    ${username}
 WORKDIR /home/${username}
+
+# Startup at the command line
+CMD ["/usr/bin/bash"]
 
