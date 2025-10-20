@@ -1,4 +1,5 @@
-FROM registry.digitalocean.com/laminar-registry/ubuntu-nix-foundation:1
+FROM ubuntu:24.04
+# FROM registry.digitalocean.com/laminar-registry/ubuntu-nix-foundation:1
 
 # Declare args
 ARG username
@@ -43,6 +44,23 @@ LABEL ${OCI_DOCS_LABEL}=${OCI_DOCS_VALUE}
 LABEL ${OCI_VERSION_LABEL}=${OCI_VERSION_VALUE}
 LABEL ${OCI_REVISION_LABEL}=${OCI_REVISION_VALUE}
 LABEL ${OCI_REFNAME_LABEL}=${OCI_REFNAME_VALUE}
+
+# Configure certs
+COPY .build/certs/.placeholder .build/certs/*.crt /usr/local/share/ca-certificates/
+
+# Update certs then update apt package lists and upgrade current packages
+# Install nala for parallel downloads and updates
+# then install base level required packages
+# Configure locales
+RUN apt-get -yqq update; apt-get -yqq upgrade; \
+  apt-get -yqq install nala; nala install locales sudo make curl git slirp4netns uidmap buildah xz-utils nano gcc -y; \
+  update-ca-certificates; \
+  locale-gen en_US; locale-gen en_US.UTF-8; dpkg-reconfigure locales; \
+  localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8; \
+  update-locale LANG="en_US.UTF-8" LANGUAGE="en_US"
+
+# Startup at the command line
+CMD ["/usr/bin/bash"]
 
 # Set up local user and add to sudoers w/o password requirement
 RUN  adduser --shell /usr/bin/bash ${username} \
