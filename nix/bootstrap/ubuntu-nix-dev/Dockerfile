@@ -56,12 +56,11 @@ USER ${username}
 ENV LANG=en_US.utf8
 ENV USER=${username}
 # Add .ssh config to user
-COPY .build/.ssh/.placeholder .build/.ssh/ /home/${username}/.ssh/
+COPY --chown=${username}:${username} .build/.ssh/.placeholder .build/.ssh/ /home/${username}/.ssh/
 # Copy in .env
 COPY --chown=${username}:${username} .env /home/${username}/.env.boot-dev
 
-RUN  chown -R ${username}:${username} /home/${username}/.ssh \
-  && find /home/${username}/.ssh -type f -exec chmod 600 {} + \
+RUN  find /home/${username}/.ssh -type f -exec chmod 600 {} + \
   && find /home/${username}/.ssh -type d -exec chmod 700 {} + \
   # Clone repos for dev config
   && mkdir /home/${username}/git \
@@ -85,9 +84,9 @@ RUN  chown -R ${username}:${username} /home/${username}/.ssh \
   && ln -s /home/${username}/git/boot-dev/git/switch-origin /home/${username}/bin/switch-origin \
   && ln -s /home/${username}/git/boot-dev/nix/bin/dev /home/${username}/bin/dev \
   # Create link for /mnt/host
-  &&  ln -s /mnt/host /home/${username}/host \
+  && ln -s /mnt/host /home/${username}/host \
   # Move .profile and .bashrc out of the way
-  &&  mv /home/${username}/.profile /home/${username}/.profile.orig \
+  && mv /home/${username}/.profile /home/${username}/.profile.orig \
   && mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 
 # Set up nix and install home-manager
