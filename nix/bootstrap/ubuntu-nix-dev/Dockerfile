@@ -109,7 +109,7 @@ RUN  mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
 
 # # Set up nix and install home-manager
 USER root
-RUN mkdir -m 0755 /nix && chown ${username} /nix
+RUN mkdir -m 0755 /nix
 
 USER ${username}
 # RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --extra-conf "filter-syscalls = false"
@@ -119,6 +119,7 @@ RUN  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems
 RUN  chmod +x /home/${username}/nix-installer.sh
 USER root
 RUN  /home/${username}/nix-installer.sh install linux --init none --no-confirm --extra-conf "filter-syscalls = false"
+RUN chown ${username}:${username} /nix -R
 
 ENV  PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${username}/.nix-profile/bin
 USER ${username}
