@@ -52,22 +52,23 @@ COPY .build/certs/.placeholder .build/certs/*.crt /usr/local/share/ca-certificat
 # Install nala for parallel downloads and updates
 # then install base level required packages
 # Configure locales
-RUN apt-get -yqq update; apt-get -yqq upgrade; \
-  apt-get -yqq install nala; nala install locales sudo make curl git slirp4netns uidmap buildah xz-utils nano gcc -y; \
-  update-ca-certificates; \
-  locale-gen en_US; locale-gen en_US.UTF-8; dpkg-reconfigure locales; \
-  localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8; \
-  update-locale LANG="en_US.UTF-8" LANGUAGE="en_US"
-
-# Startup at the command line
-CMD ["/usr/bin/bash"]
-
-# Set up local user and add to sudoers w/o password requirement
-RUN  adduser --shell /usr/bin/bash ${username} \
+RUN apt-get -yqq update \
+  && apt-get -yqq upgrade \
+  && apt-get -yqq install nala \
+  && nala install locales sudo make curl git slirp4netns uidmap buildah xz-utils nano gcc -y \
+  && update-ca-certificates \
+  && locale-gen en_US; locale-gen en_US.UTF-8; dpkg-reconfigure locales \
+  && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
+  && update-locale LANG="en_US.UTF-8" LANGUAGE="en_US" \
+  # Set up local user and add to sudoers w/o password requirement
+  && adduser --shell /usr/bin/bash ${username} \
   && groupadd -g 9999 devs \
   && usermod -a -G devs ${username} \
   && adduser ${username} sudo \
   && echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
+
+# Startup at the command line
+CMD ["/usr/bin/bash"]
 
 USER ${username}
 # Set LANG and USER in user environment
