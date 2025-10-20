@@ -60,25 +60,21 @@ COPY --chown=${username}:${username} .build/.ssh/.placeholder .build/.ssh/ /home
 # Copy in .env
 COPY --chown=${username}:${username} .env /home/${username}/.env.boot-dev
 
-RUN  find /home/${username}/.ssh -type f -exec chmod 600 {} + \
-  && find /home/${username}/.ssh -type d -exec chmod 700 {} + \
+WORKDIR /home/${username}
+RUN  find ./.ssh -type f -exec chmod 600 {} + \
+  && find ./.ssh -type d -exec chmod 700 {} + \
   # Clone repos for dev config
-  && mkdir /home/${username}/git \
-  && cd /home/${username}/git \
-  && git clone https://github.com/laminar-code/boot-dev.git \
+  && mkdir git \
+  && git clone https://github.com/laminar-code/boot-dev.git git/boot-dev \
   # Link config dot files with dev config repos
-  && mkdir -p /home/${username}/.config \
+  && mkdir -p ./.config \
   && ln -s /home/${username}/git/boot-dev/nix/config /home/${username}/.config/nix \
-  && mkdir -p /home/${username}/.config \
   && ln -s /home/${username}/git/boot-dev/tmux /home/${username}/.config/tmux \
-  && mkdir -p /home/${username}/.config \
   && ln -s /home/${username}/git/boot-dev/nvim /home/${username}/.config/nvim \
-  && mkdir -p /home/${username}/.config \
   && ln -s /home/${username}/git/boot-dev/nix/home-manager /home/${username}/.config/home-manager \
-  && mkdir -p /home/${username}/.config \
   && ln -s /home/${username}/git/boot-dev/lazygit /home/${username}/.config/lazygit \
   # Link ~/bin files with dev config repos
-  && mkdir /home/${username}/bin \
+  && mkdir bin \
   && ln -s /home/${username}/git/boot-dev/git/clone /home/${username}/bin/clone \
   && ln -s /home/${username}/git/boot-dev/git/clone-files-only /home/${username}/bin/clone-files-only \
   && ln -s /home/${username}/git/boot-dev/git/switch-origin /home/${username}/bin/switch-origin \
@@ -86,8 +82,8 @@ RUN  find /home/${username}/.ssh -type f -exec chmod 600 {} + \
   # Create link for /mnt/host
   && ln -s /mnt/host /home/${username}/host \
   # Move .profile and .bashrc out of the way
-  && mv /home/${username}/.profile /home/${username}/.profile.orig \
-  && mv /home/${username}/.bashrc /home/${username}/.bashrc.orig
+  && mv .profile .profile.orig \
+  && mv .bashrc .bashrc.orig
 
 # Set up nix and install home-manager
 
