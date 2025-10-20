@@ -45,12 +45,11 @@ LABEL ${OCI_REVISION_LABEL}=${OCI_REVISION_VALUE}
 LABEL ${OCI_REFNAME_LABEL}=${OCI_REFNAME_VALUE}
 
 # Set up local user and add to sudoers w/o password requirement
-RUN  adduser --shell /usr/bin/bash ${username}
-RUN  groupadd -g 9999 devs
-# ARG  username=${username}
-RUN  usermod -a -G devs ${username}
-RUN  adduser ${username} sudo
-RUN  echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
+RUN  adduser --shell /usr/bin/bash ${username} \
+  && groupadd -g 9999 devs \
+  && usermod -a -G devs ${username} \
+  && adduser ${username} sudo \
+  && echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username}
 
 # Add .ssh config to user
 COPY .build/.ssh/.placeholder .build/.ssh/ /home/${username}/.ssh/
