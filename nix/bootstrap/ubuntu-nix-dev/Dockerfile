@@ -112,7 +112,7 @@ USER root
 RUN mkdir -m 0755 /nix && chown ${username} /nix
 
 USER ${username}
-RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --init none -- extra-conf "filter-syscalls = false"
+RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --init none --extra-conf "filter-syscalls = false"
 # 
 # # Paused use of Determinate Systems installer for quicker, more visible installation 
 # # RUN  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > /home/${username}/nix-installer.sh
