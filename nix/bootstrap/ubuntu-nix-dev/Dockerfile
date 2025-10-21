@@ -136,7 +136,7 @@ RUN  find ./.ssh -type f -exec chmod 600 {} + \
 # USER ${username}
 # RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --extra-conf "filter-syscalls = false"
 
-RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/nixos-25.05.tar.gz nixpkgs \
+RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/release-25.05.tar.gz nixpkgs \
   && nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager \
   && nix-channel --update
 
