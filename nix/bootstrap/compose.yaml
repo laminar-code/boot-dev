@@ -9,7 +9,7 @@ services:
 
   dev:
     environment:
-        - UBUNTU_WITH_NIX_DEV
+      - UBUNTU_WITH_NIX_DEV
     image: ubuntu-nix-dev:latest
     container_name: ubuntu-nix-dev-local
     hostname: ubuntu-nix-dev
@@ -17,7 +17,7 @@ services:
     build:
       context: .
       args:
-        username: ${USERNAME} 
+        username: ${USERNAME}
         git_bearer_token: ${GIT_BEARER_TOKEN}
         git_utils_repo: ${GIT_UTILS_REPO}
       dockerfile: ubuntu-nix-dev/Dockerfile
@@ -47,4 +47,3 @@ volumes:
       o: bind
       type: none
       device: ${LOCAL_DIRECTORY}
-
