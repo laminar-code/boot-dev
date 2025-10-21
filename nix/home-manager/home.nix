@@ -164,8 +164,6 @@
     };
     git = {
       enable = true;
-      userName = "Thomas Coffee";
-      userEmail = "thms@coffee.io";
       includes = [{
         condition = "gitdir:/mnt/host/*/";
         path = "/mnt/host/git/.gitconfig-work";
@@ -174,7 +172,9 @@
         condition = "gitdir:~/host/*/";
         path = "/mnt/host/git/.gitconfig-work";
       }];
-      extraConfig = {
+      settings = {
+        user.name = "Thomas Coffee";
+        user.email = "thms@coffee.io";
         pull.rebase = false;
       };
     };
