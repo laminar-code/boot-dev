@@ -115,10 +115,17 @@ RUN  find ./.ssh -type f -exec chmod 600 {} + \
   && ln -s ${HOME_DIR}/git/boot-dev/lazygit           .config/lazygit \
   # Link ~/bin files with dev config repos
   && mkdir bin \
-  && ln -s ${HOME_DIR}/git/boot-dev/git/clone             bin/clone \
-  && ln -s ${HOME_DIR}/git/boot-dev/git/clone-files-only  bin/clone-files-only \
-  && ln -s ${HOME_DIR}/git/boot-dev/git/switch-origin     bin/switch-origin \
-  && ln -s ${HOME_DIR}/git/boot-dev/nix/bin/dev           bin/dev \
+  && ln -s ${HOME_DIR}/git/boot-dev/git/clone                 bin/clone \
+  && ln -s ${HOME_DIR}/git/boot-dev/git/clone-files-only      bin/clone-files-only \
+  && ln -s ${HOME_DIR}/git/boot-dev/git/switch-origin         bin/switch-origin \
+  && ln -s ${HOME_DIR}/git/boot-dev/git/current-version       bin/current-version \
+  && ln -s ${HOME_DIR}/git/boot-dev/git/filter-repo           bin/filter-repo \
+  && ln -s ${HOME_DIR}/git/boot-dev/git/largest-files         bin/largest-files \
+  && ln -s ${HOME_DIR}/git/boot-dev/container/docker-ports    bin/docker-ports \
+  && ln -s ${HOME_DIR}/git/boot-dev/container/labels          bin/labels \
+  && ln -s ${HOME_DIR}/git/boot-dev/container/label-container bin/label-container \
+  && ln -s ${HOME_DIR}/git/boot-dev/nix/bin/dev               bin/dev \
+  && ln -s ${HOME_DIR}/git/boot-dev/nix/bin/init              bin/init \
   # Create link for /mnt/host
   && ln -s /mnt/host host \
   # Move .profile and .bashrc out of the way
@@ -133,18 +140,12 @@ RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/nixpkgs-unstable
   && nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager \
   && nix-channel --update
 
-# Configure and install home-manager and run initial home-manager switch
-# This is retained for future but causes some warnings due to a release mismatch
-# USER ${username}
-# RUN  nix-shell '<home-manager>' -A install
-# 
-# # Link to devenv flake
-# USER ${username}
-# RUN ln -s /home/${username}/git/boot-dev/nix/devenv /home/${username}/devenv
-# 
-# # Initialize Neovim plugins
-# USER ${username}
-# RUN  nvim --headless "+Lazy! sync" +qa
+# Manual script that needs to be run after 
+# starting the container to complete 
+# configuration of boot-dev because adding 
+# home-manager to container build causes
+# an inordinate amount of build time.
+# ~/bin/init
 
 # Set workdir to start shell in home directory
 USER    ${username}
