@@ -35,6 +35,8 @@ ARG OCI_REVISION_VALUE=ERROR
 ARG OCI_REFNAME_LABEL=org.opencontainers.image.ref.name
 ARG OCI_REFNAME_VALUE=ERROR
 
+ARG HOME_DIR=/home/${username}
+
 # hadolint ignore=DL3048
 LABEL ${OCI_TITLE_LABEL}=${OCI_TITLE_VALUE}
 # hadolint ignore=DL3048
@@ -106,17 +108,17 @@ RUN  find ./.ssh -type f -exec chmod 600 {} + \
   && git clone https://github.com/laminar-code/boot-dev.git git/boot-dev \
   # Link config dot files with dev config repos
   && mkdir -p ./.config \
-  && ln -s ./git/boot-dev/nix/config        .config/nix \
-  && ln -s ./git/boot-dev/tmux              .config/tmux \
-  && ln -s ./git/boot-dev/nvim              .config/nvim \
-  && ln -s ./git/boot-dev/nix/home-manager  .config/home-manager \
-  && ln -s ./git/boot-dev/lazygit           .config/lazygit \
+  && ln -s ${HOME_DIR}/git/boot-dev/nix/config        .config/nix \
+  && ln -s ${HOME_DIR}/git/boot-dev/tmux              .config/tmux \
+  && ln -s ${HOME_DIR}/git/boot-dev/nvim              .config/nvim \
+  && ln -s ${HOME_DIR}/git/boot-dev/nix/home-manager  .config/home-manager \
+  && ln -s ${HOME_DIR}/git/boot-dev/lazygit           .config/lazygit \
   # Link ~/bin files with dev config repos
   && mkdir bin \
-  && ln -s ./git/boot-dev/git/clone             bin/clone \
-  && ln -s ./git/boot-dev/git/clone-files-only  bin/clone-files-only \
-  && ln -s ./git/boot-dev/git/switch-origin     bin/switch-origin \
-  && ln -s ./git/boot-dev/nix/bin/dev           bin/dev \
+  && ln -s ${HOME_DIR}/git/boot-dev/git/clone             bin/clone \
+  && ln -s ${HOME_DIR}/git/boot-dev/git/clone-files-only  bin/clone-files-only \
+  && ln -s ${HOME_DIR}/git/boot-dev/git/switch-origin     bin/switch-origin \
+  && ln -s ${HOME_DIR}/git/boot-dev/nix/bin/dev           bin/dev \
   # Create link for /mnt/host
   && ln -s /mnt/host host \
   # Move .profile and .bashrc out of the way
