@@ -1,0 +1,13 @@
+#!/bin/sh
+# Script to complete configuration of boot-dev
+# Adding home-manager to container build causes
+# an inordinate amount of build time
+
+# Install home-manager
+nix-shell '<home-manager>' -A install
+
+# Link to devenv flake
+ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
+
+# Initialize Neovim plugins
+nvim --headless "+Lazy! sync" +qa
