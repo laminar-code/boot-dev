@@ -10,4 +10,6 @@ nix-shell '<home-manager>' -A install
 ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
 
 # Initialize Neovim plugins
+# nvim -c "Lazy update" -c "sleep 120" -c "call feedkeys(\":qa\\<cr>\")"
+nvim --headless "+Lazy! update" +qa
 nvim --headless "+Lazy! sync" +qa
