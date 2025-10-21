@@ -132,8 +132,9 @@
         docker = "podman";
         docker-compose = "podman-compose";
       };
+      # TODO: figure out if this is needed in initExtra
+      # . "/home/devx/.nix-profile/etc/profile.d/nix.sh"
       initExtra = ''
-        . "/home/devx/.nix-profile/etc/profile.d/nix.sh"
         . "/home/devx/.nix-profile/etc/profile.d/hm-session-vars.sh"
 
         eval "$(direnv hook bash)"
