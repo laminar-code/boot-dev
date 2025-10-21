@@ -1,0 +1,77 @@
+#!/bin/sh
+# Copyright 2025 Coderz.io LLC, all rights reserved.
+
+IMAGE_FILE_NAME=$1
+REPO_URL=$2
+REPO_DIR==$3
+
+#	Human-readable title of the image (string).
+if [ ! -f README ]; then
+  echo "README file does not exist in $(pwd)"
+  exit 1
+fi
+export OCI_TITLE_LABEL=org.opencontainers.image.title
+export OCI_TITLE_VALUE=$(grep -m 1 '^# ' README | sed 's/^# //')
+echo "$OCI_TITLE_LABEL=$OCI_TITLE_VALUE"
+
+#	Human-readable description of the software packaged in the image (string).
+export OCI_DESCRIPTION_LABEL=org.opencontainers.image.description
+start_line=$(grep -n "$OCI_TITLE_VALUE" README | cut -d: -f1)
+start_line=$((start_line + 1))
+start_line="+$start_line"
+export OCI_DESCRIPTION_VALUE=$(tail -n $start_line README | head -n 1)
+echo "$OCI_DESCRIPTION_LABEL=$OCI_DESCRIPTION_VALUE"
+
+#	The date and time on which the image was built (string, RFC 3339 date-time).
+export OCI_CREATED_LABEL=org.opencontainers.image.created
+export OCI_CREATED_VALUE=$(date -u --rfc-3339=seconds)
+echo "$OCI_CREATED_LABEL=$OCI_CREATED_VALUE"
+
+# Contact details of the people or organization responsible for the image (freeform string).
+export OCI_AUTHORS_LABEL=org.opencontainers.image.authors
+export OCI_AUTHORS_VALUE=$(git shortlog -sne | cut -c7- | sed 's/^[[:space:]]*//' | sed -z 's/\n/, /g' | sed 's/, $//')
+echo "$OCI_AUTHORS_LABEL=$OCI_AUTHORS_VALUE"
+
+#	Name of the distributing entity, organization, or individual (string).
+# TODO: Calculate value
+export OCI_VENDOR_LABEL=org.opencontainers.image.vendor
+export OCI_VENDOR_VALUE="Coderz.io LLC"
+echo "$OCI_VENDOR_LABEL=$OCI_VENDOR_VALUE"
+
+#	License(s) under which contained software is distributed (string, SPDX License List).
+# TODO: Calculate value
+export OCI_LICENSE_LABEL=org.opencontainers.image.licenses
+export OCI_LICENSE_VALUE=Proprietary
+echo "$OCI_LICENSE_LABEL=$OCI_LICENSE_VALUE"
+
+#	URL to the source code for building the image (string).
+export OCI_SOURCE_LABEL=org.opencontainers.image.source
+export OCI_SOURCE_VALUE=$(git config --get remote.origin.url)
+echo "$OCI_SOURCE_LABEL=$OCI_SOURCE_VALUE"
+
+# URL to find more information on the image (string).
+# TODO: Calculate value
+export OCI_URL_LABEL=org.opencontainers.image.url
+export OCI_URL_VALUE="Repository README"
+echo "$OCI_URL_LABEL=$OCI_URL_VALUE"
+
+#	URL to get documentation on the image (string).
+# TODO: Calculate value
+export OCI_DOCS_LABEL=org.opencontainers.image.documentation
+export OCI_DOCS_VALUE="Repository README"
+echo "$OCI_DOCS_LABEL=$OCI_DOCS_VALUE"
+
+#	Version of the packaged software (string).
+export OCI_VERSION_LABEL=org.opencontainers.image.version
+export OCI_VERSION_VALUE=$(get-current-version)
+echo "$OCI_VERSION_LABEL=$OCI_VERSION_VALUE"
+
+#	Source control revision identifier for the image (string).
+export OCI_REVISION_LABEL=org.opencontainers.image.revision
+export OCI_REVISION_VALUE=$(get-current-version)
+echo "$OCI_REVISION_LABEL=$OCI_REVISION_VALUE"
+
+#	Name of the reference for a target (string).
+export OCI_REFNAME_LABEL=org.opencontainers.image.ref.name
+export OCI_REFNAME_VALUE=$(get-current-version -t)
+echo "$OCI_REFNAME_LABEL=$OCI_REFNAME_VALUE"

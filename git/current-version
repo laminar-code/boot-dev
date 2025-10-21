@@ -1,0 +1,100 @@
+#!/bin/bash
+
+PRESENT_WORKING_DIR=$(pwd)
+
+# Function to display usage
+usage() {
+  echo "Usage: $0 [-t | -b | -c | -h]"
+  echo "  -t  Get the latest revision tag"
+  echo "  -b  Get the build number (total commit count)"
+  echo "  -c  Get the short commit hash"
+  echo "  -h  Help (this message)"
+  exit 1
+}
+
+# Process command-line options
+while getopts "tbch" opt; do
+  case $opt in
+  t)
+    GET_TAG=true
+    ;;
+  b)
+    GET_BUILD=true
+    ;;
+  c)
+    GET_COMMIT=true
+    ;;
+  h)
+    usage
+    ;;
+  esac
+done
+
+for arg in "$@"; do
+  if [[ "$arg" == -* ]]; then
+    # This is an option, continue processing
+    # You might want to handle option arguments here as well
+    # e.g., if it's -f file, you'd need to consume the next argument
+    # For simplicity, this example only identifies the first non-option
+    :
+  else
+    # This is the first non-option parameter
+    first_non_option="$arg"
+    break # Exit the loop once found
+  fi
+  args_processed=$((args_processed + 1))
+done
+
+# If a non-flagged argument is provided, treat it as the path
+if [ $# -gt 0 ] && [ -n "$first_non_option" ]; then
+  REPO_PATH="$first_non_option"
+  if [ ! -d "$REPO_PATH" ]; then
+    echo "Error: Directory '$REPO_PATH' does not exist"
+    exit 1
+  fi
+  cd "$REPO_PATH" || {
+    echo "Error: Failed to change to directory '$REPO_PATH'"
+    exit 1
+  }
+fi
+
+# Check if we're in a git repository
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "Error: Not in a Git repository"
+  exit 1
+fi
+
+# Get the latest tag (if any)
+TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+
+# Get the total number of commits (build number)
+BUILD_NUMBER=$(git rev-list --count HEAD)
+
+# Get the short commit hash
+COMMIT_HASH=$(git rev-parse --short HEAD)
+
+if [ "$GET_TAG" ]; then
+  echo -n "$TAG"
+fi
+
+if [ "$GET_BUILD" ] && [ "$GET_TAG" ]; then
+  echo -n "-$BUILD_NUMBER"
+elif [ "$GET_BUILD" ]; then
+  echo -n "$BUILD_NUMBER"
+fi
+
+if [ "$GET_COMMIT" ] && [ "$GET_TAG" ]; then
+  echo -n "-$COMMIT_HASH"
+elif [ "$GET_COMMIT" ] && [ "$GET_BUILD" ]; then
+  echo -n "-$COMMIT_HASH"
+elif [ "$GET_COMMIT" ]; then
+  echo -n "$COMMIT_HASH"
+fi
+
+if [ ! "$GET_TAG" ] && [ ! "$GET_BUILD" ] && [ ! "$GET_COMMIT" ]; then
+  echo "$TAG"-"$BUILD_NUMBER"-"$COMMIT_HASH"
+else
+  echo
+fi
+
+cd $PRESENT_WORKING_DIR
