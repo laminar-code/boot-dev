@@ -15,3 +15,5 @@ home-manager switch
 # nvim -c "Lazy update" -c "sleep 120" -c "call feedkeys(\":qa\\<cr>\")"
 nvim --headless "+Lazy! update" +qa
 nvim --headless "+Lazy! sync" +qa
+
+echo "System ready. Exit and start a new session."
