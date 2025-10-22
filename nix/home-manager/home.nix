@@ -28,6 +28,7 @@
     fzf           # Fuzzy finder
     jid           # Handy json digger
     jq            # Handy json parser
+    nfpm          # Package building tool
     pv            # Pipe viewer, watch that data flow
     ripgrep       # Grep tuned for git directories
     rsync         # The OG remote sync
