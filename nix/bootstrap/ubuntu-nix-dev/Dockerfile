@@ -152,5 +152,5 @@ USER    ${username}
 WORKDIR /home/${username}
 
 # Startup at the command line
-CMD ["/usr/bin/bash"]
+CMD ["/usr/bin/bash","-c","echo 'Ubuntu Nix Development'; sleep infinity"]
 
