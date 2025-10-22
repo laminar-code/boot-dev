@@ -65,8 +65,9 @@ COPY .build/certs/.placeholder .build/certs/*.crt /usr/local/share/ca-certificat
 RUN apt-get -yqq update \
   && apt-get -yqq upgrade \
   && apt-get -yqq install nala=0.15.1 --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/* \
   && nala install -y locales sudo make curl git slirp4netns uidmap buildah xz-utils nano gcc \
+  && nala clean --lists \
+  && rm -rf /var/lib/apt/lists/* \
   && update-ca-certificates \
   && locale-gen en_US \
   && locale-gen en_US.UTF-8 \
