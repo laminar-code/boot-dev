@@ -79,6 +79,8 @@ RUN apt-get -yqq update \
   && locale-gen en_US; locale-gen en_US.UTF-8; dpkg-reconfigure locales \
   && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
   && update-locale LANG="en_US.UTF-8" LANGUAGE="en_US" \
+  && deluser ubuntu --remove-home \
+  && delgroup ubuntu \
   # Set up local user and add to sudoers w/o password requirement
   && adduser --shell /usr/bin/bash ${username} \
   && groupadd -g 9999 devs \
