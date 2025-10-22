@@ -53,6 +53,7 @@
     nodejs_22
     nodePackages.neovim
     tree-sitter
+    hadolint
 
     # CLI Environment Tools
     tmux          # Terminal multiplexer
@@ -68,9 +69,9 @@
 
     # Java/Clojure
     # Moved to devenv flake
-    # babashka
-    # clojure
-    # zulu
+    babashka
+    clojure
+    zulu
 
     # JavaScript
     # Moved to devenv flake
