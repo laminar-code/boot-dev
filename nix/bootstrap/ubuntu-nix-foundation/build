@@ -16,7 +16,7 @@ fi
 image=ubuntu-nix-foundation
 
 cd ../../..
-source label-container-with-repo-info
+source label-container
 cd $save_pwd
 
 mkdir -p .build/certs
