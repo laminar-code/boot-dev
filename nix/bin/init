@@ -9,6 +9,8 @@ nix-shell '<home-manager>' -A install
 # Link to devenv flake
 ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
 
+home-manager switch
+
 # Initialize Neovim plugins
 # nvim -c "Lazy update" -c "sleep 120" -c "call feedkeys(\":qa\\<cr>\")"
 nvim --headless "+Lazy! update" +qa
