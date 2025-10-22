@@ -12,8 +12,12 @@ ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
 home-manager switch
 
 # Initialize Neovim plugins
-# nvim -c "Lazy update" -c "sleep 120" -c "call feedkeys(\":qa\\<cr>\")"
+nvim -c "Lazy update" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
 nvim --headless "+Lazy! update" +qa
+nvim --headless "+Lazy! install" +qa
 nvim --headless "+Lazy! sync" +qa
+nvim -c "Lazy sync" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
 
+echo
+echo
 echo "System ready. Exit and start a new session."
