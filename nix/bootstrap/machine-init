@@ -17,7 +17,7 @@ mkdir ~/certs
 
 # Clone repos for dev config
 mkdir /home/${USER}/git
-cd /home/${USER}/git 
+cd /home/${USER}/git
 
 # Boot dev
 git clone https://github.com/laminar-code/boot-dev.git
@@ -26,7 +26,7 @@ git clone https://github.com/laminar-code/boot-dev.git
 git clone --depth 1 https://github.com/ryanoasis/nerd-fonts.git
 
 # Intstall IBMPlexMono
-cd nerd-fonts/ && ./install.sh 
+cd nerd-fonts/ && ./install.sh
 
 # Set up some local git scripts
 mkdir /home/${USER}/bin
@@ -45,11 +45,12 @@ sudo chown ${USER}:${USER} /nix/* -R
 export PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${USER}/.nix-profile/bin
 
 # Configure and install home-manager and run initial home-manager switch
-nix-channel --add https://github.com/nixos/nixpkgs/archive/release-24.05.tar.gz nixpkgs
-nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
+nix-channel --add https://github.com/nixos/nixpkgs/archive/release-25.05.tar.gz nixpkgs
+nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager
 nix-channel --update
 cd /home/${USER}/.config/home-manager
-nix run . -- build --flake .
-mv ~/.profile ~/.profile.orig
-mv ~/.bashrc  ~/.bashrc.orig
-nix run . -- switch --flake .
+cp -p ~/.profile ~/.profile.orig
+cp -p ~/.bashrc ~/.bashrc.orig
+rm ~/.bashrc ~/.profile
+nix-shell '<home-manager>' -A install
+
