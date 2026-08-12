@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BOOTSTRAP_DIR="$SCRIPT_DIR/nix/bootstrap"
+ENV_FILE="${ENV_FILE:-$BOOTSTRAP_DIR/.env}"
+REQUIRED_VARS=(USERNAME GIT_UTILS_REPO GIT_UTILS_REPO_RAW GIT_BEARER_TOKEN GIT_USER_NAME GIT_USER_EMAIL HOME_NIX LOCAL_DIRECTORY)
+
+SUDO=""
+if [ "$(id -u)" -ne 0 ]; then
+  SUDO="sudo"
+fi
+
+PM=""
+if command -v apt-get > /dev/null 2>&1; then
+  PM=apt
+elif command -v dnf > /dev/null 2>&1; then
+  PM=dnf
+elif command -v yum > /dev/null 2>&1; then
+  PM=yum
+elif command -v pacman > /dev/null 2>&1; then
+  PM=pacman
+else
+  echo "ERROR: Unsupported package manager."
+  exit 1
+fi
+
+install_apt() {
+  . /etc/os-release
+  $SUDO apt-get -y update
+  $SUDO apt-get -y install ca-certificates curl gnupg git jq
+  $SUDO install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL "https://download.docker.com/linux/$ID/gpg" | $SUDO gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
+  $SUDO chmod a+r /etc/apt/keyrings/docker.gpg
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$ID $VERSION_CODENAME stable" | $SUDO tee /etc/apt/sources.list.d/docker.list > /dev/null
+  $SUDO apt-get -y update
+  $SUDO apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+}
+
+install_dnf() {
+  . /etc/os-release
+  local pm=dnf
+  if [ "$PM" = "yum" ]; then
+    pm=yum
+  fi
+  $SUDO "$pm" -y install dnf-plugins-core curl git jq
+  $SUDO "$pm" -y config-manager --add-repo "https://download.docker.com/linux/$ID/docker-ce.repo"
+  $SUDO "$pm" -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+}
+
+install_pacman() {
+  $SUDO pacman -Sy --needed docker docker-buildx docker-compose git curl jq
+}
+
+if command -v docker > /dev/null 2>&1 \
+  && docker compose version > /dev/null 2>&1 \
+  && docker buildx version > /dev/null 2>&1; then
+  echo "Docker with compose and buildx already available, skipping package install."
+else
+  case "$PM" in
+    apt)
+      install_apt
+      ;;
+    dnf|yum)
+      install_dnf
+      ;;
+    pacman)
+      install_pacman
+      ;;
+  esac
+fi
+
+if command -v systemctl > /dev/null 2>&1; then
+  $SUDO systemctl enable --now docker || echo "WARN: Could not enable/start docker via systemctl."
+fi
+
+if ! id -nG | tr ' ' '\n' | grep -qx docker; then
+  $SUDO usermod -aG docker "$USER"
+  echo "Added '$USER' to the 'docker' group. Re-login (or run 'newgrp docker') before using docker."
+fi
+
+mkdir -p "$BOOTSTRAP_DIR/.build/certs" "$BOOTSTRAP_DIR/.build/.ssh"
+touch "$BOOTSTRAP_DIR/.build/certs/.placeholder" "$BOOTSTRAP_DIR/.build/.ssh/.placeholder"
+
+if [ ! -f "$ENV_FILE" ]; then
+  cp "$BOOTSTRAP_DIR/.env.README" "$ENV_FILE"
+  echo "Created $ENV_FILE from the documented template."
+else
+  echo "$ENV_FILE already exists."
+fi
+
+missing=0
+for var in "${REQUIRED_VARS[@]}"; do
+  value="$(grep -E "^${var}=" "$ENV_FILE" 2>/dev/null | tail -n 1 | cut -d= -f2- | tr -d '"' || true)"
+  if [ -z "$value" ] || printf '%s' "$value" | grep -q '<'; then
+    echo "  $var is unset or still a template placeholder."
+    missing=1
+  fi
+done
+
+if [ "$missing" -eq 1 ]; then
+  echo
+  echo "ERROR: Required variables in $ENV_FILE are missing. Edit the file and re-run this script."
+  exit 1
+fi
+
+echo
+echo "Dependencies are in place. Next: cd nix/bootstrap && ./build"
