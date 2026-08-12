@@ -93,7 +93,9 @@ else
 fi
 
 if command -v systemctl > /dev/null 2>&1; then
-  $SUDO systemctl enable --now docker || echo "WARN: Could not enable/start docker via systemctl."
+  if ! systemctl is-active docker > /dev/null 2>&1 || ! systemctl is-enabled docker > /dev/null 2>&1; then
+    $SUDO systemctl enable --now docker || echo "WARN: Could not enable/start docker via systemctl."
+  fi
 fi
 
 if ! id -nG | tr ' ' '\n' | grep -qx docker; then
@@ -104,9 +106,33 @@ fi
 mkdir -p "$BOOTSTRAP_DIR/.build/certs" "$BOOTSTRAP_DIR/.build/.ssh"
 touch "$BOOTSTRAP_DIR/.build/certs/.placeholder" "$BOOTSTRAP_DIR/.build/.ssh/.placeholder"
 
+prompt_var() {
+  local var="$1"
+  local current=""
+  local value=""
+  current="$(grep -E "^${var}=" "$ENV_FILE" | tail -n 1 | cut -d= -f2- | tr -d '"' || true)"
+  if [ -n "$current" ]; then
+    read -r -p "  $var [$current]: " value < /dev/tty || true
+  else
+    read -r -p "  $var: " value < /dev/tty || true
+  fi
+  if [ -n "$value" ]; then
+    sed -i "s|^${var}=.*|${var}=\"${value}\"|" "$ENV_FILE"
+  fi
+}
+
 if [ ! -f "$ENV_FILE" ]; then
   cp "$BOOTSTRAP_DIR/.env.README" "$ENV_FILE"
   echo "Created $ENV_FILE from the documented template."
+  if (exec 3<> /dev/tty) 2> /dev/null; then
+    exec 3>&-
+    echo "Enter values for the required variables (press Enter to keep the current value):"
+    for var in "${REQUIRED_VARS[@]}"; do
+      prompt_var "$var"
+    done
+  else
+    echo "No interactive terminal detected; fill in $ENV_FILE manually."
+  fi
 else
   echo "$ENV_FILE already exists."
 fi
