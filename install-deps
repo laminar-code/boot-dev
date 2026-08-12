@@ -99,10 +99,41 @@ if command -v systemctl > /dev/null 2>&1; then
   fi
 fi
 
-if ! id -nG | tr ' ' '\n' | grep -qx docker; then
-  $SUDO usermod -aG docker "$USER"
-  echo "Added '$USER' to the 'docker' group. Re-login (or run 'newgrp docker') before using docker."
-fi
+ensure_newgrp() {
+  if command -v newgrp > /dev/null 2>&1; then
+    return 0
+  fi
+  echo "newgrp not found; installing it."
+  case "$PM" in
+    apt)
+      $SUDO apt-get -y install login
+      ;;
+    dnf|yum)
+      $SUDO "$PM" -y install shadow-utils
+      ;;
+    pacman)
+      $SUDO pacman -S --needed shadow
+      ;;
+  esac
+}
+
+verify_docker_group() {
+  if ! getent group docker > /dev/null 2>&1; then
+    $SUDO groupadd docker
+  fi
+  if getent group docker 2>/dev/null | cut -d: -f4 | tr ',' '\n' | grep -qx "$USER"; then
+    echo "User '$USER' is a member of the 'docker' group."
+  else
+    $SUDO usermod -aG docker "$USER"
+    ensure_newgrp
+    DOCKER_GROUP_ADDED=1
+    echo "Added '$USER' to the 'docker' group. A shell with the 'docker' group will open when the script finishes."
+  fi
+}
+
+verify_docker_group
+
+trap 'if [ "${DOCKER_GROUP_ADDED:-0}" = 1 ]; then echo "Opening a new shell with the '\''docker'\'' group (type '\''exit'\'' to return)."; newgrp docker || true; fi' EXIT
 
 mkdir -p "$BOOTSTRAP_DIR/.build/certs" "$BOOTSTRAP_DIR/.build/.ssh"
 touch "$BOOTSTRAP_DIR/.build/certs/.placeholder" "$BOOTSTRAP_DIR/.build/.ssh/.placeholder"
@@ -157,6 +188,9 @@ else
 fi
 
 missing=0
+if grep -E "^GIT_BEARER_TOKEN=.*<" "$ENV_FILE" > /dev/null 2>&1; then
+  sed -i 's|^GIT_BEARER_TOKEN=.*|GIT_BEARER_TOKEN=""|' "$ENV_FILE"
+fi
 for var in "${REQUIRED_VARS[@]}"; do
   value="$(grep -E "^${var}=" "$ENV_FILE" 2>/dev/null | tail -n 1 | cut -d= -f2- | tr -d '"' || true)"
   if [ -z "$value" ] || printf '%s' "$value" | grep -q '<'; then
@@ -171,5 +205,23 @@ if [ "$missing" -eq 1 ]; then
   exit 1
 fi
 
+REL_BOOTSTRAP="$(realpath --relative-to "$PWD" "$BOOTSTRAP_DIR" 2>/dev/null || true)"
+[ -n "$REL_BOOTSTRAP" ] || REL_BOOTSTRAP="$BOOTSTRAP_DIR"
 echo
-echo "Dependencies are in place. Next: cd nix/bootstrap && ./build"
+echo "Dependencies are in place."
+
+answer="Y"
+if (exec 3<> /dev/tty) 2> /dev/null; then
+  exec 3>&-
+  read -r -p "Run the build now? [Y/n]: " answer < /dev/tty || true
+fi
+
+case "$answer" in
+  ""|[Yy]*)
+    echo "Running: cd $BOOTSTRAP_DIR && ./build"
+    (cd "$BOOTSTRAP_DIR" && ./build)
+    ;;
+  *)
+    echo "Skipping. Next: cd $REL_BOOTSTRAP && ./build"
+    ;;
+esac
