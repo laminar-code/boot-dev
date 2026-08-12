@@ -4,7 +4,8 @@ set -euo pipefail
 REPO_URL="${REPO_URL:-https://github.com/laminar-code/boot-dev.git}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/boot-dev}"
-REQUIRED_VARS=(USERNAME GIT_UTILS_REPO GIT_UTILS_REPO_RAW GIT_BEARER_TOKEN GIT_USER_NAME GIT_USER_EMAIL HOME_NIX LOCAL_DIRECTORY)
+PROMPT_VARS=(USERNAME GIT_UTILS_REPO GIT_UTILS_REPO_RAW GIT_BEARER_TOKEN GIT_USER_NAME GIT_USER_EMAIL HOME_NIX LOCAL_DIRECTORY)
+REQUIRED_VARS=(USERNAME GIT_UTILS_REPO GIT_UTILS_REPO_RAW GIT_USER_NAME GIT_USER_EMAIL HOME_NIX LOCAL_DIRECTORY)
 
 SRC_DIR="$(dirname "${BASH_SOURCE[0]:-}")"
 SCRIPT_DIR="$(cd "$SRC_DIR" 2>/dev/null && pwd || true)"
@@ -134,6 +135,8 @@ prompt_var() {
     sed -i "s|^${var}=.*|${var}=\"${value}\"|" "$ENV_FILE"
   elif [ -n "$current" ]; then
     sed -i "s|^${var}=.*|${var}=\"${current}\"|" "$ENV_FILE"
+  elif [ "$var" = "GIT_BEARER_TOKEN" ]; then
+    sed -i "s|^${var}=.*|${var}=\"\"|" "$ENV_FILE"
   fi
 }
 
@@ -142,8 +145,8 @@ if [ ! -f "$ENV_FILE" ]; then
   echo "Created $ENV_FILE from the documented template."
   if (exec 3<> /dev/tty) 2> /dev/null; then
     exec 3>&-
-    echo "Enter values for the required variables (press Enter to accept the default):"
-    for var in "${REQUIRED_VARS[@]}"; do
+    echo "Enter values for the variables (press Enter to accept the default, token is optional):"
+    for var in "${PROMPT_VARS[@]}"; do
       prompt_var "$var"
     done
   else

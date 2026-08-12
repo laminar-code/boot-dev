@@ -28,12 +28,6 @@ if [ -z $GIT_UTILS_REPO_RAW ]; then
   exit 2
 fi
 
-if [ -z $GIT_BEARER_TOKEN ]; then
-  echo "ERROR: Environment variable GIT_BEARER_TOKEN does not have a value."
-  echo "Review .env.README for .env file format."
-  exit 2
-fi
-
 if [ -z "$GIT_USER_NAME" ]; then
   echo "ERROR: Environment variable GIT_USER_NAME does not have a value."
   echo "Review .env.README for .env file format."

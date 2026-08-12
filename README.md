@@ -35,6 +35,10 @@ go-dev logs you into the running dev container.
 
 Any certificates that need to be installed into the ca bundle need to be stored in PEM format in ubuntu-nix-foundation/certs. They will be ignored by git, but will be copied into the new image and bundled with the system ca certs. 
 
+## Security warning
+
+The GIT_BEARER_TOKEN is passed to the container build as a docker build arg, which means it can be exposed in the image build history. This needs to be fixed so the token is not passed as a build arg.
+
 ## home-manager
 
 Home Manager is installed by default as a flake. The current version is hard-coded to aarch64 and will need to be updated for other platforms. A new flake to handle all systems is in progress but still doesn't generically work with the home-manager switch command.

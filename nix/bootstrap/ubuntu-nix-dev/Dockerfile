@@ -8,6 +8,7 @@ ENV LANGUAGE="en_US"
 # Declare args
 ARG username
 ARG git_utils_repo
+ARG git_bearer_token
 ARG DEBIAN_FRONTEND=noninteractive
 
 ARG OCI_TITLE_LABEL=org.opencontainers.image.title
@@ -107,7 +108,11 @@ RUN  find ./.ssh -type f -exec chmod 600 {} + \
   && find ./.ssh -type d -exec chmod 700 {} + \
   # Clone repos for dev config
   && mkdir git \
-  && git clone https://github.com/laminar-code/boot-dev.git git/boot-dev \
+  && if [ -n "$git_bearer_token" ]; then \
+       git clone -c http.extraHeader="Authorization: Bearer $git_bearer_token" "$git_utils_repo" git/boot-dev; \
+     else \
+       git clone "$git_utils_repo" git/boot-dev; \
+     fi \
   # Link config dot files with dev config repos
   && mkdir -p ./.config \
   && ln -s ${HOME_DIR}/git/boot-dev/nix/config        .config/nix \
