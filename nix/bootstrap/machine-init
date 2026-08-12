@@ -7,7 +7,7 @@ sudo apt-get -yqq upgrade
 # Install nala for parallel downloads and updates
 # then install base level required packages
 sudo apt-get -yqq install nala
-sudo nala install locales sudo make curl git slirp4netns uidmap buildah xz-utils neovim gcc -y
+sudo nala install locales sudo make curl git slirp4netns uidmap buildah xz-utils neovim gcc direnv starship -y
 
 # Configure certs
 # Place any local certs into ~/certs
