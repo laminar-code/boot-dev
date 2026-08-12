@@ -51,7 +51,7 @@ fi
 install_apt() {
   . /etc/os-release
   $SUDO apt-get -y update
-  $SUDO apt-get -y install ca-certificates curl gnupg git jq
+  $SUDO apt-get -y install ca-certificates curl gnupg git jq util-linux-extra
   $SUDO install -m 0755 -d /etc/apt/keyrings
   curl -fsSL "https://download.docker.com/linux/$ID/gpg" | $SUDO gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
   $SUDO chmod a+r /etc/apt/keyrings/docker.gpg
