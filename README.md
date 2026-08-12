@@ -5,6 +5,24 @@ The motivation is to have a toolbox that can be easily installed and later remov
 
 ## Usage
 
+### One-liner install
+
+Install the host dependencies (docker with the compose and buildx plugins, git, and curl) and bootstrap the .env file by running install-deps directly from the repository:
+
+```
+curl -fsSL https://raw.githubusercontent.com/laminar-code/boot-dev/main/install-deps | bash
+```
+
+When piped, the script fetches the repository to ~/boot-dev before running. The destination and repo can be overridden with the INSTALL_DIR and REPO_URL environment variables, e.g.:
+
+```
+curl -fsSL https://raw.githubusercontent.com/laminar-code/boot-dev/main/install-deps | INSTALL_DIR=/opt/boot-dev bash
+```
+
+The script supports apt, dnf, yum, and pacman based hosts, and verifies the required .env variables are filled in before finishing.
+
+### Building the container
+
 Set up the .env file according to the documentation in the .env.README template.
 
 clean; build; run in the nix bootstrap directory will build a clean dev container based on Ubuntu 24.04.

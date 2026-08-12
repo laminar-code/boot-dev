@@ -1,10 +1,32 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BOOTSTRAP_DIR="$SCRIPT_DIR/nix/bootstrap"
-ENV_FILE="${ENV_FILE:-$BOOTSTRAP_DIR/.env}"
+REPO_URL="${REPO_URL:-https://github.com/laminar-code/boot-dev.git}"
+REPO_BRANCH="${REPO_BRANCH:-main}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/boot-dev}"
 REQUIRED_VARS=(USERNAME GIT_UTILS_REPO GIT_UTILS_REPO_RAW GIT_BEARER_TOKEN GIT_USER_NAME GIT_USER_EMAIL HOME_NIX LOCAL_DIRECTORY)
+
+SRC_DIR="$(dirname "${BASH_SOURCE[0]:-}")"
+SCRIPT_DIR="$(cd "$SRC_DIR" 2>/dev/null && pwd || true)"
+BOOTSTRAP_DIR="$SCRIPT_DIR/nix/bootstrap"
+
+if [ ! -d "$BOOTSTRAP_DIR" ]; then
+  if [ -d "$INSTALL_DIR" ] && [ -n "$(ls -A "$INSTALL_DIR" 2>/dev/null)" ]; then
+    echo "ERROR: $INSTALL_DIR exists and is not empty. Set INSTALL_DIR to a different location."
+    exit 1
+  fi
+  echo "boot-dev sources not found locally; fetching to $INSTALL_DIR"
+  mkdir -p "$INSTALL_DIR"
+  if command -v git > /dev/null 2>&1; then
+    git clone --quiet --branch "$REPO_BRANCH" "$REPO_URL" "$INSTALL_DIR"
+  else
+    curl -fsSL "https://github.com/laminar-code/boot-dev/archive/refs/heads/$REPO_BRANCH.tar.gz" | tar xz -C "$INSTALL_DIR" --strip-components=1
+  fi
+  SCRIPT_DIR="$INSTALL_DIR"
+  BOOTSTRAP_DIR="$SCRIPT_DIR/nix/bootstrap"
+fi
+
+ENV_FILE="${ENV_FILE:-$BOOTSTRAP_DIR/.env}"
 
 SUDO=""
 if [ "$(id -u)" -ne 0 ]; then
