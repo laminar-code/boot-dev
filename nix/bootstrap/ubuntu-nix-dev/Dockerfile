@@ -134,10 +134,13 @@ RUN  find ./.ssh -type f -exec chmod 600 {} + \
   && ln -s ${HOME_DIR}/git/boot-dev/nix/bin/dev               bin/dev \
   && ln -s ${HOME_DIR}/git/boot-dev/nix/bin/init              bin/init \
   # Create link for /mnt/host
-  && ln -s /mnt/host host \
+  && ln -s /mnt/host host
   # Move .profile and .bashrc out of the way
-  && mv .profile .profile.orig \
-  && mv .bashrc .bashrc.orig
+  # This is only required before installing home-manager
+  # which will throw an error when nix tries to manage
+  # these dot files
+  # && mv .profile .profile.orig \
+  # && mv .bashrc .bashrc.orig
 
 # Resumed use of determinate systems installer
 # USER ${username}

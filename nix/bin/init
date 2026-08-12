@@ -3,6 +3,13 @@
 # Adding home-manager to container build causes
 # an inordinate amount of build time
 
+# Need to remove .bashrc and .profile to
+# prevent conflict when home-manager takes over
+# management of .bashrc and .profile
+cp -p ~/.bashrc ~/.bashrc.orig
+cp -p ~/.profile ~/.profile.orig
+rm ~/.bashrc ~/.profile
+
 # Install home-manager
 nix-shell '<home-manager>' -A install
 
