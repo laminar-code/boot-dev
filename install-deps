@@ -109,8 +109,22 @@ touch "$BOOTSTRAP_DIR/.build/certs/.placeholder" "$BOOTSTRAP_DIR/.build/.ssh/.pl
 prompt_var() {
   local var="$1"
   local current=""
+  local default=""
   local value=""
   current="$(grep -E "^${var}=" "$ENV_FILE" | tail -n 1 | cut -d= -f2- | tr -d '"' || true)"
+  case "$var" in
+    USERNAME)           default="${USER:-$(id -un)}" ;;
+    GIT_UTILS_REPO)     default="$REPO_URL" ;;
+    GIT_UTILS_REPO_RAW) default="https://raw.githubusercontent.com/laminar-code/boot-dev/$REPO_BRANCH" ;;
+    GIT_BEARER_TOKEN)   default="" ;;
+    GIT_USER_NAME)      default="$(git config --get user.name 2>/dev/null || true)" ;;
+    GIT_USER_EMAIL)     default="$(git config --get user.email 2>/dev/null || true)" ;;
+    HOME_NIX)           default="https://raw.githubusercontent.com/laminar-code/boot-dev/$REPO_BRANCH/nix/home-manager/home.nix" ;;
+    LOCAL_DIRECTORY)    default="$HOME/work" ;;
+  esac
+  if [ -z "$current" ] || printf '%s' "$current" | grep -q '<'; then
+    current="$default"
+  fi
   if [ -n "$current" ]; then
     read -r -p "  $var [$current]: " value < /dev/tty || true
   else
@@ -118,6 +132,8 @@ prompt_var() {
   fi
   if [ -n "$value" ]; then
     sed -i "s|^${var}=.*|${var}=\"${value}\"|" "$ENV_FILE"
+  elif [ -n "$current" ]; then
+    sed -i "s|^${var}=.*|${var}=\"${current}\"|" "$ENV_FILE"
   fi
 }
 
@@ -126,7 +142,7 @@ if [ ! -f "$ENV_FILE" ]; then
   echo "Created $ENV_FILE from the documented template."
   if (exec 3<> /dev/tty) 2> /dev/null; then
     exec 3>&-
-    echo "Enter values for the required variables (press Enter to keep the current value):"
+    echo "Enter values for the required variables (press Enter to accept the default):"
     for var in "${REQUIRED_VARS[@]}"; do
       prompt_var "$var"
     done
