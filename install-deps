@@ -218,10 +218,10 @@ fi
 
 case "$answer" in
   ""|[Yy]*)
-    echo "Running: cd $BOOTSTRAP_DIR && newgrp docker && ./build"
-    (cd "$BOOTSTRAP_DIR" && ./build)
+    echo "Running: cd $BOOTSTRAP_DIR && sg docker \"./build\""
+    (cd "$BOOTSTRAP_DIR" && sg docker "./build")
     ;;
   *)
-    echo "Skipping. Next: cd $REL_BOOTSTRAP && newgrp docker && ./build"
+    echo "Skipping. Next: cd $REL_BOOTSTRAP && sg docker \"./build EOF\""
     ;;
 esac
