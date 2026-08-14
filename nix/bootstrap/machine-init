@@ -54,3 +54,18 @@ cp -p ~/.bashrc ~/.bashrc.orig
 rm ~/.bashrc ~/.profile
 nix-shell '<home-manager>' -A install
 
+# Link to devenv flake
+ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
+
+home-manager switch
+
+# Initialize Neovim plugins
+nvim -c "Lazy update" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
+nvim --headless "+Lazy! update" +qa
+nvim --headless "+Lazy! install" +qa
+nvim --headless "+Lazy! sync" +qa
+nvim -c "Lazy sync" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
+
+echo
+echo
+echo "System ready. Logout and log back in to start a clean session."
