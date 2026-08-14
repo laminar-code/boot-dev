@@ -90,9 +90,10 @@ RUN apt-get -yqq update \
   && echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${username} \
   # Install nix
   && mkdir -m 0755 /nix \
-  && curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > nix-installer.sh \
-  && chmod +x nix-installer.sh \
-  && ./nix-installer.sh install linux --init none --no-confirm --extra-conf "filter-syscalls = false" \
+  # Pause install of nix
+  # && curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > nix-installer.sh \
+  # && chmod +x nix-installer.sh \
+  # && ./nix-installer.sh install linux --init none --no-confirm --extra-conf "filter-syscalls = false" \
   && chown ${username}:${username} /nix -R
 
 USER ${username}
@@ -146,16 +147,16 @@ RUN  find ./.ssh -type f -exec chmod 600 {} + \
 # USER ${username}
 # RUN  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --extra-conf "filter-syscalls = false"
 
-RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/release-25.05.tar.gz nixpkgs \
-  && nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager \
-  && nix-channel --update
+# RUN  nix-channel --add https://github.com/nixos/nixpkgs/archive/release-25.05.tar.gz nixpkgs \
+#   && nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager \
+#   && nix-channel --update
 
 # Manual script that needs to be run after 
 # starting the container to complete 
 # configuration of boot-dev because adding 
 # home-manager to container build causes
 # an inordinate amount of build time.
-# ~/bin/init
+# ~/bin/init deprecated, run machine-init instead
 
 # Set workdir to start shell in home directory
 USER    ${username}
