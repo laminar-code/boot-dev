@@ -60,6 +60,12 @@ ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
 home-manager switch
 
 # Initialize Neovim plugins
+echo
+echo "Headless initailization of Neovim will commence in 10 seconds."
+echo "Initialization will require 2 minutes."
+echo "Please stand by..."
+echo
+
 nvim -c "Lazy update" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
 nvim --headless "+Lazy! update" +qa
 nvim --headless "+Lazy! install" +qa
