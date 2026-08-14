@@ -71,10 +71,11 @@ nvim --headless "+Lazy! update" +qa
 nvim --headless "+Lazy! install" +qa
 nvim --headless "+Lazy! sync" +qa
 
-# Resolve noice issue
-nvim --headless -c "TSUpdateSync vim vimdoc" +qa
-
 nvim -c "Lazy sync" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
+
+# Resolve noice issue
+nvim --headless -c "TSUpdate vim" +qa
+nvim --headless -c "TSUpdate vimdoc" +qa
 
 rm -rf ~/.cache/nvim
 
