@@ -73,7 +73,7 @@ COPY .build/certs/.placeholder .build/certs/*.crt /usr/local/share/ca-certificat
 RUN apt-get -yqq update \
   && apt-get -yqq upgrade \
   && apt-get -yqq install nala=0.15.1 --no-install-recommends \
-  && nala install -y locales sudo make curl git slirp4netns uidmap buildah xz-utils nano gcc newgrp starship \
+  && nala install -y locales sudo make curl git slirp4netns uidmap buildah xz-utils nano gcc util-linux-extra \
   && nala clean --lists \
   && rm -rf /var/lib/apt/lists/* \
   && update-ca-certificates \
