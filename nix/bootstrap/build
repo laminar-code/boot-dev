@@ -79,9 +79,9 @@ fi
 if [ -f "$DOCKER_COMPOSE" ]; then
   $DOCKER_COMPOSE build --no-cache
 else
-  if [ -f "$PODMAN" ]; then
-    $PODMAN compose --no-cache build
-  else
+  # if [ -f "$PODMAN" ]; then
+  #   $PODMAN compose --no-cache build
+  # else
     $DOCKER compose build --no-cache
-  fi
+  # fi
 fi
