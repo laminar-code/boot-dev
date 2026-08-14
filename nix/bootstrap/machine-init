@@ -72,6 +72,8 @@ nvim --headless "+Lazy! install" +qa
 nvim --headless "+Lazy! sync" +qa
 nvim -c "Lazy sync" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
 
+rm -rf ~/.cache/nvim
+
 echo
 echo
 echo "System ready. Logout and log back in to start a clean session."
