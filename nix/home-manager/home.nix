@@ -134,12 +134,16 @@
         docker = "podman";
         docker-compose = "podman-compose";
       };
-      # TODO: figure out if this is needed in initExtra
-      # . "/home/devx/.nix-profile/etc/profile.d/nix.sh"
       initExtra = ''
-        . "/home/devx/.nix-profile/etc/profile.d/hm-session-vars.sh"
-
-        eval "$(direnv hook bash)"
+        # Initialize nix environment
+	if [ -e ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
+	  . ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+	fi
+         if [ -e ~/.nix-profile/etc/profile.d/nix.sh ]; then
+	  . ~/.nix-profile/etc/profile.d/nix.sh
+	fi
+        
+	eval "$(direnv hook bash)"
         eval "$(starship init bash)"
 
         SSH_ENV="$HOME/.ssh/agent-environment"
