@@ -27,6 +27,17 @@ git clone --depth 1 https://github.com/ryanoasis/nerd-fonts.git
 
 # Install BlexMono
 cd nerd-fonts/ && ./install.sh IBMPlexMono
+cd ..
+
+# Set Blex Mono Text as the GNOME Terminal default font.
+# Skipped when GNOME Terminal is unavailable (e.g. inside the container).
+if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Terminal.ProfilesList; then
+  profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
+  if [ -n "$profile" ]; then
+    gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-system-font false
+    gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" font "Blex Mono Text 12"
+  fi
+fi
 
 # Set up some local git scripts
 mkdir /home/${USER}/bin
