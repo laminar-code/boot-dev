@@ -66,18 +66,8 @@ echo "Initialization will require 2 minutes."
 echo "Please stand by..."
 echo
 
-nvim -c "Lazy update" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
-nvim --headless "+Lazy! update" +qa
-nvim --headless "+Lazy! install" +qa
+# The bang makes Lazy wait until the sync (install/update/clean) has finished
 nvim --headless "+Lazy! sync" +qa
-
-nvim -c "Lazy sync" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
-
-# Resolve noice issue
-nvim --headless -c "TSUpdate vim" +qa
-nvim --headless -c "TSUpdate vimdoc" +qa
-
-rm -rf ~/.cache/nvim
 
 echo
 echo

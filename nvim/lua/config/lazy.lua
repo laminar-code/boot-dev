@@ -1,3 +1,17 @@
+-- Ubuntu's nvim package installs bundled parsers (vimdoc, vim, ...) in
+-- <prefix>/lib/nvim/parser. Lazy computes the system lib dir from the
+-- first of <prefix>/lib64 or <prefix>/lib that exists, so an empty /usr/lib64
+-- causes it to drop /usr/lib/nvim from the runtimepath and bundled parsers
+-- become unreachable (e.g. E5113 when opening :help). Re-add the real one.
+local function add_system_parser_dirs()
+  local prefix = vim.fn.fnamemodify(vim.v.progpath, ":p:h:h")
+  for _, lib in ipairs({ prefix .. "/lib/nvim", prefix .. "/lib64/nvim" }) do
+    if vim.uv.fs_stat(lib .. "/parser") then
+      vim.opt.rtp:append(lib)
+    end
+  end
+end
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -71,3 +85,5 @@ require("lazy").setup({
     },
   },
 })
+
+add_system_parser_dirs()
