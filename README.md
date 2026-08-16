@@ -13,6 +13,12 @@ Install the host dependencies (docker with the compose and buildx plugins, git, 
 curl -fsSL https://raw.githubusercontent.com/laminar-code/boot-dev/main/install-deps | bash
 ```
 
+For hosts without curl, wget works the same way:
+
+```
+wget -qO- https://raw.githubusercontent.com/laminar-code/boot-dev/main/install-deps | bash
+```
+
 When piped, the script fetches the repository to ~/boot-dev before running. The destination and repo can be overridden with the INSTALL_DIR and REPO_URL environment variables, e.g.:
 
 ```
