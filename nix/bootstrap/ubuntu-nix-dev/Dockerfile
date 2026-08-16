@@ -72,13 +72,13 @@ COPY .build/certs/.placeholder .build/certs/*.crt /usr/local/share/ca-certificat
 # Configure locales
 RUN apt-get -yqq update \
   && apt-get -yqq upgrade \
-  && apt-get -yqq install nala=0.15.1 --no-install-recommends \
+  && apt-get -yqq install nala=0.16.0 --no-install-recommends \
   && nala install -y locales sudo make curl git slirp4netns uidmap buildah xz-utils nano gcc util-linux-extra \
   && nala clean --lists \
   && rm -rf /var/lib/apt/lists/* \
   && update-ca-certificates \
   && locale-gen en_US; locale-gen en_US.UTF-8; dpkg-reconfigure locales \
-  && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
+  # && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
   && update-locale LANG="en_US.UTF-8" LANGUAGE="en_US" \
   && (deluser ubuntu --remove-home || true) \
   && (delgroup ubuntu 2>/dev/null || true) \
