@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 # FROM registry.digitalocean.com/laminar-registry/ubuntu-nix-foundation:1
 
 # Set LANG in user environment

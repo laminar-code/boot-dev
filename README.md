@@ -31,7 +31,7 @@ The script supports apt, dnf, yum, and pacman based hosts, and verifies the requ
 
 Set up the .env file according to the documentation in the .env.README template.
 
-clean; build; run in the nix bootstrap directory will build a clean dev container based on Ubuntu 24.04.
+clean; build; run in the nix bootstrap directory will build a clean dev container based on Ubuntu 26.04.
 
 start-dev was intended to start up the development container after it was built, but this is deprecated in favor of run which leverages docker compose to do the same thing.
 
