@@ -7,7 +7,7 @@ sudo apt-get -yqq upgrade
 # Install nala for parallel downloads and updates
 # then install base level required packages
 sudo apt-get -yqq install nala
-sudo nala install locales sudo make curl git slirp4netns uidmap buildah xz-utils neovim gcc direnv starship -y
+sudo nala install locales sudo make curl git unzip slirp4netns uidmap buildah xz-utils neovim gcc direnv starship -y
 
 # Configure certs
 # Place any local certs into ~/certs
@@ -22,12 +22,12 @@ cd /home/${USER}/git
 # Boot dev
 git clone https://github.com/laminar-code/boot-dev.git
 
-# Nerd fonts
-git clone --depth 1 https://github.com/ryanoasis/nerd-fonts.git
-
-# Install BlexMono
-cd nerd-fonts/ && ./install.sh IBMPlexMono
-cd ..
+# Download and install the IBMPlexMono nerd font
+mkdir -p ~/.local/share/fonts
+curl -L https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.0/IBMPlexMono.zip -o /tmp/IBMPlexMono.zip
+unzip -o /tmp/IBMPlexMono.zip -d ~/.local/share/fonts
+fc-cache -f
+rm /tmp/IBMPlexMono.zip
 
 # Set Blex Mono Text as the GNOME Terminal default font.
 # Skipped when GNOME Terminal is unavailable (e.g. inside the container).
@@ -35,7 +35,7 @@ if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | 
   profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
   if [ -n "$profile" ]; then
     gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-system-font false
-    gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" font "Blex Mono Text 12"
+    gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" font "BlexMono Nerd Font Mono Text 12"
   fi
 fi
 
