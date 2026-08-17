@@ -70,9 +70,9 @@
 
     # Java/Clojure
     # Moved to devenv flake
-    babashka
-    clojure
-    zulu
+    # babashka
+    # clojure
+    # zulu
 
     # JavaScript
     # Moved to devenv flake
