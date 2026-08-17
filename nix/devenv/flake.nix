@@ -129,6 +129,36 @@
           })
         ];
       };
+
+
+      cloud = devenv.lib.mkShell {
+        inherit inputs pkgs;
+        modules = [
+          ({ pkgs, config, ... }: {
+            packages = with pkgs; [ 
+              s3cmd
+            ];
+            enterShell = ''
+              echo Cloud shell...
+            '';
+          })
+        ];
+      };
+      
+      tor = devenv.lib.mkShell {
+        inherit inputs pkgs;
+        modules = [
+          ({ pkgs, config, ... }: {
+            packages = with pkgs; [ 
+              torbrowser-launcher
+            ];
+            enterShell = ''
+              echo Tor shell...
+            '';
+          })
+        ];
+      };
+
     };
   };
 }
