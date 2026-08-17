@@ -22,20 +22,22 @@ cd /home/${USER}/git
 # Boot dev
 git clone https://github.com/laminar-code/boot-dev.git
 
-# Download and install the IBMPlexMono nerd font
+# Download and install nerd fonts
 mkdir -p ~/.local/share/fonts
 curl -L https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.0/IBMPlexMono.zip -o /tmp/IBMPlexMono.zip
+curl -L https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.0/JetBrainsMono.zip -o /tmp/JetBrainsMono.zip
 unzip -o /tmp/IBMPlexMono.zip -d ~/.local/share/fonts
+unzip -o /tmp/JetBrainsMono.zip -d ~/.local/share/fonts
 fc-cache -f
-rm /tmp/IBMPlexMono.zip
+rm /tmp/IBMPlexMono.zip /tmp/JetBrainsMono.zip
 
-# Set Blex Mono Text as the GNOME Terminal default font.
+# Set JetBrains Mono Nerd Font Medium as the GNOME Terminal default font.
 # Skipped when GNOME Terminal is unavailable (e.g. inside the container).
 if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Terminal.ProfilesList; then
   profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
   if [ -n "$profile" ]; then
     gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-system-font false
-    gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" font "BlexMono Nerd Font Mono Text 12"
+    gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" font "JetBrainsMono Nerd Font Medium 12"
   fi
 fi
 
