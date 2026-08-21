@@ -1,0 +1,7 @@
+# Backup ignore patterns
+*.log
+*.tmp
+*~
+*.swp
+.DS_Store
+Thumbs.db

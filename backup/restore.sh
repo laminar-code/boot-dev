@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# Restore script
+# Usage: ./restore.sh <backup-file> [restore-dir]
+#        ./restore.sh --latest [module] [restore-dir]
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Source libraries
+source "${SCRIPT_DIR}/lib/common.sh"
+source "${SCRIPT_DIR}/lib/s3.sh"
+source "${SCRIPT_DIR}/lib/keys.sh"
+source "${SCRIPT_DIR}/lib/config.sh"
+source "${SCRIPT_DIR}/lib/pass.sh"
+
+# Parse arguments
+RESTORE_DIR="/"
+BACKUP_FILE=""
+LATEST=false
+MODULE=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --latest)
+            LATEST=true
+            shift
+            ;;
+        keys|gpg|ssh|certs|config|pass)
+            MODULE="$1"
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: $0 <backup-file> [restore-dir]"
+            echo "       $0 --latest [module] [restore-dir]"
+            echo ""
+            echo "Options:"
+            echo "  --latest    Restore from most recent backup"
+            echo "  keys        Restore keys backup"
+            echo "  gpg         Restore GPG keys backup"
+            echo "  ssh         Restore SSH keys backup"
+            echo "  certs       Restore SSL certificates backup"
+            echo "  config      Restore config backup"
+            echo "  pass        Restore pass password store"
+            echo "  -h, --help  Show this help"
+            exit 0
+            ;;
+        *)
+            if [[ -z "$BACKUP_FILE" ]]; then
+                BACKUP_FILE="$1"
+            else
+                RESTORE_DIR="$1"
+            fi
+            shift
+            ;;
+    esac
+done
+
+# Load configuration
+load_config
+
+# Find latest backup if requested
+if [[ "$LATEST" == "true" ]]; then
+    backup_dir=$(ensure_backup_dir)
+
+    pattern="*.tar.gz*"
+    if [[ -n "$MODULE" ]]; then
+        pattern="${MODULE}_*.tar.gz*"
+    fi
+
+    BACKUP_FILE=$(ls -t "${backup_dir}"/${pattern} 2>/dev/null | head -1)
+
+    if [[ -z "$BACKUP_FILE" ]]; then
+        log_error "No backups found matching pattern: $pattern"
+        exit 1
+    fi
+
+    log_info "Found latest backup: $BACKUP_FILE"
+fi
+
+if [[ -z "$BACKUP_FILE" ]]; then
+    log_error "No backup file specified"
+    echo "Usage: $0 <backup-file> [restore-dir]"
+    echo "       $0 --latest [module] [restore-dir]"
+    exit 1
+fi
+
+if [[ ! -f "$BACKUP_FILE" ]]; then
+    # Try to download from S3
+    filename=$(basename "$BACKUP_FILE")
+    log_info "Local file not found, attempting S3 download..."
+    s3_download "$filename" "/tmp" || {
+        log_error "Backup file not found: $BACKUP_FILE"
+        exit 1
+    }
+    BACKUP_FILE="/tmp/${filename}"
+fi
+
+echo ""
+log_info "========================================="
+log_info "  Restore Started"
+log_info "  File: $BACKUP_FILE"
+log_info "  Target: $RESTORE_DIR"
+log_info "========================================="
+echo ""
+
+# Determine module from filename
+detected_module=""
+if [[ "$BACKUP_FILE" == *keys_* ]]; then
+    detected_module="keys"
+elif [[ "$BACKUP_FILE" == *gpg_* ]]; then
+    detected_module="gpg"
+elif [[ "$BACKUP_FILE" == *ssh_* ]]; then
+    detected_module="ssh"
+elif [[ "$BACKUP_FILE" == *certs_* ]]; then
+    detected_module="certs"
+elif [[ "$BACKUP_FILE" == *config_* ]]; then
+    detected_module="config"
+elif [[ "$BACKUP_FILE" == *pass_* ]]; then
+    detected_module="pass"
+fi
+
+if [[ -n "$detected_module" ]]; then
+    case "$detected_module" in
+        keys)
+            restore_keys "$BACKUP_FILE" "$RESTORE_DIR"
+            ;;
+        gpg)
+            restore_gpg "$BACKUP_FILE" "$RESTORE_DIR"
+            ;;
+        ssh)
+            restore_ssh "$BACKUP_FILE" "$RESTORE_DIR"
+            ;;
+        certs)
+            restore_certs "$BACKUP_FILE" "$RESTORE_DIR"
+            ;;
+        config)
+            restore_config "$BACKUP_FILE" "$RESTORE_DIR"
+            ;;
+        pass)
+            restore_pass "$BACKUP_FILE" "$RESTORE_DIR"
+            ;;
+    esac
+else
+    # Generic restore - just extract
+    log_info "Extracting backup..."
+    file="$BACKUP_FILE"
+
+    if [[ "$file" == *.gpg ]]; then
+        log_info "Decrypting backup..."
+        file=$(decrypt_file "$file")
+    fi
+
+    tar -xzf "$file" -C "$RESTORE_DIR"
+
+    log_success "Backup restored to: $RESTORE_DIR"
+fi
+
+echo ""
+log_info "========================================="
+log_success "  Restore Complete"
+log_info "========================================="
+echo ""
