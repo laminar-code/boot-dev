@@ -46,7 +46,7 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         *)
-            if [[ -z "$BACKUP_FILE" ]]; then
+            if [[ -z "$BACKUP_FILE" && "$LATEST" != "true" ]]; then
                 BACKUP_FILE="$1"
             else
                 RESTORE_DIR="$1"
@@ -144,14 +144,21 @@ if [[ -n "$detected_module" ]]; then
 else
     # Generic restore - just extract
     log_info "Extracting backup..."
-    file="$BACKUP_FILE"
 
-    if [[ "$file" == *.gpg ]]; then
+    # Work on a temp copy so the original backup is never modified
+    tmp_dir=$(mktemp -d)
+    file="${tmp_dir}/$(basename "${BACKUP_FILE%.gpg}")"
+    cp "$BACKUP_FILE" "$file"
+
+    if [[ "$BACKUP_FILE" == *.gpg ]]; then
         log_info "Decrypting backup..."
         file=$(decrypt_file "$file")
     fi
 
     tar -xzf "$file" -C "$RESTORE_DIR"
+
+    # Cleanup temp files
+    rm -rf "$tmp_dir"
 
     log_success "Backup restored to: $RESTORE_DIR"
 fi

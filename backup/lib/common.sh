@@ -87,19 +87,32 @@ create_archive() {
     fi
 
     local level="${COMPRESSION_LEVEL:-6}"
-    tar -czf "$output" "${exclude_args[@]}" "${sources[@]}" 2>/dev/null
+
+    # Store members under their basenames so archives extract to
+    # clean relative paths instead of embedding absolute locations
+    local src_args=()
+    local src
+    for src in "${sources[@]}"; do
+        src_args+=(-C "$(dirname "$src")" "$(basename "$src")")
+    done
+
+    tar -czf "$output" "${exclude_args[@]}" "${src_args[@]}"
 }
 
 # Encrypt a file with GPG
 encrypt_file() {
     local file="$1"
     local recipient="${GPG_RECIPIENT:-}"
+    local passphrase="${GPG_PASSPHRASE:-}"
 
     if [[ -z "$recipient" ]]; then
-        gpg --batch --yes --symmetric --cipher-algo AES256 \
-            --passphrase-file /dev/stdin <<< "" \
-            -o "${file}.gpg" "$file" 2>/dev/null || \
-        gpg --batch --yes --symmetric --cipher-algo AES256 \
+        if [[ -z "$passphrase" ]]; then
+            log_error "Symmetric encryption requires GPG_PASSPHRASE to be set (or configure GPG_RECIPIENT)"
+            return 1
+        fi
+        gpg --batch --yes --pinentry-mode loopback \
+            --symmetric --cipher-algo AES256 \
+            --passphrase "$passphrase" \
             -o "${file}.gpg" "$file"
     else
         gpg --batch --yes --recipient "$recipient" \
@@ -120,8 +133,48 @@ decrypt_file() {
         output="${file%.gpg}"
     fi
 
-    gpg --batch --yes --decrypt -o "$output" "$file"
+    local pfargs=()
+    if [[ -z "${GPG_RECIPIENT:-}" && -n "${GPG_PASSPHRASE:-}" ]]; then
+        pfargs=(--pinentry-mode loopback --passphrase "$GPG_PASSPHRASE")
+    fi
+
+    gpg --batch --yes "${pfargs[@]}" --decrypt -o "$output" "$file"
     echo "$output"
+}
+
+# Bundle multiple backup files into a single encrypted archive.
+# The bundle replaces the individual files, which are removed after
+# encryption so no association between them remains on disk.
+create_bundle() {
+    local name="$1"
+    shift
+    local files=("$@")
+
+    local backup_dir
+    backup_dir=$(ensure_backup_dir)
+    local bundle_path="${backup_dir}/${name}.tar.gz"
+
+    local members=()
+    local f
+    for f in "${files[@]}"; do
+        members+=("$(basename "$f")")
+    done
+
+    log_info "Creating bundle: $(basename "$bundle_path")"
+    tar -czf "$bundle_path" -C "$backup_dir" "${members[@]}"
+
+    # Always encrypt the bundle so its contents stay opaque
+    log_info "Encrypting bundle..."
+    local encrypted
+    encrypted=$(encrypt_file "$bundle_path")
+
+    # Remove individual archives; the bundle replaces them
+    rm -f "${files[@]}"
+
+    s3_upload "$encrypted"
+
+    log_success "Bundle complete: $encrypted ($(human_size "$encrypted"))"
+    echo "$encrypted"
 }
 
 # Parse module from arguments

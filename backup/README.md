@@ -38,7 +38,7 @@ backup/
 
 ## Modules
 
-- **keys** - SSH keys, GPG keys, SSL certificates, credentials
+- **keys** - SSH keys, GPG keys, SSL certificates, credentials, pass password store
 - **config** - System configs, app configs, dotfiles
 
 ## Requirements

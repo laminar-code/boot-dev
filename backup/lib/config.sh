@@ -25,6 +25,7 @@ backup_config() {
                     log_warn "Could not copy $dir (try running as root)"
                     continue
                 }
+                sources+=("$staging_dest")
                 log_info "Including system config: $dir"
             else
                 log_warn "System config dir not found: $dir"
@@ -64,11 +65,6 @@ backup_config() {
         fi
     fi
 
-    # Add staging dir if it has content
-    if [[ -d "$staging_dir" ]] && [[ -n "$(ls -A "$staging_dir" 2>/dev/null)" ]]; then
-        sources=("$staging_dir" "${sources[@]}")
-    fi
-
     if [[ ${#sources[@]} -eq 0 ]]; then
         log_error "No configuration files found to backup"
         rm -rf "$staging_dir"
@@ -82,11 +78,17 @@ backup_config() {
     # Cleanup staging
     rm -rf "$staging_dir"
 
-    # Upload to S3
-    s3_upload "$archive_path"
+    local final_file="$archive_path"
+    if [[ "${ENCRYPT_BACKUPS:-false}" == "true" ]]; then
+        log_info "Encrypting backup..."
+        final_file=$(encrypt_file "$archive_path")
+    fi
 
-    log_success "Configuration backup complete: $archive_path ($(human_size "$archive_path"))"
-    echo "$archive_path"
+    # Upload to S3
+    s3_upload "$final_file"
+
+    log_success "Configuration backup complete: $final_file ($(human_size "$final_file"))"
+    echo "$final_file"
 }
 
 # Restore configuration from backup
@@ -96,10 +98,14 @@ restore_config() {
 
     log_info "Restoring configuration from: $backup_file"
 
-    local file="$backup_file"
+    # Work on a temp copy so the original backup is never modified
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    local file="${tmp_dir}/$(basename "${backup_file%.gpg}")"
+    cp "$backup_file" "$file"
 
     # Decrypt if needed
-    if [[ "$file" == *.gpg ]]; then
+    if [[ "$backup_file" == *.gpg ]]; then
         log_info "Decrypting backup..."
         file=$(decrypt_file "$file")
     fi
@@ -107,10 +113,8 @@ restore_config() {
     # Extract
     tar -xzf "$file" -C "$restore_dir"
 
-    # Cleanup decrypted temp file
-    if [[ "$backup_file" == *.gpg && "$file" != "$backup_file" ]]; then
-        rm -f "$file"
-    fi
+    # Cleanup temp files
+    rm -rf "$tmp_dir"
 
     log_success "Configuration restored to: $restore_dir"
 }

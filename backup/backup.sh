@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Main backup script
 # Usage: ./backup.sh [module] [--name <name>] [--no-encrypt] [--no-s3]
-# Modules: keys, gpg, ssh, certs, config, all (default: all)
+# Modules: keys, gpg, ssh, certs, config, pass, all (default: all)
 
 set -euo pipefail
 
@@ -42,7 +42,7 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [module] [--name <name>] [--no-encrypt] [--no-s3]"
             echo ""
             echo "Modules:"
-            echo "  keys    Backup security keys (SSH, GPG, SSL)"
+            echo "  keys    Backup security keys (SSH, GPG, SSL) and pass store"
             echo "  gpg     Backup GPG keys only"
             echo "  ssh     Backup SSH keys only"
             echo "  certs   Backup SSL certificates only"
@@ -51,7 +51,7 @@ while [[ $# -gt 0 ]]; do
             echo "  all     Backup everything (default)"
             echo ""
             echo "Options:"
-            echo "  --name <name>  Custom output filename (without extension)"
+            echo "  --name <name>  Custom output filename (keys/all: single encrypted bundle)"
             echo "  --no-encrypt   Skip GPG encryption"
             echo "  --no-s3        Skip S3 upload"
             echo "  -h, --help     Show this help"
@@ -78,6 +78,21 @@ if [[ "$NO_S3" == "true" ]]; then
     S3_BUCKET=""
 fi
 
+# Named composite runs are bundled into a single encrypted archive:
+# submodules use default names and skip individual S3 uploads, then the
+# bundle is encrypted and uploaded on its own.
+BUNDLE_NAME=""
+if [[ -n "$BACKUP_NAME" ]]; then
+    case "$MODULE" in
+        keys|all)
+            BUNDLE_NAME="$BACKUP_NAME"
+            BACKUP_NAME=""
+            S3_BUCKET_SAVE="$S3_BUCKET"
+            S3_BUCKET=""
+            ;;
+    esac
+fi
+
 # Run backup
 echo ""
 log_info "========================================="
@@ -90,6 +105,7 @@ backups=()
 case "$MODULE" in
     keys)
         backups+=("$(backup_keys)")
+        backups+=("$(backup_pass)")
         ;;
     gpg)
         backups+=("$(backup_gpg)")
@@ -112,6 +128,13 @@ case "$MODULE" in
         backups+=("$(backup_pass)")
         ;;
 esac
+
+# Replace named composite results with a single encrypted bundle
+if [[ -n "${BUNDLE_NAME}" ]] && [[ ${#backups[@]} -gt 0 ]]; then
+    bundle_path=$(create_bundle "$BUNDLE_NAME" "${backups[@]}")
+    backups=("$bundle_path")
+    S3_BUCKET="${S3_BUCKET_SAVE:-}"
+fi
 
 # Cleanup old local backups
 if [[ "${LOCAL_RETENTION_DAYS:-0}" -gt 0 ]]; then

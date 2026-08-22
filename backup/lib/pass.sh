@@ -17,7 +17,7 @@ backup_pass() {
     log_info "Including: $pass_dir"
 
     local archive_file="${backup_dir}/${BACKUP_NAME:-pass_${ts}}.tar.gz"
-    tar -czf "$archive_file" "$pass_dir" 2>/dev/null
+    tar -czf "$archive_file" -C "$(dirname "$pass_dir")" "$(basename "$pass_dir")" 2>/dev/null
 
     local final_file="$archive_file"
     if [[ "${ENCRYPT_BACKUPS:-false}" == "true" ]]; then
@@ -37,8 +37,13 @@ restore_pass() {
 
     log_info "Restoring pass store from: $backup_file"
 
-    local file="$backup_file"
-    if [[ "$file" == *.gpg ]]; then
+    # Work on a temp copy so the original backup is never modified
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    local file="${tmp_dir}/$(basename "${backup_file%.gpg}")"
+    cp "$backup_file" "$file"
+
+    if [[ "$backup_file" == *.gpg ]]; then
         log_info "Decrypting backup..."
         file=$(decrypt_file "$file")
     fi
@@ -47,6 +52,8 @@ restore_pass() {
     file="${file%.gz}"
 
     tar -xf "$file" -C "$restore_dir" 2>/dev/null
+
+    rm -rf "$tmp_dir"
 
     log_success "Pass store restored to: $restore_dir"
 }

@@ -107,7 +107,15 @@ backup_keys() {
     # Create gzipped tar
     local archive_file="${backup_dir}/${archive_name}.tar.gz"
     log_info "Creating archive: ${archive_name}.tar.gz"
-    tar -czf "$archive_file" "${sources[@]}" 2>/dev/null
+
+    # Store members under their basenames (ssh/, gpg/, ...) so restores
+    # land in clean relative paths and the gpg/* patterns keep working
+    local src_args=()
+    local src
+    for src in "${sources[@]}"; do
+        src_args+=(-C "$(dirname "$src")" "$(basename "$src")")
+    done
+    tar -czf "$archive_file" "${src_args[@]}" 2>/dev/null
 
     # Cleanup staging
     rm -rf "$staging_dir"
@@ -138,10 +146,12 @@ restore_keys() {
     local gpg_staging="${staging_dir}/gpg_extracted"
     mkdir -p "$gpg_staging"
 
-    local file="$backup_file"
+    # Work on a temp copy so the original backup is never modified
+    local file="${staging_dir}/$(basename "${backup_file%.gpg}")"
+    cp "$backup_file" "$file"
 
     # Decrypt if needed
-    if [[ "$file" == *.gpg ]]; then
+    if [[ "$backup_file" == *.gpg ]]; then
         log_info "Decrypting backup..."
         file=$(decrypt_file "$file")
     fi
