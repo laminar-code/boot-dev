@@ -203,10 +203,10 @@
         pull.rebase = false;
       };
     };
-    zen-browser = {
-      enable = true;
-      setAsDefaultBrowser = true;
-    };
+    # zen-browser = {
+    #   enable = true;
+    #   setAsDefaultBrowser = true;
+    # };
   };
 }
 
