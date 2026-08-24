@@ -5,6 +5,9 @@
 
   fonts.fontconfig.enable = true;
 
+  targets.genericLinux.enable = true;
+  xdg.enable = true;
+
   imports = [
     # inputs.zen-browser.homeModules.beta
     # inputs.zen-browser.homeModules.twilight
@@ -30,6 +33,7 @@
     # Shell Tools
     direnv        # Manage environment variables per directory
     devenv        # Manage development environments
+    kitty         # Cross-platform terminal emulator
     starship      # Command prompt
 
     # General CLI Tools
@@ -202,6 +206,19 @@
       extraConfig = {
         pull.rebase = false;
       };
+    };
+    kitty = {
+      enable = true;
+      settings = {
+        background_opacity = "0.8";
+        confirm_os_window_close = 0;
+        scrollback_lines = 10000;
+      };
+      font = {
+        name = "JetBrainsMono Nerd Font";
+        size = 12;
+      };
+      themeFile = "Catppuccin-Mocha";
     };
     # zen-browser = {
     #   enable = true;
