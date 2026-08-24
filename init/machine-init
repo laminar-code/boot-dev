@@ -70,6 +70,7 @@ export PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${USER}/.nix-profile
 # Configure and install home-manager and run initial home-manager switch
 nix-channel --add https://github.com/nixos/nixpkgs/archive/release-25.05.tar.gz nixpkgs
 nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager
+nix-channel --add https://github.com/catppuccin/nix/archive/release-26.05.tar.gz catppuccin
 nix-channel --update
 cd /home/${USER}/.config/home-manager
 cp -p ~/.profile ~/.profile.orig
