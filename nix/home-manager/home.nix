@@ -3,10 +3,22 @@
   home.homeDirectory = "/home/devx";
   home.stateVersion = "25.05";
 
+  fonts.fontconfig.enable = true;
+
+  imports = [
+    # inputs.zen-browser.homeModules.beta
+    # inputs.zen-browser.homeModules.twilight
+    # inputs.zen-browser.homeModules.twilight-official
+    <catppuccin/modules/home-manager>
+  ];
+
   home.packages = with pkgs; [
     # Adds the 'hello' command to your environment. It prints a friendly
     # "Hello, world!" when run.
     hello
+
+    # Intallation platforms
+    flatpak
 
     # Networking Tools
     dnsutils
@@ -21,22 +33,24 @@
     starship      # Command prompt
 
     # General CLI Tools
-    bat           # Much improved cat
-    btop          # Much improved top
-    eza           # Expanded ls
-    fd            # Quick and easy find
-    fzf           # Fuzzy finder
-    jid           # Handy json digger
-    jq            # Handy json parser
-    nfpm          # Package building tool
-    pv            # Pipe viewer, watch that data flow
-    ripgrep       # Grep tuned for git directories
-    rsync         # The OG remote sync
-    time          # Get time and timing of events
-    unzip         # Decompression for the masses
-    visidata      # Visualize data
-    wget          # Get that HTTP stuff
-    zip           # Compression for the masses
+    bat             # Much improved cat
+    btop            # Much improved top
+    catppuccin      # Terminal theme
+    eza             # Expanded ls
+    fd              # Quick and easy find
+    fzf             # Fuzzy finder
+    jid             # Handy json digger
+    jq              # Handy json parser
+    magic-wormhole  # P2P secure file transfer
+    nfpm            # Package building tool
+    pv              # Pipe viewer, watch that data flow
+    ripgrep         # Grep tuned for git directories
+    rsync           # The OG remote sync
+    time            # Get time and timing of events
+    unzip           # Decompression for the masses
+    visidata        # Visualize data
+    wget            # Get that HTTP stuff
+    zip             # Compression for the masses
 
     # CLI Image and PDF Tools
     imagemagick
@@ -90,11 +104,15 @@
     podman
     podman-compose
 
+    #UI Apps
+    warp
+
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
     # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
     # # fonts?
     pkgs.nerd-fonts.blex-mono
+    pkgs.nerd-fonts.jetbrains-mono
 
     # # You can also create simple shell scripts directly inside your
     # # configuration. For example, this adds a command 'my-hello' to your
@@ -184,6 +202,10 @@
       extraConfig = {
         pull.rebase = false;
       };
+    };
+    zen-browser = {
+      enable = true;
+      setAsDefaultBrowser = true;
     };
   };
 }
