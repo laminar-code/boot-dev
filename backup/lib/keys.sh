@@ -17,17 +17,37 @@ backup_keys() {
     # Export GPG keys
     local gpg_found=false
     if command -v gpg &>/dev/null; then
+        # Count existing keys first; listing never needs a passphrase
+        local pub_count sec_count
+        pub_count=$(gpg --list-keys 2>/dev/null | grep -c '^pub' || true)
+        sec_count=$(gpg --list-secret-keys 2>/dev/null | grep -c '^sec' || true)
+
         log_info "Exporting GPG public keys..."
-        if gpg --export 2>/dev/null | grep -q .; then
-            gpg --export --output "${gpg_staging}/pubkeys.gpg" 2>/dev/null
+        if [[ "$pub_count" -gt 0 ]]; then
+            if ! gpg --export --output "${gpg_staging}/pubkeys.gpg"; then
+                log_error "Failed to export GPG public keys"
+                rm -rf "$staging_dir"
+                return 1
+            fi
             gpg_found=true
         else
             log_warn "No GPG public keys found"
         fi
 
         log_info "Exporting GPG secret keys..."
-        if gpg --export-secret-keys 2>/dev/null | grep -q .; then
-            gpg --export-secret-keys --output "${gpg_staging}/secretkeys.gpg" 2>/dev/null
+        if [[ "$sec_count" -gt 0 ]]; then
+            rm -f "${gpg_staging}/secretkeys.gpg"
+            if ! gpg --export-secret-keys --output "${gpg_staging}/secretkeys.gpg"; then
+                log_error "Failed to export GPG secret keys (wrong passphrase?)"
+                rm -rf "$staging_dir"
+                return 1
+            fi
+            # A cancelled or wrong passphrase can yield an empty export
+            if [[ ! -s "${gpg_staging}/secretkeys.gpg" ]]; then
+                log_error "GPG secret key export produced no data (passphrase rejected?)"
+                rm -rf "$staging_dir"
+                return 1
+            fi
             gpg_found=true
         else
             log_warn "No GPG secret keys found"
