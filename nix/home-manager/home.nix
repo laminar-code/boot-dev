@@ -47,6 +47,7 @@
     jq              # Handy json parser
     magic-wormhole  # P2P secure file transfer
     nfpm            # Package building tool
+    pass            # Password/secrets managment
     pv              # Pipe viewer, watch that data flow
     ripgrep         # Grep tuned for git directories
     rsync           # The OG remote sync

@@ -7,7 +7,7 @@ sudo apt-get -yqq upgrade
 # Install nala for parallel downloads and updates
 # then install base level required packages
 sudo apt-get -yqq install nala
-sudo nala install locales sudo make curl git unzip slirp4netns uidmap buildah xz-utils neovim gcc direnv starship -y
+sudo nala install locales sudo make curl git unzip slirp4netns uidmap buildah xz-utils neovim gcc -y #direnv starship pass
 
 # Install signal-cli
 sudo curl -sL -o /etc/apt/trusted.gpg.d/morph027-signal-cli.asc https://packaging.gitlab.io/signal-cli/gpg.key
