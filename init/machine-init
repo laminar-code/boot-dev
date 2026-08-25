@@ -31,16 +31,6 @@ unzip -o /tmp/JetBrainsMono.zip -d ~/.local/share/fonts
 fc-cache -f
 rm /tmp/IBMPlexMono.zip /tmp/JetBrainsMono.zip
 
-# Set JetBrains Mono Nerd Font Medium as the GNOME Terminal default font.
-# Skipped when GNOME Terminal is unavailable (e.g. inside the container).
-if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Terminal.ProfilesList; then
-  profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
-  if [ -n "$profile" ]; then
-    gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-system-font false
-    gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" font "JetBrainsMono Nerd Font Medium 12"
-  fi
-fi
-
 # Set up local scripts
 mkdir /home/${USER}/bin
 ln -s /home/${USER}/git/boot-dev/git/clone              /home/${USER}/bin/clone
@@ -70,6 +60,7 @@ export PATH=${PATH}:/nix/var/nix/profiles/default/bin:/home/${USER}/.nix-profile
 # Configure and install home-manager and run initial home-manager switch
 nix-channel --add https://github.com/nixos/nixpkgs/archive/release-25.05.tar.gz nixpkgs
 nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager
+nix-channel --add https://github.com/catppuccin/nix/archive/release-25.05.tar.gz catppuccin
 nix-channel --update
 cd /home/${USER}/.config/home-manager
 cp -p ~/.profile ~/.profile.orig
@@ -91,6 +82,26 @@ echo
 
 # The bang makes Lazy wait until the sync (install/update/clean) has finished
 nvim --headless "+Lazy! sync" +qa
+
+# Set JetBrains Mono Nerd Font Medium as the GNOME Terminal default font.
+# Skipped when GNOME Terminal is unavailable (e.g. inside the container).
+if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Terminal.ProfilesList; then
+  profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
+  if [ -n "$profile" ]; then
+    gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-system-font false
+    gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" font "JetBrainsMono Nerd Font Medium 12"
+  fi
+fi
+
+if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Ptyxis; then
+  profile=$(gsettings get org.gnome.Ptyxis default-profile-uuid | tr -d "'")
+  if [ -n "$profile" ]; then
+    gsettings set org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/$profile/ palette "Catppuccin Mocha"
+  fi
+
+  gsettings set org.gnome.Ptyxis use-system-font false
+  gsettings set org.gnome.Ptyxis font-name "JetBrainsMono Nerd Font Medium 12"
+fi
 
 echo
 echo
