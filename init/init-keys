@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# Initialize personal credentials: SSH keys, GPG keys, and pass store
+# Usage: ./init-keys [ssh] [gpg] [pass]
+# With no arguments, all three are initialized.
+
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 [ssh] [gpg] [pass]"
+    echo ""
+    echo "Initialize credentials. With no arguments, all three are initialized."
+    echo ""
+    echo "Options:"
+    echo "  ssh   Create a new SSH key pair (~/.ssh/id_ed25519)"
+    echo "  gpg   Create a new GPG store and key pair"
+    echo "  pass  Initialize a new pass store using the GPG key"
+    echo "  -h, --help  Show this help"
+}
+
+# Parse arguments
+DO_SSH=false
+DO_GPG=false
+DO_PASS=false
+
+if [[ $# -eq 0 ]]; then
+    DO_SSH=true
+    DO_GPG=true
+    DO_PASS=true
+else
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            ssh)   DO_SSH=true ;;
+            gpg)   DO_GPG=true ;;
+            pass)  DO_PASS=true ;;
+            -h|--help) usage; exit 0 ;;
+            *)
+                echo "Unknown option: $1" >&2
+                usage >&2
+                exit 1
+                ;;
+        esac
+        shift
+    done
+fi
+
+# --- SSH ---
+init_ssh() {
+    local ssh_dir="$HOME/.ssh"
+    local key_file="$ssh_dir/id_ed25519"
+
+    if [[ -f "$key_file" ]]; then
+        echo "[skip] SSH key already exists: $key_file"
+        return 0
+    fi
+
+    echo "[init] Creating new SSH key pair..."
+    mkdir -p "$ssh_dir"
+    chmod 700 "$ssh_dir"
+
+    # Prompts for an optional passphrase
+    ssh-keygen -t ed25519 -C "${USER}@$(hostname)" -f "$key_file"
+
+    chmod 600 "$key_file"
+    chmod 644 "${key_file}.pub"
+    echo "[ ok ] SSH key pair created: $key_file"
+}
+
+# --- GPG ---
+init_gpg() {
+    export GNUPGHOME="${GNUPGHOME:-$HOME/.gnupg}"
+    mkdir -m 700 -p "$GNUPGHOME"
+
+    # Listing keys never requires a passphrase
+    local key_count
+    key_count=$(gpg --list-keys 2>/dev/null | grep -c '^pub' || true)
+
+    if [[ "$key_count" -gt 0 ]]; then
+        echo "[skip] GPG keys already exist in: $GNUPGHOME"
+        return 0
+    fi
+
+    echo "[init] Creating new GPG key..."
+
+    if [[ -n "${GPG_REAL_NAME:-}" && -n "${GPG_EMAIL:-}" ]]; then
+        # Unattended generation from environment
+        local params
+        params="Key-Type: eddsa
+Key-Curve: Ed25519
+Key-Usage: sign
+Subkey-Type: ecdh
+Subkey-Curve: Cv25519
+Subkey-Usage: encrypt
+Name-Real: ${GPG_REAL_NAME}
+Name-Email: ${GPG_EMAIL}
+Expire-Date: 0"
+        if [[ -n "${GPG_PASSPHRASE:-}" ]]; then
+            params="Passphrase: ${GPG_PASSPHRASE}
+${params}"
+        else
+            params="%no-protection
+${params}"
+        fi
+        printf '%s\n%%commit\n' "$params" | gpg --batch --generate-key
+    else
+        # Interactive generation
+        gpg --full-generate-key
+    fi
+
+    echo "[ ok ] GPG key created in: $GNUPGHOME"
+}
+
+# --- Pass ---
+init_pass() {
+    if ! command -v pass >/dev/null 2>&1; then
+        echo "[fail] 'pass' is not installed (e.g.: sudo apt-get install pass)" >&2
+        return 1
+    fi
+
+    local store_dir="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+
+    if [[ -d "$store_dir" ]] && [[ -n "$(ls -A "$store_dir" 2>/dev/null)" ]]; then
+        echo "[skip] Pass store already initialized: $store_dir"
+        return 0
+    fi
+
+    # Reuse the first available GPG key as the store encryption id
+    local gpg_id="${PASS_GPG_ID:-}"
+    if [[ -z "$gpg_id" ]]; then
+        gpg_id=$(gpg --list-keys --with-colons 2>/dev/null | awk -F: '/^pub/{print $5; exit}')
+    fi
+
+    if [[ -z "$gpg_id" ]]; then
+        echo "[fail] No GPG key found to initialize the pass store (run: $0 gpg)" >&2
+        return 1
+    fi
+
+    echo "[init] Initializing pass store with GPG id: $gpg_id"
+    pass init "$gpg_id"
+    echo "[ ok ] Pass store initialized: $store_dir"
+}
+
+# Run requested initializations (fixed order: dependencies first)
+STATUS=0
+
+if [[ "$DO_SSH" == "true" ]]; then
+    echo ""
+    echo "=== SSH ==="
+    init_ssh || STATUS=1
+fi
+
+if [[ "$DO_GPG" == "true" ]]; then
+    echo ""
+    echo "=== GPG ==="
+    init_gpg || STATUS=1
+fi
+
+if [[ "$DO_PASS" == "true" ]]; then
+    echo ""
+    echo "=== Pass ==="
+    init_pass || STATUS=1
+fi
+
+exit "$STATUS"
