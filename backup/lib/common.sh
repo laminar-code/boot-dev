@@ -103,17 +103,18 @@ create_archive() {
 encrypt_file() {
     local file="$1"
     local recipient="${GPG_RECIPIENT:-}"
-    local passphrase="${GPG_PASSPHRASE:-}"
+    local keyfile="${BACKUP_KEY_FILE:-$HOME/.backup_key}"
 
     if [[ -z "$recipient" ]]; then
-        if [[ -z "$passphrase" ]]; then
-            log_error "Symmetric encryption requires GPG_PASSPHRASE to be set (or configure GPG_RECIPIENT)"
+        if [[ -f "$keyfile" ]]; then
+            gpg --batch --yes --pinentry-mode loopback \
+                --symmetric --cipher-algo AES256 \
+                --passphrase-file "$keyfile" \
+                -o "${file}.gpg" "$file"
+        else
+            log_error "Symmetric encryption requires $keyfile to exist (or configure GPG_RECIPIENT)"
             return 1
         fi
-        gpg --batch --yes --pinentry-mode loopback \
-            --symmetric --cipher-algo AES256 \
-            --passphrase "$passphrase" \
-            -o "${file}.gpg" "$file"
     else
         gpg --batch --yes --recipient "$recipient" \
             --trust-model always \
@@ -134,8 +135,11 @@ decrypt_file() {
     fi
 
     local pfargs=()
-    if [[ -z "${GPG_RECIPIENT:-}" && -n "${GPG_PASSPHRASE:-}" ]]; then
-        pfargs=(--pinentry-mode loopback --passphrase "$GPG_PASSPHRASE")
+    if [[ -z "${GPG_RECIPIENT:-}" ]]; then
+        local keyfile="${BACKUP_KEY_FILE:-$HOME/.backup_key}"
+        if [[ -f "$keyfile" ]]; then
+            pfargs=(--pinentry-mode loopback --passphrase-file "$keyfile")
+        fi
     fi
 
     gpg --batch --yes "${pfargs[@]}" --decrypt -o "$output" "$file"
