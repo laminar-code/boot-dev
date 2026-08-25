@@ -9,6 +9,13 @@ sudo apt-get -yqq upgrade
 sudo apt-get -yqq install nala
 sudo nala install locales sudo make curl git unzip slirp4netns uidmap buildah xz-utils neovim gcc direnv starship -y
 
+# Install signal-cli
+sudo curl -sL -o /etc/apt/trusted.gpg.d/morph027-signal-cli.asc https://packaging.gitlab.io/signal-cli/gpg.key
+echo "deb https://packaging.gitlab.io/signal-cli signalcli main" | sudo tee /etc/apt/sources.list.d/morph027-signal-cli.list
+sudo apt-get -yqq update
+sudo apt-get install signal-cli-native
+# signal-cli link -n "DevConsole" | xargs -L 1 qrencode -o signal_qr.png
+
 # Configure certs
 # Place any local certs into ~/certs
 mkdir ~/certs
