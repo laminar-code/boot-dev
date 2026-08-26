@@ -7,6 +7,15 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Track temp files for cleanup on exit
+TEMP_FILES=()
+cleanup() {
+    for f in "${TEMP_FILES[@]}"; do
+        [[ -e "$f" ]] && rm -rf "$f"
+    done
+}
+trap cleanup EXIT
+
 # Source libraries
 source "${SCRIPT_DIR}/lib/common.sh"
 source "${SCRIPT_DIR}/lib/s3.sh"
@@ -92,14 +101,16 @@ if [[ -z "$BACKUP_FILE" ]]; then
 fi
 
 if [[ ! -f "$BACKUP_FILE" ]]; then
-    # Try to download from S3
+    # Try to download from S3 into a unique temp directory
+    s3tmp_dir=$(mktemp -d)
+    TEMP_FILES+=("$s3tmp_dir")
     filename=$(basename "$BACKUP_FILE")
     log_info "Local file not found, attempting S3 download..."
-    s3_download "$filename" "/tmp" || {
+    s3_download "$filename" "$s3tmp_dir" || {
         log_error "Backup file not found: $BACKUP_FILE"
         exit 1
     }
-    BACKUP_FILE="/tmp/${filename}"
+    BACKUP_FILE="${s3tmp_dir}/${filename}"
 fi
 
 echo ""
@@ -153,6 +164,7 @@ else
 
     # Work on a temp copy so the original backup is never modified
     tmp_dir=$(mktemp -d)
+    TEMP_FILES+=("$tmp_dir")
     file="${tmp_dir}/$(basename "${BACKUP_FILE%.gpg}")"
     cp "$BACKUP_FILE" "$file"
 
@@ -191,9 +203,6 @@ else
         # No inner encrypted archives, just extract directly
         tar -xzf "$file" -C "$RESTORE_DIR"
     fi
-
-    # Cleanup temp files
-    rm -rf "$tmp_dir"
 
     log_success "Backup restored to: $RESTORE_DIR"
 fi
