@@ -81,6 +81,18 @@ fi
 # Recompute S3 base path now that config is loaded
 S3_BASE="s3://${S3_BUCKET:-}/${S3_PREFIX:-backups}"
 
+# Validate S3 configuration
+if [[ -z "${S3_BUCKET:-}" ]]; then
+    if [[ "$NO_S3" == "true" ]]; then
+        log_info "S3 upload disabled (--no-s3)"
+    else
+        log_error "S3_BUCKET is not set in config/backup.conf. Use --no-s3 to skip S3 uploads."
+        exit 1
+    fi
+else
+    log_info "S3 bucket: ${S3_BUCKET} (prefix: ${S3_PREFIX:-backups})"
+fi
+
 # Named composite runs are bundled into a single encrypted archive:
 # submodules use default names and skip individual S3 uploads, then the
 # bundle is encrypted and uploaded on its own.
