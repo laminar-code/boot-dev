@@ -51,6 +51,7 @@
     pv              # Pipe viewer, watch that data flow
     ripgrep         # Grep tuned for git directories
     rsync           # The OG remote sync
+    s3cmd           # S3 file storage tool
     time            # Get time and timing of events
     unzip           # Decompression for the masses
     visidata        # Visualize data
