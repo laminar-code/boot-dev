@@ -148,7 +148,7 @@ if [[ -n "$detected_module" ]]; then
             ;;
     esac
 else
-    # Generic restore - just extract
+    # Generic restore - extract bundle and handle inner encrypted archives
     log_info "Extracting backup..."
 
     # Work on a temp copy so the original backup is never modified
@@ -157,11 +157,40 @@ else
     cp "$BACKUP_FILE" "$file"
 
     if [[ "$BACKUP_FILE" == *.gpg ]]; then
-        log_info "Decrypting backup..."
+        log_info "Decrypting bundle..."
         file=$(decrypt_file "$file")
     fi
 
-    tar -xzf "$file" -C "$RESTORE_DIR"
+    # Untar the bundle to a staging directory
+    bundle_extract="${tmp_dir}/bundle"
+    mkdir -p "$bundle_extract"
+    tar -xzf "$file" -C "$bundle_extract"
+
+    # Find and process all inner .tar.gz.gpg files
+    inner_files=()
+    while IFS= read -r -d '' f; do
+        inner_files+=("$f")
+    done < <(find "$bundle_extract" -name "*.tar.gz.gpg" -print0 2>/dev/null)
+
+    if [[ ${#inner_files[@]} -gt 0 ]]; then
+        log_info "Found ${#inner_files[@]} encrypted archive(s) in bundle"
+        for inner_file in "${inner_files[@]}"; do
+            log_info "Processing: $(basename "$inner_file")"
+            extracted="$inner_file"
+            if [[ "$inner_file" == *.gpg ]]; then
+                extracted=$(decrypt_file "$inner_file")
+            fi
+            gunzip -f "$extracted" 2>/dev/null || true
+            tar_file="${extracted%.gz}"
+            if [[ -f "$tar_file" ]]; then
+                tar -xf "$tar_file" -C "$RESTORE_DIR" 2>/dev/null
+                log_success "Restored: $(basename "$tar_file")"
+            fi
+        done
+    else
+        # No inner encrypted archives, just extract directly
+        tar -xzf "$file" -C "$RESTORE_DIR"
+    fi
 
     # Cleanup temp files
     rm -rf "$tmp_dir"
