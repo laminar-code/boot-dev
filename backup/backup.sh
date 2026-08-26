@@ -78,6 +78,9 @@ if [[ "$NO_S3" == "true" ]]; then
     S3_BUCKET=""
 fi
 
+# Recompute S3 base path now that config is loaded
+S3_BASE="s3://${S3_BUCKET:-}/${S3_PREFIX:-backups}"
+
 # Named composite runs are bundled into a single encrypted archive:
 # submodules use default names and skip individual S3 uploads, then the
 # bundle is encrypted and uploaded on its own.

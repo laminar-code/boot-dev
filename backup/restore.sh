@@ -59,6 +59,9 @@ done
 # Load configuration
 load_config
 
+# Recompute S3 base path now that config is loaded
+S3_BASE="s3://${S3_BUCKET:-}/${S3_PREFIX:-backups}"
+
 # Find latest backup if requested
 if [[ "$LATEST" == "true" ]]; then
     backup_dir=$(ensure_backup_dir)
