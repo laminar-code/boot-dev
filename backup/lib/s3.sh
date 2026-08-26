@@ -50,7 +50,7 @@ s3_download() {
     local s3_path="${S3_BASE}/${filename}"
 
     log_info "Downloading from ${s3_path}..."
-    if s3cmd get "$s3_path" "$output" --quiet; then
+    if s3cmd get "$s3_path" "$output" --force --quiet 2>/dev/null; then
         log_success "Downloaded from ${s3_path}"
     else
         log_error "Failed to download from ${s3_path}"
