@@ -9,7 +9,10 @@ s3_upload() {
     local bucket="${S3_BUCKET:-}"
 
     if [[ -z "$bucket" ]]; then
-        log_warn "S3 bucket not configured, skipping upload"
+        return 0
+    fi
+
+    if [[ "${SKIP_S3:-false}" == "true" ]]; then
         return 0
     fi
 

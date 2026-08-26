@@ -94,16 +94,15 @@ else
 fi
 
 # Named composite runs are bundled into a single encrypted archive:
-# submodules use default names and skip individual S3 uploads, then the
-# bundle is encrypted and uploaded on its own.
+# submodules skip individual S3 uploads, then the bundle is encrypted
+# and uploaded on its own.
 BUNDLE_NAME=""
 if [[ -n "$BACKUP_NAME" ]]; then
     case "$MODULE" in
         keys|all)
             BUNDLE_NAME="$BACKUP_NAME"
             BACKUP_NAME=""
-            S3_BUCKET_SAVE="$S3_BUCKET"
-            S3_BUCKET=""
+            export SKIP_S3=true
             ;;
     esac
 fi
@@ -146,9 +145,9 @@ esac
 
 # Replace named composite results with a single encrypted bundle
 if [[ -n "${BUNDLE_NAME}" ]] && [[ ${#backups[@]} -gt 0 ]]; then
+    unset SKIP_S3
     bundle_path=$(create_bundle "$BUNDLE_NAME" "${backups[@]}")
     backups=("$bundle_path")
-    S3_BUCKET="${S3_BUCKET_SAVE:-}"
 fi
 
 # Cleanup old local backups
