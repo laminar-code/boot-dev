@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # S3 upload/download utilities (s3cmd)
 
-S3_BASE="s3://${S3_BUCKET:-}/${S3_PREFIX:-backups}"
+S3_BASE="s3://${S3_BUCKET:-}/${S3_PREFIX:-}"
 
 # Upload a file to S3
 s3_upload() {
