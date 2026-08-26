@@ -79,7 +79,7 @@ if [[ "$NO_S3" == "true" ]]; then
 fi
 
 # Recompute S3 base path now that config is loaded
-S3_BASE="s3://${S3_BUCKET:-}/${S3_PREFIX:-backups}"
+S3_BASE="s3://${S3_BUCKET:-}/${S3_PREFIX:-}"
 
 # Validate S3 configuration
 if [[ -z "${S3_BUCKET:-}" ]]; then
