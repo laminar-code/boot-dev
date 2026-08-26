@@ -60,7 +60,10 @@ done
 load_config
 
 # Recompute S3 base path now that config is loaded
-S3_BASE="s3://${S3_BUCKET:-}/${S3_PREFIX:-}"
+S3_BASE="s3://${S3_BUCKET:-}"
+if [[ -n "${S3_PREFIX:-}" ]]; then
+    S3_BASE="${S3_BASE}/${S3_PREFIX}"
+fi
 
 # Find latest backup if requested
 if [[ "$LATEST" == "true" ]]; then

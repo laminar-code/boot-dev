@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # S3 upload/download utilities (s3cmd)
 
-S3_BASE="s3://${S3_BUCKET:-}/${S3_PREFIX:-}"
+S3_BASE="s3://${S3_BUCKET:-}"
+if [[ -n "${S3_PREFIX:-}" ]]; then
+    S3_BASE="${S3_BASE}/${S3_PREFIX}"
+fi
 
 # Upload a file to S3
 s3_upload() {
