@@ -177,7 +177,7 @@ else
     mkdir -p "$bundle_extract"
     tar -xzf "$file" -C "$bundle_extract"
 
-    # Find and process all inner .tar.gz.gpg files
+    # Decrypt and extract all inner .tar.gz.gpg files into the staging dir
     inner_files=()
     while IFS= read -r -d '' f; do
         inner_files+=("$f")
@@ -194,13 +194,18 @@ else
             gunzip -f "$extracted" 2>/dev/null || true
             tar_file="${extracted%.gz}"
             if [[ -f "$tar_file" ]]; then
-                tar -xf "$tar_file" -C "$RESTORE_DIR" 2>/dev/null
-                log_success "Restored: $(basename "$tar_file")"
+                tar -xf "$tar_file" -C "$bundle_extract" 2>/dev/null
+                log_success "Extracted: $(basename "$tar_file")"
             fi
         done
-    else
-        # No inner encrypted archives, just extract directly
-        tar -xzf "$file" -C "$RESTORE_DIR"
+    fi
+
+    # Restore SSH keys if an ssh directory is found in the staging dir
+    if [[ -d "${bundle_extract}/ssh" ]]; then
+        ssh_dir="${SSH_KEYS_DIR:-$HOME/.ssh}"
+        mkdir -p "$ssh_dir"
+        mv "${bundle_extract}"/ssh/* "$ssh_dir"/ 2>/dev/null
+        log_success "SSH keys restored to: $ssh_dir"
     fi
 
     log_success "Backup restored to: $RESTORE_DIR"
