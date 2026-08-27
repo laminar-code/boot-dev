@@ -417,9 +417,20 @@ restore_ssh() {
     gunzip -f "$file" 2>/dev/null
     file="${file%.gz}"
 
-    tar -xf "$file" -C "$restore_dir" 2>/dev/null
+    local staging_dir
+    staging_dir=$(mktemp -d)
+    tar -xf "$file" -C "$staging_dir" 2>/dev/null
 
-    log_success "SSH keys restored to: $restore_dir"
+    local ssh_dir="${SSH_KEYS_DIR:-$HOME/.ssh}"
+    if [[ -d "${staging_dir}/ssh" ]]; then
+        mkdir -p "$ssh_dir"
+        mv "${staging_dir}"/ssh/* "$ssh_dir"/ 2>/dev/null
+        log_success "SSH keys restored to: $ssh_dir"
+    else
+        log_warn "No ssh directory found in backup"
+    fi
+
+    rm -rf "$staging_dir"
 }
 
 # --- Certs module ---

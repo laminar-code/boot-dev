@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
             LATEST=true
             shift
             ;;
-        keys|gpg|ssh|certs|config|pass)
+        keys|gpg|certs|config|pass)
             MODULE="$1"
             shift
             ;;
@@ -47,7 +47,6 @@ while [[ $# -gt 0 ]]; do
             echo "  --latest    Restore from most recent backup"
             echo "  keys        Restore keys backup"
             echo "  gpg         Restore GPG keys backup"
-            echo "  ssh         Restore SSH keys backup"
             echo "  certs       Restore SSL certificates backup"
             echo "  config      Restore config backup"
             echo "  pass        Restore pass password store"
