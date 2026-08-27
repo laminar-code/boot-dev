@@ -16,8 +16,13 @@ backup_pass() {
     log_info "Starting pass backup..."
     log_info "Including: $pass_dir"
 
+    local staging_dir="${backup_dir}/pass_staging_${ts}"
+    mkdir -p "$staging_dir/pass"
+    cp -a "$pass_dir" "$staging_dir/pass/"
+
     local archive_file="${backup_dir}/${BACKUP_NAME:-pass_${ts}}.tar.gz"
-    tar -czf "$archive_file" -C "$(dirname "$pass_dir")" "$(basename "$pass_dir")" 2>/dev/null
+    tar -czf "$archive_file" -C "$staging_dir" pass 2>/dev/null
+    rm -rf "$staging_dir"
 
     local final_file="$archive_file"
     if [[ "${ENCRYPT_BACKUPS:-false}" == "true" ]]; then
@@ -51,9 +56,18 @@ restore_pass() {
     gunzip -f "$file" 2>/dev/null
     file="${file%.gz}"
 
-    tar -xf "$file" -C "$restore_dir" 2>/dev/null
+    local staging_dir="${tmp_dir}/staging"
+    mkdir -p "$staging_dir"
+    tar -xf "$file" -C "$staging_dir" 2>/dev/null
+
+    local pass_store="${PASS_STORE_DIR:-$HOME/.password-store}"
+    if [[ -d "${staging_dir}/pass/.password-store" ]]; then
+        mkdir -p "$pass_store"
+        cp -a "${staging_dir}/pass/.password-store/." "$pass_store/" 2>/dev/null
+        log_success "Pass store restored to: $pass_store"
+    else
+        log_warn "No pass directory found in backup"
+    fi
 
     rm -rf "$tmp_dir"
-
-    log_success "Pass store restored to: $restore_dir"
 }

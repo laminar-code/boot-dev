@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
             LATEST=true
             shift
             ;;
-        keys|certs|config|pass)
+        keys|certs|config)
             MODULE="$1"
             shift
             ;;
@@ -48,7 +48,6 @@ while [[ $# -gt 0 ]]; do
             echo "  keys        Restore keys backup"
             echo "  certs       Restore SSL certificates backup"
             echo "  config      Restore config backup"
-            echo "  pass        Restore pass password store"
             echo "  -h, --help  Show this help"
             exit 0
             ;;
@@ -129,8 +128,6 @@ elif [[ "$BACKUP_FILE" == *certs_* ]]; then
     detected_module="certs"
 elif [[ "$BACKUP_FILE" == *config_* ]]; then
     detected_module="config"
-elif [[ "$BACKUP_FILE" == *pass_* ]]; then
-    detected_module="pass"
 fi
 
 if [[ -n "$detected_module" ]]; then
@@ -143,9 +140,6 @@ if [[ -n "$detected_module" ]]; then
             ;;
         config)
             restore_config "$BACKUP_FILE" "$RESTORE_DIR"
-            ;;
-        pass)
-            restore_pass "$BACKUP_FILE" "$RESTORE_DIR"
             ;;
     esac
 else
@@ -219,6 +213,14 @@ else
             fi
             log_success "GPG keys imported"
         fi
+    fi
+
+    # Restore pass store if a pass directory is found in the staging dir
+    if [[ -d "${bundle_extract}/pass/.password-store" ]]; then
+        pass_store="${PASS_STORE_DIR:-$HOME/.password-store}"
+        mkdir -p "$pass_store"
+        cp -a "${bundle_extract}/pass/.password-store/." "$pass_store/" 2>/dev/null
+        log_success "Pass store restored to: $pass_store"
     fi
 
     log_success "Backup restored to: $RESTORE_DIR"
