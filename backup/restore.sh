@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
             LATEST=true
             shift
             ;;
-        keys|gpg|certs|config|pass)
+        keys|certs|config|pass)
             MODULE="$1"
             shift
             ;;
@@ -46,7 +46,6 @@ while [[ $# -gt 0 ]]; do
             echo "Options:"
             echo "  --latest    Restore from most recent backup"
             echo "  keys        Restore keys backup"
-            echo "  gpg         Restore GPG keys backup"
             echo "  certs       Restore SSL certificates backup"
             echo "  config      Restore config backup"
             echo "  pass        Restore pass password store"
@@ -124,8 +123,6 @@ echo ""
 detected_module=""
 if [[ "$BACKUP_FILE" == *keys_* ]]; then
     detected_module="keys"
-elif [[ "$BACKUP_FILE" == *gpg_* ]]; then
-    detected_module="gpg"
 elif [[ "$BACKUP_FILE" == *ssh_* ]]; then
     detected_module="ssh"
 elif [[ "$BACKUP_FILE" == *certs_* ]]; then
@@ -140,12 +137,6 @@ if [[ -n "$detected_module" ]]; then
     case "$detected_module" in
         keys)
             restore_keys "$BACKUP_FILE" "$RESTORE_DIR"
-            ;;
-        gpg)
-            restore_gpg "$BACKUP_FILE" "$RESTORE_DIR"
-            ;;
-        ssh)
-            restore_ssh "$BACKUP_FILE" "$RESTORE_DIR"
             ;;
         certs)
             restore_certs "$BACKUP_FILE" "$RESTORE_DIR"
@@ -206,6 +197,28 @@ else
         mkdir -p "$ssh_dir"
         mv "${bundle_extract}"/ssh/* "$ssh_dir"/ 2>/dev/null
         log_success "SSH keys restored to: $ssh_dir"
+    fi
+
+    # Restore GPG keys if a gpg directory is found in the staging dir
+    if [[ -d "${bundle_extract}/gpg" ]]; then
+        if ! command -v gpg &>/dev/null; then
+            log_error "GPG not found, cannot import keys"
+        else
+            gpg_dir="${bundle_extract}/gpg"
+            if [[ -f "${gpg_dir}/pubkeys.gpg" ]]; then
+                log_info "Importing GPG public keys..."
+                gpg --import "${gpg_dir}/pubkeys.gpg" 2>&1 | tail -1 || log_warn "Failed to import public keys"
+            fi
+            if [[ -f "${gpg_dir}/secretkeys.gpg" ]]; then
+                log_info "Importing GPG secret keys..."
+                gpg --import "${gpg_dir}/secretkeys.gpg" 2>&1 | tail -1 || log_warn "Failed to import secret keys"
+            fi
+            if [[ -f "${gpg_dir}/trustdb.txt" ]]; then
+                log_info "Importing GPG trust database..."
+                gpg --import-ownertrust "${gpg_dir}/trustdb.txt" 2>&1 | tail -1 || log_warn "Failed to import trust database"
+            fi
+            log_success "GPG keys imported"
+        fi
     fi
 
     log_success "Backup restored to: $RESTORE_DIR"
