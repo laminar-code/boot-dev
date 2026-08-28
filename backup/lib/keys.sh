@@ -55,7 +55,7 @@ backup_keys() {
 
         log_info "Exporting GPG trust database..."
         if gpg --export-ownertrust 2>/dev/null | grep -q .; then
-            gpg --export-ownertrust "${gpg_staging}/trustdb.txt" 2>/dev/null
+            gpg --export-ownertrust > "${gpg_staging}/trustdb.txt" 2>/dev/null
         fi
 
         if [[ "$gpg_found" == "true" ]]; then
@@ -262,7 +262,7 @@ backup_gpg() {
 
     log_info "Exporting GPG trust database..."
     if gpg --export-ownertrust 2>/dev/null | grep -q .; then
-        gpg --export-ownertrust "${gpg_staging}/trustdb.txt" 2>/dev/null
+        gpg --export-ownertrust > "${gpg_staging}/trustdb.txt" 2>/dev/null
     fi
 
     if [[ "$gpg_found" != "true" ]]; then
