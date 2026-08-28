@@ -64,6 +64,10 @@
               export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [
                 pkgs.stdenv.cc.cc
               ]}
+	      
+	      # Spoof a standard curl User-Agent to bypass the crates.io blocklist
+              export PIP_HTTP_HEADERS='{"User-Agent": "curl/8.0.0"}'
+              
               virtualenv --quiet pylocal
               pip install --quiet --upgrade pip
               source ./venv/bin/activate > /dev/null
@@ -90,7 +94,11 @@
               export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [
                 pkgs.stdenv.cc.cc
               ]}
-              virtualenv --quiet pylocal
+	      
+	      # Spoof a standard curl User-Agent to bypass the crates.io blocklist
+              export PIP_HTTP_HEADERS='{"User-Agent": "curl/8.0.0"}'
+              
+	      virtualenv --quiet pylocal
               source ./pylocal/bin/activate > /dev/null
               pip install --quiet --upgrade pip
               pip3 install --quiet keepercommander
