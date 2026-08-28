@@ -205,8 +205,10 @@
         condition = "gitdir:~/host/*/";
         path = "/mnt/host/git/.gitconfig-work";
       }];
-      extraConfig = {
-        pull.rebase = false;
+      settings = {
+	pull = {
+      	  rebase = false;
+    	};
       };
     };
     kitty = {
