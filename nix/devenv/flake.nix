@@ -67,10 +67,13 @@
 	      
 	      # Spoof a standard curl User-Agent to bypass the crates.io blocklist
               export PIP_HTTP_HEADERS='{"User-Agent": "curl/8.0.0"}'
-              
-              virtualenv --quiet pylocal
-              pip install --quiet --upgrade pip
+             
+	      if [ ! -d "venv" ]; then
+    		virtualenv --quiet venv
+  	      fi
               source ./venv/bin/activate > /dev/null
+
+              pip install --quiet --upgrade pip
             '';
           })
         ];
@@ -97,9 +100,11 @@
 	      
 	      # Spoof a standard curl User-Agent to bypass the crates.io blocklist
               export PIP_HTTP_HEADERS='{"User-Agent": "curl/8.0.0"}'
-              
-	      virtualenv --quiet pylocal
-              source ./pylocal/bin/activate > /dev/null
+             
+	      if [ ! -d "venv" ]; then
+    		virtualenv --quiet venv
+  	      fi
+              source ./venv/bin/activate > /dev/null
               pip install --quiet --upgrade pip
               pip3 install --quiet keepercommander
               pip3 install --quiet --upgrade keepercommander
