@@ -72,7 +72,6 @@
     lua
     luarocks
     nodejs_22
-    nodePackages.neovim
     tree-sitter
     hadolint
 
@@ -207,7 +206,7 @@
         user = {
       	  name = "Thomas Coffee";
       	  email = "thms@coffee.io";
-	}
+	};
 	pull = {
       	  rebase = false;
     	};
