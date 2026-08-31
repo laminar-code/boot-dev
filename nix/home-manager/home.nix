@@ -2,6 +2,11 @@
   home.username = "devx"; 
   home.homeDirectory = "/home/devx";
   home.stateVersion = "25.05";
+  # Dynamically sets the home directory path based on the OS architecture string
+  home.homeDirectory = 
+    if pkgs.stdenv.isDarwin 
+    then "/Users/${username}" 
+    else "/home/${username}";
 
   fonts.fontconfig.enable = true;
 
