@@ -40,24 +40,24 @@ rm /tmp/IBMPlexMono.zip /tmp/JetBrainsMono.zip
 
 # Set up local scripts
 mkdir /home/${USER}/bin
-ln -s /home/${USER}/git/boot-dev/git/clone              /home/${USER}/bin/clone
-ln -s /home/${USER}/git/boot-dev/git/clone-files-only   /home/${USER}/bin/clone-files-only
-ln -s /home/${USER}/git/boot-dev/git/switch-origin       /home/${USER}/bin/switch-origin
-ln -s /home/${USER}/git/boot-dev/git/current-version     /home/${USER}/bin/current-version
-ln -s /home/${USER}/git/boot-dev/git/filter-repo         /home/${USER}/bin/filter-repo
-ln -s /home/${USER}/git/boot-dev/git/largest-files       /home/${USER}/bin/largest-files
-ln -s /home/${USER}/git/boot-dev/container/docker-ports  /home/${USER}/bin/docker-ports
-ln -s /home/${USER}/git/boot-dev/container/labels        /home/${USER}/bin/labels
+ln -s /home/${USER}/git/boot-dev/git/clone /home/${USER}/bin/clone
+ln -s /home/${USER}/git/boot-dev/git/clone-files-only /home/${USER}/bin/clone-files-only
+ln -s /home/${USER}/git/boot-dev/git/switch-origin /home/${USER}/bin/switch-origin
+ln -s /home/${USER}/git/boot-dev/git/current-version /home/${USER}/bin/current-version
+ln -s /home/${USER}/git/boot-dev/git/filter-repo /home/${USER}/bin/filter-repo
+ln -s /home/${USER}/git/boot-dev/git/largest-files /home/${USER}/bin/largest-files
+ln -s /home/${USER}/git/boot-dev/container/docker-ports /home/${USER}/bin/docker-ports
+ln -s /home/${USER}/git/boot-dev/container/labels /home/${USER}/bin/labels
 ln -s /home/${USER}/git/boot-dev/container/label-container /home/${USER}/bin/label-container
-ln -s /home/${USER}/git/boot-dev/nix/bin/dev             /home/${USER}/bin/dev
-ln -s /home/${USER}/git/boot-dev/nix/bin/init            /home/${USER}/bin/init
+ln -s /home/${USER}/git/boot-dev/nix/bin/dev /home/${USER}/bin/dev
+ln -s /home/${USER}/git/boot-dev/nix/bin/init /home/${USER}/bin/init
 
 # Link base config directories to boot-dev
-mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nix/config        /home/${USER}/.config/nix
-mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/tmux              /home/${USER}/.config/tmux
-mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nvim              /home/${USER}/.config/nvim
-mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nix/home-manager  /home/${USER}/.config/home-manager
-mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/lazygit           /home/${USER}/.config/lazygit
+mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nix/config /home/${USER}/.config/nix
+mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/tmux /home/${USER}/.config/tmux
+mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nvim /home/${USER}/.config/nvim
+mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nix/home-manager /home/${USER}/.config/home-manager
+mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/lazygit /home/${USER}/.config/lazygit
 
 # Install nix
 curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
@@ -78,7 +78,9 @@ nix-shell '<home-manager>' -A install
 # Link to devenv flake
 ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
 
-home-manager switch
+# migrate to flake
+# home-manager switch
+home-manager switch --flake .#devx
 
 # Initialize Neovim plugins
 echo
