@@ -1,10 +1,10 @@
-{ config, pkgs, ... }: {
-  home.username = "devx"; 
-  home.homeDirectory = "/home/devx";
+{ pkgs, username, system, ... }: {
+  home.username = username; 
   home.stateVersion = "25.05";
+  # home.homeDirectory = "/home/devx";
   # Dynamically sets the home directory path based on the OS architecture string
   home.homeDirectory = 
-    if pkgs.stdenv.isDarwin 
+    if pkgs.stdenv.hostPlatform.isDarwin
     then "/Users/${username}" 
     else "/home/${username}";
 
