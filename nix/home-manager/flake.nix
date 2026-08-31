@@ -9,12 +9,14 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    catppuccin.url = "github:catppuccin/nix";
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
 
     # Utility to easily loop over multiple target systems
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { nixpkgs, home-manager, flake-utils, ... }:
+  outputs = { nixpkgs, home-manager, flake-utils, ... }@inputs:
     let
       username = "devx"; # Change to your actual Ubuntu username
     in
@@ -32,8 +34,8 @@
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
+          extraSpecialArgs = { inherit inputs username; };
           modules = [ ./home.nix ];
-          extraSpecialArgs = { inherit username system; };
         };
     };
 }
