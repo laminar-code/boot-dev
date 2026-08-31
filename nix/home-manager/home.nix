@@ -1,4 +1,4 @@
-{ pkgs, username, system, ... }: {
+{ pkgs, inputs, username, ... }: {
   home.username = username; 
   home.stateVersion = "25.05";
   # home.homeDirectory = "/home/devx";
@@ -17,7 +17,8 @@
     # inputs.zen-browser.homeModules.beta
     # inputs.zen-browser.homeModules.twilight
     # inputs.zen-browser.homeModules.twilight-official
-    <catppuccin/modules/home-manager>
+    inputs.catppuccin.homeModules.catppuccin
+    inputs.nix-flatpak.homeManagerModules.nix-flatpak
   ];
 
   home.packages = with pkgs; [
@@ -62,6 +63,9 @@
     visidata        # Visualize data
     wget            # Get that HTTP stuff
     zip             # Compression for the masses
+
+    # Email
+    himalaya
 
     # CLI Image and PDF Tools
     imagemagick
@@ -151,6 +155,11 @@
 
   home.sessionPath = [ "/home/devx/bin" ];
 
+  catppuccin = {
+    enable = true;
+    autoEnable = true;
+  };
+
   programs = {
     home-manager.enable = true;
     bash = {
@@ -211,11 +220,14 @@
         user = {
       	  name = "Thomas Coffee";
       	  email = "thms@coffee.io";
-	};
-	pull = {
+	      };
+	      pull = {
       	  rebase = false;
-    	};
+    	  };
       };
+    };
+    himalaya = {
+      enable = true;
     };
     kitty = {
       enable = true;
