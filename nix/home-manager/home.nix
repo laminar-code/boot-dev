@@ -160,6 +160,26 @@
     autoEnable = true;
   };
 
+  # Configure Flatpak applications
+  services.flatpak = {
+    enable = true;
+
+    # Automatically add the Flathub remote repository if missing
+    remotes = [{
+      name = "flathub";
+      location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+    }];
+
+    # Declare the packages you want to install
+    packages = [
+      "app.zen_browser.zen"
+      "com.vivaldi.Vivaldi"
+    ];
+
+    # Optional: Automatically update packages on activation
+    update.auto.enable = true;
+  };
+
   programs = {
     home-manager.enable = true;
     bash = {
