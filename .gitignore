@@ -1,6 +1,8 @@
 # nix output
 result
 
+backup.conf
+
 lazyvim.json
 
 .env
