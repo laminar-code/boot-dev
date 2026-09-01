@@ -1,4 +1,4 @@
-{ pkgs, inputs, username, ... }: {
+{ pkgs, inputs, config, username, ... }: {
   home.username = username; 
   home.stateVersion = "25.05";
   # home.homeDirectory = "/home/devx";
@@ -12,6 +12,10 @@
 
   targets.genericLinux.enable = true;
   xdg.enable = true;
+  xdg.systemDirs.data = [
+    "${config.home.homeDirectory}/.local/share/flatpak/exports/share"
+    "/var/lib/flatpak/exports/share"
+  ];
 
   imports = [
     # inputs.zen-browser.homeModules.beta
@@ -27,7 +31,7 @@
     hello
 
     # Intallation platforms
-    flatpak
+    # flatpak # Installed at system level due to apparmor
 
     # Networking Tools
     dnsutils
@@ -151,7 +155,6 @@
 
   home.sessionVariables = {
     EDITOR = "nvim";
-    # XDG_DATA_DIRS = "$HOME/.local/share/flatpak/exports/share:$XDG_DATA_DIRS";
   };
 
   home.sessionPath = [ "/home/devx/bin" ];
