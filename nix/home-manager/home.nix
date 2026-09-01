@@ -13,10 +13,10 @@ in
 
   targets.genericLinux.enable = true;
   xdg.enable = true;
-  xdg.systemDirs.data = [
-    "${homeDir}/.local/share/flatpak/exports/share"
-    "/var/lib/flatpak/exports/share"
-  ];
+  # xdg.systemDirs.data = [
+  #   "${homeDir}/.local/share/flatpak/exports/share"
+  #   "/var/lib/flatpak/exports/share"
+  # ];
 
   imports = [
     # inputs.zen-browser.homeModules.beta
