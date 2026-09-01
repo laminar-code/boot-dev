@@ -46,6 +46,10 @@
     kitty         # Cross-platform terminal emulator
     starship      # Command prompt
 
+    # Security Tools
+    gnupg         # Pretty Good Privacy
+    pass          # Password/secrets managment
+
     # General CLI Tools
     bat             # Much improved cat
     btop            # Much improved top
@@ -57,7 +61,6 @@
     jq              # Handy json parser
     magic-wormhole  # P2P secure file transfer
     nfpm            # Package building tool
-    pass            # Password/secrets managment
     pv              # Pipe viewer, watch that data flow
     ripgrep         # Grep tuned for git directories
     rsync           # The OG remote sync

@@ -59,6 +59,10 @@ mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nvim /home/${
 mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/nix/home-manager /home/${USER}/.config/home-manager
 mkdir -p /home/${USER}/.config && ln -s /home/${USER}/git/boot-dev/lazygit /home/${USER}/.config/lazygit
 
+# Remove system gnupg prior to installing nix and home-manager to avoid version conflicts
+sudo apt remove gnupg -yqq
+sudo apt autoremove -yqq
+
 # Install nix
 curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
 sudo chown ${USER}:${USER} /nix/* -R
