@@ -194,6 +194,7 @@
         vim = "nvim";
         docker = "podman";
         docker-compose = "podman-compose";
+        hm-switch = "home-manager switch --impure --flake ~/.config/home-manager#${username}";
       };
       initExtra = ''
         # Initialize nix environment

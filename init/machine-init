@@ -80,7 +80,7 @@ ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
 
 # migrate to flake
 # home-manager switch
-home-manager switch --flake --impure .#devx
+home-manager switch --impure --flake ~/.config/home-manager#devx
 
 # Initialize Neovim plugins
 echo
