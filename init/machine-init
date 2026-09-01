@@ -86,7 +86,7 @@ ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
 # home-manager switch
 # install home-manager and switch from flake
 # home-manager switch --impure --flake ~/.config/home-manager#devx
-nix run github:nix-community/home-manager -- switch --flake ~/.config/home-manager#devx
+nix run github:nix-community/home-manager -- switch --impure --flake ~/.config/home-manager#devx
 
 # Initialize Neovim plugins
 echo
