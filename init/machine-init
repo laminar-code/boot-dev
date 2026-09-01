@@ -77,14 +77,16 @@ cd /home/${USER}/.config/home-manager
 cp -p ~/.profile ~/.profile.orig
 cp -p ~/.bashrc ~/.bashrc.orig
 rm ~/.bashrc ~/.profile
-nix-shell '<home-manager>' -A install
+# nix-shell '<home-manager>' -A install
 
 # Link to devenv flake
 ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
 
 # migrate to flake
 # home-manager switch
-home-manager switch --impure --flake ~/.config/home-manager#devx
+# install home-manager and switch from flake
+# home-manager switch --impure --flake ~/.config/home-manager#devx
+nix run github:nix-community/home-manager -- switch --flake ~/.config/home-manager#devx
 
 # Initialize Neovim plugins
 echo
