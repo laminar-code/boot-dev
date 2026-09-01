@@ -59,10 +59,12 @@ backup_keys() {
             gpg --export-ownertrust > "${gpg_staging}/trustdb.txt" 2>/dev/null
         fi
 
-        if [[ -f "${gpg_home}/gpg.conf" ]]; then
-            cp "${gpg_home}/gpg.conf" "$gpg_staging/"
-            log_info "Including GPG config: gpg.conf"
-        fi
+        for conf in gpg.conf gpg-agent.conf; do
+            if [[ -f "${gpg_home}/${conf}" ]]; then
+                cp "${gpg_home}/${conf}" "$gpg_staging/"
+                log_info "Including GPG config: ${conf}"
+            fi
+        done
 
         if [[ "$gpg_found" == "true" ]]; then
             log_success "GPG keys exported to staging"
@@ -217,11 +219,12 @@ restore_keys() {
             log_info "Importing GPG trust database..."
             gpg --import-ownertrust "${gpg_staging}/gpg/trustdb.txt" 2>&1 | tail -1 || log_warn "Failed to import trust database"
         fi
-        if [[ -f "${gpg_staging}/gpg/gpg.conf" ]]; then
-            log_info "Restoring GPG config..."
-            mkdir -p "$gpg_home"
-            cp "${gpg_staging}/gpg/gpg.conf" "${gpg_home}/gpg.conf"
-        fi
+        for conf in gpg.conf gpg-agent.conf; do
+            if [[ -f "${gpg_staging}/gpg/${conf}" ]]; then
+                log_info "Restoring GPG config: ${conf}"
+                cp "${gpg_staging}/gpg/${conf}" "${gpg_home}/${conf}"
+            fi
+        done
         log_success "GPG keys imported"
     fi
 
@@ -278,10 +281,12 @@ backup_gpg() {
         gpg --export-ownertrust > "${gpg_staging}/trustdb.txt" 2>/dev/null
     fi
 
-    if [[ -f "${gpg_home}/gpg.conf" ]]; then
-        cp "${gpg_home}/gpg.conf" "$gpg_staging/"
-        log_info "Including GPG config: gpg.conf"
-    fi
+    for conf in gpg.conf gpg-agent.conf; do
+        if [[ -f "${gpg_home}/${conf}" ]]; then
+            cp "${gpg_home}/${conf}" "$gpg_staging/"
+            log_info "Including GPG config: ${conf}"
+        fi
+    done
 
     if [[ "$gpg_found" != "true" ]]; then
         log_error "No GPG keys found to backup"
@@ -343,12 +348,14 @@ restore_gpg() {
             log_info "Importing GPG trust database..."
             gpg --import-ownertrust "${gpg_dir}/trustdb.txt" 2>&1 | tail -1 || log_warn "Failed to import trust database"
         fi
-        if [[ -f "${gpg_dir}/gpg.conf" ]]; then
-            local gpg_home="${GNUPGHOME:-$HOME/.gnupg}"
-            log_info "Restoring GPG config..."
-            mkdir -p "$gpg_home"
-            cp "${gpg_dir}/gpg.conf" "${gpg_home}/gpg.conf"
-        fi
+        local gpg_home="${GNUPGHOME:-$HOME/.gnupg}"
+        mkdir -p "$gpg_home"
+        for conf in gpg.conf gpg-agent.conf; do
+            if [[ -f "${gpg_dir}/${conf}" ]]; then
+                log_info "Restoring GPG config: ${conf}"
+                cp "${gpg_dir}/${conf}" "${gpg_home}/${conf}"
+            fi
+        done
         log_success "GPG keys imported"
     fi
 
