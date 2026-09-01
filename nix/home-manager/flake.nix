@@ -11,6 +11,7 @@
     };
     catppuccin.url = "github:catppuccin/nix";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
+    himalaya-tui.url = "github:pimalaya/himalaya-tui";
 
     # Utility to easily loop over multiple target systems
     flake-utils.url = "github:numtide/flake-utils";

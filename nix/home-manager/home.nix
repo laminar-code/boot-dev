@@ -73,7 +73,8 @@ in
     zip             # Compression for the masses
 
     # Email
-    himalaya
+    himalaya        # CLI email client
+    inputs.himalaya-tui.packages.${pkgs.system}.default # TUI for himalaya
 
     # CLI Image and PDF Tools
     imagemagick
