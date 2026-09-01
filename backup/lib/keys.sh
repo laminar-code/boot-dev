@@ -9,6 +9,7 @@ backup_keys() {
     local archive_name="${BACKUP_NAME:-keys_${ts}}"
     local staging_dir="${backup_dir}/staging_${ts}"
     local gpg_staging="${staging_dir}/gpg"
+    local gpg_home="${GNUPGHOME:-$HOME/.gnupg}"
 
     mkdir -p "$staging_dir" "$gpg_staging"
 
@@ -56,6 +57,11 @@ backup_keys() {
         log_info "Exporting GPG trust database..."
         if gpg --export-ownertrust 2>/dev/null | grep -q .; then
             gpg --export-ownertrust > "${gpg_staging}/trustdb.txt" 2>/dev/null
+        fi
+
+        if [[ -f "${gpg_home}/gpg.conf" ]]; then
+            cp "${gpg_home}/gpg.conf" "$gpg_staging/"
+            log_info "Including GPG config: gpg.conf"
         fi
 
         if [[ "$gpg_found" == "true" ]]; then
@@ -114,7 +120,7 @@ backup_keys() {
     fi
 
     # Add exported GPG keys (relative path for clean restore)
-    if [[ "$gpg_found" == "true" ]] && [[ -n "$(ls -A "$gpg_staging" 2>/dev/null)" ]]; then
+    if [[ -n "$(ls -A "$gpg_staging" 2>/dev/null)" ]]; then
         sources+=("$gpg_staging")
     fi
 
@@ -197,6 +203,7 @@ restore_keys() {
     fi
 
     # Import GPG keys
+    local gpg_home="${GNUPGHOME:-$HOME/.gnupg}"
     if [[ -d "${gpg_staging}/gpg" ]]; then
         if [[ -f "${gpg_staging}/gpg/pubkeys.gpg" ]]; then
             log_info "Importing GPG public keys..."
@@ -209,6 +216,11 @@ restore_keys() {
         if [[ -f "${gpg_staging}/gpg/trustdb.txt" ]]; then
             log_info "Importing GPG trust database..."
             gpg --import-ownertrust "${gpg_staging}/gpg/trustdb.txt" 2>&1 | tail -1 || log_warn "Failed to import trust database"
+        fi
+        if [[ -f "${gpg_staging}/gpg/gpg.conf" ]]; then
+            log_info "Restoring GPG config..."
+            mkdir -p "$gpg_home"
+            cp "${gpg_staging}/gpg/gpg.conf" "${gpg_home}/gpg.conf"
         fi
         log_success "GPG keys imported"
     fi
@@ -232,6 +244,7 @@ backup_gpg() {
     ts=$(timestamp)
     local staging_dir="${backup_dir}/staging_${ts}"
     local gpg_staging="${staging_dir}/gpg"
+    local gpg_home="${GNUPGHOME:-$HOME/.gnupg}"
 
     mkdir -p "$staging_dir" "$gpg_staging"
 
@@ -263,6 +276,11 @@ backup_gpg() {
     log_info "Exporting GPG trust database..."
     if gpg --export-ownertrust 2>/dev/null | grep -q .; then
         gpg --export-ownertrust > "${gpg_staging}/trustdb.txt" 2>/dev/null
+    fi
+
+    if [[ -f "${gpg_home}/gpg.conf" ]]; then
+        cp "${gpg_home}/gpg.conf" "$gpg_staging/"
+        log_info "Including GPG config: gpg.conf"
     fi
 
     if [[ "$gpg_found" != "true" ]]; then
@@ -324,6 +342,12 @@ restore_gpg() {
         if [[ -f "${gpg_dir}/trustdb.txt" ]]; then
             log_info "Importing GPG trust database..."
             gpg --import-ownertrust "${gpg_dir}/trustdb.txt" 2>&1 | tail -1 || log_warn "Failed to import trust database"
+        fi
+        if [[ -f "${gpg_dir}/gpg.conf" ]]; then
+            local gpg_home="${GNUPGHOME:-$HOME/.gnupg}"
+            log_info "Restoring GPG config..."
+            mkdir -p "$gpg_home"
+            cp "${gpg_dir}/gpg.conf" "${gpg_home}/gpg.conf"
         fi
         log_success "GPG keys imported"
     fi
