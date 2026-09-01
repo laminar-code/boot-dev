@@ -1,19 +1,20 @@
-{ pkgs, inputs, config, username, ... }: {
+{ pkgs, inputs, username, ... }:
+let 
+  homeDir = if pkgs.stdenv.hostPlatform.isDarwin then "/Users/${username}" else "/home/${username}";
+in
+{
   home.username = username; 
   home.stateVersion = "25.05";
   # home.homeDirectory = "/home/devx";
   # Dynamically sets the home directory path based on the OS architecture string
-  home.homeDirectory = 
-    if pkgs.stdenv.hostPlatform.isDarwin
-    then "/Users/${username}" 
-    else "/home/${username}";
+  home.homeDirectory = homeDir;
 
   fonts.fontconfig.enable = true;
 
   targets.genericLinux.enable = true;
   xdg.enable = true;
   xdg.systemDirs.data = [
-    "${config.home.homeDirectory}/.local/share/flatpak/exports/share"
+    "${homeDir}/.local/share/flatpak/exports/share"
     "/var/lib/flatpak/exports/share"
   ];
 
