@@ -12,7 +12,7 @@ sudo nala install locales sudo make curl ca-certificates git unzip slirp4netns u
 # Install gpg 2.4.9
 curl -fsSL https://repos.gnupg.org/deb/gnupg/resolute-devel/gnupg-signing-key.gpg | sudo gpg --dearmor --yes -o /usr/share/keyrings/gnupg-keyring.gpg
 sudo chmod a+r /usr/share/keyrings/gnupg-keyring.gpg
-cat <<EOF >/etc/apt/sources.list.d/gnupg.sources
+sudo tee /etc/apt/sources.list.d/gnupg.sources <<EOF
 Types: deb deb-src
 URIs: https://repos.gnupg.org/deb/gnupg/resolute-devel/
 Suites: resolute
