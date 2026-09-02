@@ -1,4 +1,4 @@
-{ pkgs, inputs, username, ... }:
+{ pkgs, inputs, username, nixpkgs-gnupg, ... }:
 let 
   homeDir = if pkgs.stdenv.hostPlatform.isDarwin then "/Users/${username}" else "/home/${username}";
 in
@@ -13,10 +13,6 @@ in
 
   targets.genericLinux.enable = true;
   xdg.enable = true;
-  # xdg.systemDirs.data = [
-  #   "${homeDir}/.local/share/flatpak/exports/share"
-  #   "/var/lib/flatpak/exports/share"
-  # ];
 
   imports = [
     # inputs.zen-browser.homeModules.beta
@@ -74,7 +70,7 @@ in
 
     # Email
     himalaya        # CLI email client
-    inputs.himalaya-tui.packages.${pkgs.system}.default # TUI for himalaya
+    inputs.himalaya-tui.packages.${pkgs.stdenv.hostPlatform.system}.default # TUI for himalaya
 
     # CLI Image and PDF Tools
     imagemagick
@@ -169,28 +165,45 @@ in
     autoEnable = true;
   };
 
-  # Configure Flatpak applications
-  services.flatpak = {
-    enable = true;
+  # Configure Servicies
+  services = {
+    flatpak = {
+      enable = true;
 
-    # Automatically add the Flathub remote repository if missing
-    remotes = [{
-      name = "flathub";
-      location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
-    }];
+      # Automatically add the Flathub remote repository if missing
+      remotes = [{
+        name = "flathub";
+        location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+      }];
 
-    # Declare the packages you want to install
-    packages = [
-      "app.zen_browser.zen"
-      "com.vivaldi.Vivaldi"
-    ];
+      # Declare the packages you want to install
+      packages = [
+        "app.zen_browser.zen"
+        "com.vivaldi.Vivaldi"
+      ];
 
-    # Optional: Automatically update packages on activation
-    update.auto.enable = true;
+      # Optional: Automatically update packages on activation
+      update.auto.enable = true;
+    };
+    gpg-agent = {
+      enable = true;
+      enableSshSupport = true;
+    
+      # Explicitly pick a pinentry package matching your desktop environment 
+      # (e.g., pinentry-gnome3, pinentry-qt, pinentry-curses)
+      pinentry.package = pkgs.pinentry-curses; # Use pinentry-qt or pinentry-gnome3 if you have a GUI
+    
+      extraConfig = ''
+        allow-loopback-pinentry
+      '';
+    };
   };
 
+  # Configure Programs
   programs = {
-    home-manager.enable = true;
+    home-manager = {
+      enable = true;
+    };
     bash = {
       enable = true;
       shellAliases = {
@@ -238,6 +251,11 @@ in
       	  rebase = false;
     	  };
       };
+    };
+    gpg = {
+      enable = true;
+      package = nixpkgs-gnupg; # Ensures version 2.4.8 is targeted
+      # package = pkgs.gnupg; # Ensures version 2.4.9 is targeted
     };
     himalaya = {
       enable = true;
