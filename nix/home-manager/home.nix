@@ -226,10 +226,15 @@ in
 	eval "$(direnv hook bash)"
         eval "$(starship init bash)"
 
+	# Point SSH to the GPG Agent socket
+	export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+
+	# Ensure GPG can prompt for passphrases correctly in the current terminal
+	export GPG_TTY=$(tty)
+	gpg-connect-agent updatestartuptty /bye >/dev/null
+
         # Use gpg-agent as the SSH agent (requires enable-ssh-support in gpg-agent.conf)
-        export GPG_TTY="$(tty)"
         gpgconf --launch gpg-agent
-        export SSH_AUTH_SOCK="$HOME/.gnupg/S.gpg-agent.ssh"
       '';
     };
     git = {
