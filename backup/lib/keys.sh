@@ -59,7 +59,7 @@ backup_keys() {
             gpg --export-ownertrust > "${gpg_staging}/trustdb.txt" 2>/dev/null
         fi
 
-        for conf in gpg.conf gpg-agent.conf; do
+        for conf in gpg.conf gpg-agent.conf sshcontrol; do
             if [[ -f "${gpg_home}/${conf}" ]]; then
                 cp "${gpg_home}/${conf}" "$gpg_staging/"
                 log_info "Including GPG config: ${conf}"
@@ -219,7 +219,7 @@ restore_keys() {
             log_info "Importing GPG trust database..."
             gpg --import-ownertrust "${gpg_staging}/gpg/trustdb.txt" 2>&1 | tail -1 || log_warn "Failed to import trust database"
         fi
-        for conf in gpg.conf gpg-agent.conf; do
+        for conf in gpg.conf gpg-agent.conf sshcontrol; do
             if [[ -f "${gpg_staging}/gpg/${conf}" ]]; then
                 log_info "Restoring GPG config: ${conf}"
                 cp "${gpg_staging}/gpg/${conf}" "${gpg_home}/${conf}"
@@ -281,7 +281,7 @@ backup_gpg() {
         gpg --export-ownertrust > "${gpg_staging}/trustdb.txt" 2>/dev/null
     fi
 
-    for conf in gpg.conf gpg-agent.conf; do
+    for conf in gpg.conf gpg-agent.conf sshcontrol; do
         if [[ -f "${gpg_home}/${conf}" ]]; then
             cp "${gpg_home}/${conf}" "$gpg_staging/"
             log_info "Including GPG config: ${conf}"
@@ -350,7 +350,7 @@ restore_gpg() {
         fi
         local gpg_home="${GNUPGHOME:-$HOME/.gnupg}"
         mkdir -p "$gpg_home"
-        for conf in gpg.conf gpg-agent.conf; do
+        for conf in gpg.conf gpg-agent.conf sshcontrol; do
             if [[ -f "${gpg_dir}/${conf}" ]]; then
                 log_info "Restoring GPG config: ${conf}"
                 cp "${gpg_dir}/${conf}" "${gpg_home}/${conf}"
