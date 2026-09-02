@@ -4,7 +4,8 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
-    nixpkgs-gnupg.url = "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe"; # 2.4.8 commit reference
+    # 2.4.8 commit reference
+    nixpkgs-gnupg.url = "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe";
 
     home-manager = {
       # url = "github:nix-community/home-manager";
@@ -32,13 +33,28 @@
       homeConfigurations.${username} = 
         let
           # Detects the architecture of the machine running the flake command
-          system = builtins.currentSystem or "aarch64-linux"; 
-          pkgs = nixpkgs.legacyPackages.${system};
+          system = builtins.currentSystem or "aarch64-linux";
+          # Overlay that pulls gnupg from the pinned revision
+          gnupgOverlay = final: prev: {
+            gnupg = (import nixpkgs-gnupg { inherit system; }).gnupg;
+          };
+          pkgs = import nixpkgs {
+            inherit system;
+          };
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = { inherit inputs username nixpkgs-gnupg; };
-          modules = [ ./home.nix ];
+          extraSpecialArgs = { inherit inputs username; };
+          modules = [ 
+            ./home.nix 
+            {
+              nixpkgs.overlays = [
+                (final: prev: {
+                  gnupg = (import nixpkgs-gnupg { inherit system; config.allowUnfree = true; }).gnupg;
+                })
+              ];
+            }
+          ];
         };
     };
 }

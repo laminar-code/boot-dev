@@ -1,4 +1,4 @@
-{ pkgs, inputs, username, nixpkgs-gnupg, ... }:
+{ pkgs, inputs, username, ... }:
 let 
   homeDir = if pkgs.stdenv.hostPlatform.isDarwin then "/Users/${username}" else "/home/${username}";
 in
@@ -254,8 +254,7 @@ in
     };
     gpg = {
       enable = true;
-      package = nixpkgs-gnupg; # Ensures version 2.4.8 is targeted
-      # package = pkgs.gnupg; # Ensures version 2.4.9 is targeted
+      package = pkgs.gnupg;
     };
     himalaya = {
       enable = true;
