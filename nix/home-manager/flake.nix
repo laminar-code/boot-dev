@@ -3,10 +3,12 @@
   description = "System-Independent Home Manager Flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
+    nixpkgs-gnupg.url = "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe"; # 2.4.8 commit reference
+
     home-manager = {
-      url = "github:nix-community/home-manager";
+      # url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     catppuccin.url = "github:catppuccin/nix";
@@ -17,7 +19,7 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { nixpkgs, home-manager, flake-utils, ... }@inputs:
+  outputs = { nixpkgs, nixpkgs-gnupg, home-manager, flake-utils, ... }@inputs:
     let
       username = "devx"; # Change to your actual Ubuntu username
     in
@@ -30,12 +32,12 @@
       homeConfigurations.${username} = 
         let
           # Detects the architecture of the machine running the flake command
-          system = builtins.currentSystem or "x86_64-linux"; 
+          system = builtins.currentSystem or "aarch64-linux"; 
           pkgs = nixpkgs.legacyPackages.${system};
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = { inherit inputs username; };
+          extraSpecialArgs = { inherit inputs username nixpkgs-gnupg; };
           modules = [ ./home.nix ];
         };
     };
