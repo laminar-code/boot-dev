@@ -40,7 +40,7 @@ in
     # Shell Tools
     direnv        # Manage environment variables per directory
     devenv        # Manage development environments
-    kitty         # Cross-platform terminal emulator
+    ghostty	  # Cross-platform terminal emulator
     starship      # Command prompt
 
     # Security Tools
@@ -264,18 +264,8 @@ in
     himalaya = {
       enable = true;
     };
-    kitty = {
+    ghostty = {
       enable = true;
-      settings = {
-        background_opacity = "0.8";
-        confirm_os_window_close = 0;
-        scrollback_lines = 10000;
-      };
-      font = {
-        name = "JetBrainsMono Nerd Font";
-        size = 12;
-      };
-      themeFile = "Catppuccin-Mocha";
     };
     # zen-browser = {
     #   enable = true;
