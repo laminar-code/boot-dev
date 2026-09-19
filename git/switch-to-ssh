@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Get the current remote origin URL
+current_url=$(git remote get-url origin 2>/dev/null)
+
+# Check if an origin remote actually exists
+if [ -z "$current_url" ]; then
+    echo "Error: No 'origin' remote found in this Git repository."
+    exit 1
+fi
+
+# Check if the URL is currently using HTTPS
+if [[ "$current_url" =~ ^https:// ]]; then
+    # Transform HTTPS URL to SSH format
+    # Example: https://github.com/username/repo.git -> git@github.com:username/repo.git
+    ssh_url=$(echo "$current_url" | sed -E 's#https://([^/]+)/(.*)#git@\1:\2#')
+    
+    echo "Converting remote origin..."
+    echo "  From: $current_url"
+    echo "  To:   $ssh_url"
+    
+    # Apply the new URL
+    git remote set-url origin "$ssh_url"
+    echo "Successfully updated remote origin to SSH!"
+
+elif [[ "$current_url" =~ ^git@ ]]; then
+    echo "The remote origin is already using SSH ($current_url)."
+else
+    echo "Unrecognized URL format: $current_url"
+    exit 1
+fi
+
