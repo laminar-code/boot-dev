@@ -106,7 +106,7 @@
   	      fi
               source ./venv/bin/activate > /dev/null
               pip install --quiet --upgrade pip
-              pip3 install --quiet keepercommander
+              pip3 install --quiet mlkem keepercommander
               pip3 install --quiet --upgrade keepercommander
               keeper shell
             '';
