@@ -7,7 +7,22 @@ sudo apt-get -yqq upgrade
 # Install nala for parallel downloads and updates
 # then install base level required packages
 sudo apt-get -yqq install nala
-sudo nala install locales sudo make curl ca-certificates git unzip slirp4netns uidmap buildah xz-utils neovim gcc flatpak xdg-desktop-portal -y
+sudo nala install -y locales sudo make curl ca-certificates git unzip slirp4netns uidmap buildah xz-utils nano neovim gcc flatpak xdg-desktop-portal util-linux-extra
+sudo nala clean --lists
+sudo rm -rf /var/lib/apt/lists/*
+sudo update-ca-certificates
+sudo locale-gen en_US; locale-gen en_US.UTF-8
+sudo dpkg-reconfigure locales
+sudo update-locale LANG="en_US.UTF-8" LANGUAGE="en_US"
+sudo (deluser ubuntu --remove-home || true)
+sudo (delgroup ubuntu 2>/dev/null || true)
+sudo adduser --shell /usr/bin/bash devx
+sudo groupadd -g 9999 devs
+sudo usermod -a -G devs devx
+sudo adduser devx sudo
+sudo echo "devx ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/devx
+sudo mkdir -m 0755 /nix
+sudo chown devx:devx /nix -R
 
 # Install gpg 2.4.9
 curl -fsSL https://repos.gnupg.org/deb/gnupg/resolute-devel/gnupg-signing-key.gpg | sudo gpg --dearmor --yes -o /usr/share/keyrings/gnupg-keyring.gpg
