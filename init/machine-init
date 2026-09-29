@@ -14,8 +14,8 @@ sudo update-ca-certificates
 sudo locale-gen en_US; locale-gen en_US.UTF-8
 sudo dpkg-reconfigure locales
 sudo update-locale LANG="en_US.UTF-8" LANGUAGE="en_US"
-sudo (deluser ubuntu --remove-home || true)
-sudo (delgroup ubuntu 2>/dev/null || true)
+sudo $(deluser ubuntu --remove-home || true)
+sudo $(delgroup ubuntu 2>/dev/null || true)
 sudo adduser --shell /usr/bin/bash devx
 sudo groupadd -g 9999 devs
 sudo usermod -a -G devs devx
