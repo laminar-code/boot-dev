@@ -72,24 +72,24 @@ rm /tmp/IBMPlexMono.zip /tmp/JetBrainsMono.zip
 
 # Set up local scripts
 mkdir /home/${CONFIG_USER}/bin
-ln -s /home/${CONFIG_USER}/git/boot-dev/git/clone /home/${USER}/bin/clone
-ln -s /home/${CONFIG_USER}/git/boot-dev/git/clone-files-only /home/${USER}/bin/clone-files-only
-ln -s /home/${CONFIG_USER}/git/boot-dev/git/switch-origin /home/${USER}/bin/switch-origin
-ln -s /home/${CONFIG_USER}/git/boot-dev/git/current-version /home/${USER}/bin/current-version
-ln -s /home/${CONFIG_USER}/git/boot-dev/git/filter-repo /home/${USER}/bin/filter-repo
-ln -s /home/${CONFIG_USER}/git/boot-dev/git/largest-files /home/${USER}/bin/largest-files
-ln -s /home/${CONFIG_USER}/git/boot-dev/container/docker-ports /home/${USER}/bin/docker-ports
-ln -s /home/${CONFIG_USER}/git/boot-dev/container/labels /home/${USER}/bin/labels
-ln -s /home/${CONFIG_USER}/git/boot-dev/container/label-container /home/${USER}/bin/label-container
-ln -s /home/${CONFIG_USER}/git/boot-dev/nix/bin/dev /home/${USER}/bin/dev
-ln -s /home/${CONFIG_USER}/git/boot-dev/nix/bin/init /home/${USER}/bin/init
+ln -s /home/${CONFIG_USER}/git/boot-dev/git/clone /home/${CONFIG_USER}/bin/clone
+ln -s /home/${CONFIG_USER}/git/boot-dev/git/clone-files-only /home/${CONFIG_USER}/bin/clone-files-only
+ln -s /home/${CONFIG_USER}/git/boot-dev/git/switch-origin /home/${CONFIG_USER}/bin/switch-origin
+ln -s /home/${CONFIG_USER}/git/boot-dev/git/current-version /home/${CONFIG_USER}/bin/current-version
+ln -s /home/${CONFIG_USER}/git/boot-dev/git/filter-repo /home/${CONFIG_USER}/bin/filter-repo
+ln -s /home/${CONFIG_USER}/git/boot-dev/git/largest-files /home/${CONFIG_USER}/bin/largest-files
+ln -s /home/${CONFIG_USER}/git/boot-dev/container/docker-ports /home/${CONFIG_USER}/bin/docker-ports
+ln -s /home/${CONFIG_USER}/git/boot-dev/container/labels /home/${CONFIG_USER}/bin/labels
+ln -s /home/${CONFIG_USER}/git/boot-dev/container/label-container /home/${CONFIG_USER}/bin/label-container
+ln -s /home/${CONFIG_USER}/git/boot-dev/nix/bin/dev /home/${CONFIG_USER}/bin/dev
+ln -s /home/${CONFIG_USER}/git/boot-dev/nix/bin/init /home/${CONFIG_USER}/bin/init
 
 # Link base config directories to boot-dev
-mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${USER}/git/boot-dev/nix/config /home/${USER}/.config/nix
-mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${USER}/git/boot-dev/tmux /home/${USER}/.config/tmux
-mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${USER}/git/boot-dev/nvim /home/${USER}/.config/nvim
-mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${USER}/git/boot-dev/nix/home-manager /home/${USER}/.config/home-manager
-mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${USER}/git/boot-dev/lazygit /home/${USER}/.config/lazygit
+mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${CONFIG_USER}/git/boot-dev/nix/config /home/${CONFIG_USER}/.config/nix
+mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${CONFIG_USER}/git/boot-dev/tmux /home/${CONFIG_USER}/.config/tmux
+mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${CONFIG_USER}/git/boot-dev/nvim /home/${CONFIG_USER}/.config/nvim
+mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${CONFIG_USER}/git/boot-dev/nix/home-manager /home/${CONFIG_USER}/.config/home-manager
+mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${CONFIG_USER}/git/boot-dev/lazygit /home/${CONFIG_USER}/.config/lazygit
 
 # Remove system gnupg prior to installing nix and home-manager to avoid version conflicts
 sudo apt remove gnupg -yqq
@@ -112,7 +112,7 @@ rm ~/.bashrc ~/.profile
 # nix-shell '<home-manager>' -A install
 
 # Link to devenv flake
-ln -s /home/${CONFIG_USER}/git/boot-dev/nix/devenv /home/${USER}/devenv
+ln -s /home/${CONFIG_USER}/git/boot-dev/nix/devenv /home/${CONFIG_USER}/devenv
 
 # migrate to flake
 # home-manager switch
