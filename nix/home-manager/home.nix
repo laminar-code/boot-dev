@@ -77,7 +77,7 @@ in
     pandoc
     qpdf
     tectonic
-    zint            # Encode data into barcodes
+    zint-qt         # Encode data into barcodes
     timg            # Terminal image viewer
 
     # Base NeoVim Development
