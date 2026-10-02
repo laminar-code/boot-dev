@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+# Live end-to-end test for bin/add-authorized-keys.
+# Creates a throwaway user, exercises the script against it, then removes it.
+# Requires root: sudo ./test-add-authorized-keys
+
+set -uo pipefail
+
+SCRIPT="$(cd "$(dirname "$0")" && pwd)/add-authorized-keys"
+TESTUSER="bdkeytest$$"
+TESTHOME="/tmp/$TESTUSER"
+SRCUSER="${SUDO_USER:-root}"
+RC=0
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Must run as root: sudo $0" >&2
+    exit 1
+fi
+
+# check <description> <command...> -- passes when the command succeeds.
+check() {
+    local desc="$1"
+    shift
+    if "$@" > /dev/null 2>&1; then
+        echo "  PASS  $desc"
+    else
+        echo "  FAIL  $desc"
+        RC=1
+    fi
+}
+
+# check_absent <description> <pattern> <file>
+check_absent() {
+    local desc="$1" pattern="$2" file="$3"
+    if grep -q "$pattern" "$file"; then
+        echo "  FAIL  $desc"
+        RC=1
+    else
+        echo "  PASS  $desc"
+    fi
+}
+
+# check_rc <description> <expected-rc> <command...>
+check_rc() {
+    local desc="$1" want="$2"
+    shift 2
+    "$@" > /dev/null 2>&1
+    local got=$?
+    if [ "$got" -eq "$want" ]; then
+        echo "  PASS  $desc (rc=$got)"
+    else
+        echo "  FAIL  $desc (rc=$got, want $want)"
+        RC=1
+    fi
+}
+
+cleanup() {
+    userdel -r "$TESTUSER" 2>/dev/null
+    rm -rf "$TESTHOME"
+}
+trap cleanup EXIT
+
+cleanup
+useradd -m -d "$TESTHOME" -s /bin/bash "$TESTUSER" || exit 1
+
+SRCDIR="$TESTHOME/src"
+SRC_AUTH="$SRCDIR/.ssh/authorized_keys"
+AUTH="$TESTHOME/.ssh/authorized_keys"
+mkdir -p "$SRCDIR/.ssh" "$TESTHOME/.ssh"
+chmod 700 "$SRCDIR/.ssh" "$TESTHOME/.ssh"
+
+# Source keys: one discoverable only via authorized_keys, one only via .pub.
+printf 'ssh-ed25519 AAAAfakesourceauth my-key\n' > "$SRC_AUTH"
+printf 'ssh-ed25519 BBBBfakesourcepub pub-key\n'  > "$SRCDIR/.ssh/pub-key.pub"
+# Pre-existing target entry that must survive untouched.
+printf 'ssh-ed25519 CCCCalready c\n' > "$AUTH"
+chmod 600 "$AUTH"
+
+run() {
+    "$SCRIPT" -s "$SRCUSER" "$TESTUSER" "$@" 2>&1
+}
+
+show() {
+    printf '%s\n' "$1" | sed 's/^/    /'
+}
+
+echo "=== target user: $TESTUSER   source user: $SRCUSER ==="
+
+echo
+echo "--- dry run ---"
+out="$(run -n my-key pub-key)"
+show "$out"
+check "dry run reports my-key"  grep -q "would add my-key"  <<< "$out"
+check "dry run reports pub-key" grep -q "would add pub-key" <<< "$out"
+check_absent "dry run wrote nothing" "AAAAfakesourceauth" "$AUTH"
+
+echo
+echo "--- real run ---"
+out="$(run my-key pub-key)"
+show "$out"
+check "added my-key"              grep -q "AAAAfakesourceauth my-key" "$AUTH"
+check "added pub-key"             grep -q "BBBBfakesourcepub pub-key" "$AUTH"
+check "pre-existing entry kept"   grep -q "CCCCalready" "$AUTH"
+check "authorized_keys mode 600"  test "$(stat -c %a "$AUTH")" = 600
+check ".ssh dir mode 700"         test "$(stat -c %a "$TESTHOME/.ssh")" = 700
+
+echo
+echo "--- idempotent re-run ---"
+before="$(wc -l < "$AUTH")"
+out="$(run my-key pub-key)"
+after="$(wc -l < "$AUTH")"
+show "$out"
+check "reports already authorized" grep -q "\[skip\]" <<< "$out"
+check "line count unchanged"       test "$before" -eq "$after"
+
+echo
+echo "--- dedupe on material, not whole line ---"
+# Same key material as my-key but a different comment must still be skipped.
+sed -i 's/ my-key$/ other-comment/' "$SRC_AUTH"
+out="$(run my-key)"
+show "$out"
+check "same material, new comment -> skipped" grep -q "\[skip\]" <<< "$out"
+
+echo
+echo "--- option-prefixed existing entry ---"
+printf 'command="/bin/false" ssh-ed25519 DDDDopted opt-key\n' > "$AUTH"
+printf 'ssh-ed25519 DDDDopted other-comment\n' > "$SRCDIR/.ssh/opt-key.pub"
+out="$(run opt-key)"
+show "$out"
+check "option-prefixed dedupe hits" grep -q "\[skip\]" <<< "$out"
+check "option-prefixed not duplicated" test "$(grep -c DDDDopted "$AUTH")" -eq 1
+
+echo
+echo "--- missing key name ---"
+out="$(run no-such-key)"
+show "$out"
+check "missing key reports fail" grep -q "\[fail\]" <<< "$out"
+check_rc "missing key exits non-zero" 1 "$SCRIPT" -s "$SRCUSER" "$TESTUSER" no-such-key
+
+echo
+echo "--- mixed good and bad names ---"
+out="$(run my-key no-such-key pub-key)"
+show "$out"
+check "valid names still processed" grep -qE "added|skip" <<< "$out"
+check_rc "mixed run exits non-zero" 1 "$SCRIPT" -s "$SRCUSER" "$TESTUSER" my-key no-such-key pub-key
+
+echo
+echo "--- nonexistent target user ---"
+out="$("$SCRIPT" -s "$SRCUSER" no-such-user-xyz my-key 2>&1)"
+show "$out"
+check "unknown target errors" grep -q "no such user" <<< "$out"
+check_rc "unknown target exits 1" 1 "$SCRIPT" -s "$SRCUSER" no-such-user-xyz my-key
+
+echo
+echo "--- target with no .ssh directory ---"
+rm -rf "$TESTHOME/.ssh"
+out="$(run my-key)"
+show "$out"
+check "creates missing .ssh tree"  grep -q "AAAAfakesourceauth my-key" "$AUTH"
+check "new authorized_keys 600"   test "$(stat -c %a "$AUTH")" = 600
+
+echo
+if [ "$RC" -eq 0 ]; then
+    echo "ALL TESTS PASSED"
+else
+    echo "SOME TESTS FAILED"
+fi
+exit "$RC"

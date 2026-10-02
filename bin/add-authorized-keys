@@ -1,0 +1,214 @@
+#!/usr/bin/env bash
+# Copy named SSH keys from the current user to another user's
+# authorized_keys on this host.
+# Usage: add-authorized-keys [-s <source-user>] [-n] <target-user> <key-name> [key-name...]
+#
+# A key name is resolved from the source user in this order:
+#   1. ~/.ssh/authorized_keys, matching the comment against the key name
+#   2. ~/.ssh/<key-name>.pub
+#
+# Keys already present in the target's authorized_keys are skipped. Dedupe
+# compares key material rather than whole lines so the same key under a
+# different comment or option prefix is still recognized.
+#
+# Runs as root only; no privilege escalation is performed.
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: add-authorized-keys [-s <source-user>] [-n] <target-user> <key-name> [key-name...]
+
+Copy named SSH keys from the current user to another user's authorized_keys.
+
+Options:
+  -s <source-user>  Read keys from this user (default: $SUDO_USER, else $USER)
+  -n                Dry run; report what would change without writing
+  -h, --help        Show this help
+EOF
+}
+
+die() {
+    echo "[fail] $*" >&2
+    exit 1
+}
+
+home_for() {
+    local user="$1" home
+    home="$(getent passwd "$user" 2>/dev/null | cut -d: -f6 || true)"
+    [ -n "$home" ] || die "no such user: $user"
+    printf '%s\n' "$home"
+}
+
+is_key_type() {
+    case "$1" in
+        ssh-rsa|ssh-dss|ssh-ed25519|\
+        ssh-rsa-cert-v01@openssh.com|ssh-dss-cert-v01@openssh.com|\
+        ssh-ed25519-cert-v01@openssh.com|\
+        ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521|\
+        ecdsa-sha2-nistp256-cert-v01@openssh.com|\
+        ecdsa-sha2-nistp384-cert-v01@openssh.com|\
+        ecdsa-sha2-nistp521-cert-v01@openssh.com|\
+        sk-ssh-ed25519@openssh.com|sk-ecdsa-sha2-nistp256@openssh.com)
+            return 0
+            ;;
+        *) return 1
+            ;;
+    esac
+}
+
+# Splits a key line into KEY_TYPE, KEY_MATERIAL and COMMENT. The key type is
+# located by scanning the fields so that option prefixes such as
+# command="/bin/foo" are handled.
+parse_key_line() {
+    local line="$1" i
+    local -a fields=()
+    read -r -a fields <<< "$line"
+    for ((i = 0; i < ${#fields[@]}; i++)); do
+        if is_key_type "${fields[i]}"; then
+            KEY_TYPE="${fields[i]}"
+            KEY_MATERIAL="${fields[i+1]:-}"
+            COMMENT="${fields[*]:i+2}"
+            return 0
+        fi
+    done
+    return 1
+}
+
+resolve_from_authorized_keys() {
+    local name="$1" auth="$2" line
+    [ -f "$auth" ] || return 1
+    while IFS= read -r line || [ -n "$line" ]; do
+        case "$line" in ''|\#*) continue ;; esac
+        parse_key_line "$line" || continue
+        [ "$COMMENT" = "$name" ] || continue
+        printf '%s\n' "$line"
+        return 0
+    done < "$auth"
+    return 1
+}
+
+resolve_from_pub() {
+    local name="$1" pubdir="$2" pub base candidate
+    [ -d "$pubdir" ] || return 1
+    for pub in "$pubdir"/*.pub; do
+        [ -f "$pub" ] || continue
+        base="$(basename "$pub" .pub)"
+        [ "$base" = "$name" ] || continue
+        IFS= read -r candidate < "$pub" || true
+        [ -n "$candidate" ] || continue
+        printf '%s\n' "$candidate"
+        return 0
+    done
+    return 1
+}
+
+resolve_key() {
+    local name="$1" src_home="$2" line
+    if line="$(resolve_from_authorized_keys "$name" "$src_home/.ssh/authorized_keys")"; then
+        printf '%s\n' "$line"
+        return 0
+    fi
+    line="$(resolve_from_pub "$name" "$src_home/.ssh")" || return 1
+    printf '%s\n' "$line"
+}
+
+target_has_key() {
+    local material="$1" auth="$2" line
+    [ -f "$auth" ] || return 1
+    while IFS= read -r line || [ -n "$line" ]; do
+        case "$line" in ''|\#*) continue ;; esac
+        parse_key_line "$line" || continue
+        [ "$KEY_TYPE $KEY_MATERIAL" = "$material" ] || continue
+        return 0
+    done < "$auth"
+    return 1
+}
+
+# Command substitution strips trailing newlines, so an empty result means the
+# file already ends in a newline.
+ensure_trailing_newline() {
+    local file="$1" last
+    [ -s "$file" ] || return 0
+    last="$(tail -c 1 "$file")"
+    [ -n "$last" ] || return 0
+    printf '\n' >> "$file"
+}
+
+for arg in "$@"; do
+    [ "$arg" = "--" ] && break
+    if [ "$arg" = "--help" ]; then
+        usage
+        exit 0
+    fi
+done
+
+DRY_RUN=0
+SOURCE_USER=""
+
+while getopts ":s:nh" opt; do
+    case "$opt" in
+        s) SOURCE_USER="$OPTARG" ;;
+        n) DRY_RUN=1 ;;
+        h) usage; exit 0 ;;
+        \?) echo "Unknown option: -$OPTARG" >&2; usage >&2; exit 1 ;;
+        :) echo "Option -$OPTARG requires an argument." >&2; usage >&2; exit 1 ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -lt 2 ]; then
+    usage >&2
+    exit 1
+fi
+
+if [ "$EUID" -ne 0 ]; then
+    die "must be run as root (try: sudo $0 ...)"
+fi
+
+TARGET_USER="$1"
+shift
+
+if [ -z "$SOURCE_USER" ]; then
+    SOURCE_USER="${SUDO_USER:-$USER}"
+fi
+
+SRC_HOME="$(home_for "$SOURCE_USER")"
+TGT_HOME="$(home_for "$TARGET_USER")"
+AUTH="$TGT_HOME/.ssh/authorized_keys"
+
+if [ "$DRY_RUN" -eq 0 ]; then
+    mkdir -p "$TGT_HOME/.ssh"
+    chmod 700 "$TGT_HOME/.ssh"
+    if [ ! -f "$AUTH" ]; then
+        install -m 600 /dev/null "$AUTH"
+    fi
+fi
+
+STATUS=0
+for name in "$@"; do
+    if ! line="$(resolve_key "$name" "$SRC_HOME")"; then
+        echo "[fail] no key named '$name' found for $SOURCE_USER"
+        STATUS=1
+        continue
+    fi
+    if ! parse_key_line "$line"; then
+        echo "[fail] could not read key material for '$name'"
+        STATUS=1
+        continue
+    fi
+    if target_has_key "$KEY_TYPE $KEY_MATERIAL" "$AUTH"; then
+        echo "[skip] $name is already authorized for $TARGET_USER"
+        continue
+    fi
+    if [ "$DRY_RUN" -eq 1 ]; then
+        echo "[ ok ] would add $name to $AUTH"
+        continue
+    fi
+    ensure_trailing_newline "$AUTH"
+    printf '%s\n' "$line" >> "$AUTH"
+    chmod 600 "$AUTH"
+    echo "[ ok ] added $name to $AUTH"
+done
+
+exit "$STATUS"
