@@ -1,33 +1,151 @@
 #!/usr/bin/env bash
-# Initialize terminal theme and font settings for Ubuntu
-# Currently sets Catppuccin Mocha theme for GNOME Terminal and Ptyxis
+# Initialize terminal theme and font settings for Linux and macOS
+# Configures Catppuccin Mocha theme for:
+#   Linux (Ubuntu/GNOME): GNOME Terminal, Ptyxis
+#   Linux/macOS: Ghostty
+#   macOS: Default Terminal (Apple Terminal), iTerm2
 
 set -euo pipefail
 
-# Set Catppuccin Mocha theme for GNOME Terminal
-if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Terminal.ProfilesList; then
-    profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
-    if [ -n "$profile" ]; then
-        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-system-font false
-        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" font "JetBrainsMono Nerd Font Medium 12"
-        # Set Catppuccin Mocha palette if available
-        # Note: palette must be set as a string with dconf/gsettings
-        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" palette "['#45475A', '#F38BA8', '#A6E3A1', '#F9E2AF', '#89B4FA', '#F5C2E7', '#94E2D5', '#BAC2DE', '#585B70', '#F38BA8', '#A6E3A1', '#F9E2AF', '#89B4FA', '#F5C2E7', '#94E2D5', '#A6ADC8']"
-        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" background-color "#1E1E2E"
-        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" foreground-color "#CDD6F4"
-        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-theme-colors false
+# Detect platform
+PLATFORM=""
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    PLATFORM="mac"
+elif [[ "$(uname -s)" == "Linux" ]]; then
+    PLATFORM="linux"
+fi
+
+# JetBrainsMono Nerd Font
+FONT_NAME="JetBrainsMono Nerd Font Medium 12"
+
+# Catppuccin Mocha colors
+BACKGROUND="#1E1E2E"
+FOREGROUND="#CDD6F4"
+CURSOR="#F5E0DC"
+SELECTION_BACKGROUND="#585B70"
+# GNOME Terminal palette (16 colors)
+PALETTE_GNOME="['#45475A', '#F38BA8', '#A6E3A1', '#F9E2AF', '#89B4FA', '#F5C2E7', '#94E2D5', '#BAC2DE', '#585B70', '#F38BA8', '#A6E3A1', '#F9E2AF', '#89B4FA', '#F5C2E7', '#94E2D5', '#A6ADC8']"
+
+# Configure Linux GNOME terminals
+if [[ "$PLATFORM" == "linux" ]]; then
+    # GNOME Terminal
+    if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Terminal.ProfilesList; then
+        profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
+        if [ -n "$profile" ]; then
+            gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-system-font false
+            gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" font "$FONT_NAME"
+            gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" palette "$PALETTE_GNOME"
+            gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" background-color "$BACKGROUND"
+            gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" foreground-color "$FOREGROUND"
+            gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-theme-colors false
+        fi
+    fi
+
+    # GNOME Ptyxis
+    if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Ptyxis; then
+        profile=$(gsettings get org.gnome.Ptyxis default-profile-uuid | tr -d "'")
+        if [ -n "$profile" ]; then
+            gsettings set org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/"$profile"/ palette "Catppuccin Mocha"
+        fi
+        gsettings set org.gnome.Ptyxis use-system-font false
+        gsettings set org.gnome.Ptyxis font-name "$FONT_NAME"
     fi
 fi
 
-# Set Catppuccin Mocha theme for GNOME Ptyxis
-if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Ptyxis; then
-    profile=$(gsettings get org.gnome.Ptyxis default-profile-uuid | tr -d "'")
-    if [ -n "$profile" ]; then
-        gsettings set org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/"$profile"/ palette "Catppuccin Mocha"
+# Configure Ghostty (cross-platform: Linux and macOS)
+if command -v ghostty >/dev/null 2>&1; then
+    GHOSTTY_CONFIG_DIR="$HOME/.config/ghostty"
+    GHOSTTY_CONFIG="$GHOSTTY_CONFIG_DIR/config"
+    mkdir -p "$GHOSTTY_CONFIG_DIR"
+
+    if [ -f "$GHOSTTY_CONFIG" ] && grep -q "theme" "$GHOSTTY_CONFIG"; then
+        echo "Ghostty config exists with theme setting, skipping theme setup"
+    else
+        {
+            echo "# Catppuccin Mocha theme"
+            echo "theme = Catppuccin Mocha"
+            echo "font-family = \"JetBrainsMono Nerd Font\""
+            echo "font-size = 12"
+            echo "background = $BACKGROUND"
+            echo "foreground = $FOREGROUND"
+            echo "cursor-color = $CURSOR"
+            echo "selection-background = $SELECTION_BACKGROUND"
+        } >> "$GHOSTTY_CONFIG"
+        echo "Ghostty configured with Catppuccin Mocha"
+    fi
+fi
+
+# Configure macOS Terminal.app (Default Terminal)
+if [[ "$PLATFORM" == "mac" ]]; then
+    if osascript -e "tell application \"Terminal\" to version" >/dev/null 2>&1; then
+        # Set default profile to Pro (safe base) and customize, or create Catppuccin profile
+        osascript <<'OSA'
+tell application "Terminal"
+    set target to default settings
+    set background color of target to {30, 30, 46} -- Catppuccin Mocha background #1E1E2E
+    set normal text color of target to {205, 214, 244} -- Catppuccin Mocha foreground #CDD6F4
+    set cursor color of target to {245, 224, 220} -- Catppuccin Mocha cursor #F5E0DC
+    set selection color of target to {88, 91, 112} -- Catppuccin Mocha surface2 #585B70
+    set font name of target to "JetBrainsMono Nerd Font"
+    set font size of target to 12
+end tell
+OSA
+        echo "macOS Terminal.app configured with Catppuccin Mocha"
     fi
 
-    gsettings set org.gnome.Ptyxis use-system-font false
-    gsettings set org.gnome.Ptyxis font-name "JetBrainsMono Nerd Font Medium 12"
+    # Configure iTerm2
+    if [ -d "/Applications/iTerm.app" ] || command -v iTerm2 >/dev/null 2>&1; then
+        defaults write com.googlecode.iterm2 PrefsCustomFolder -string "$HOME/.config/iterm2"
+        defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
+
+        ITERM2_PREFS_DIR="$HOME/.config/iterm2"
+        mkdir -p "$ITERM2_PREFS_DIR"
+
+        # If Catppuccin Mocha theme isn't present, add basic color settings
+        if [ ! -f "$ITERM2_PREFS_DIR/Catppuccin Mocha.itermcolors" ]; then
+            cat > "$ITERM2_PREFS_DIR/com.googlecode.iterm2.plist.patch" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>BackgroundColor</key>
+  <dict>
+    <key>Blue Component</key>
+    <real>0.1803921568627451</real>
+    <key>Green Component</key>
+    <real>0.11764705882352941</real>
+    <key>Red Component</key>
+    <real>0.11764705882352941</real>
+  </dict>
+  <key>ForegroundColor</key>
+  <dict>
+    <key>Blue Component</key>
+    <real>0.9568627450980393</real>
+    <key>Green Component</key>
+    <real>0.8392156862745098</real>
+    <key>Red Component</key>
+    <real>0.803921568627451</real>
+  </dict>
+  <key>CursorColor</key>
+  <dict>
+    <key>Blue Component</key>
+    <real>0.8627450980392157</real>
+    <key>Green Component</key>
+    <real>0.8784313725490196</real>
+    <key>Red Component</key>
+    <real>0.9607843137254902</real>
+  </dict>
+  <key>Font</key>
+  <string>JetBrainsMono Nerd Font 12</string>
+  <key>UseNonAsciiFont</key>
+  <false/>
+</dict>
+</plist>
+PLIST
+            echo "iTerm2 preferences directory configured"
+        fi
+    fi
 fi
 
 echo "Terminal theme configuration complete."
+
