@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Initialize terminal theme and font settings for Ubuntu
+# Currently sets Catppuccin Mocha theme for GNOME Terminal and Ptyxis
+
+set -euo pipefail
+
+# Set Catppuccin Mocha theme for GNOME Terminal
+if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Terminal.ProfilesList; then
+    profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
+    if [ -n "$profile" ]; then
+        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-system-font false
+        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" font "JetBrainsMono Nerd Font Medium 12"
+        # Set Catppuccin Mocha palette if available
+        # Note: palette must be set as a string with dconf/gsettings
+        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" palette "['#45475A', '#F38BA8', '#A6E3A1', '#F9E2AF', '#89B4FA', '#F5C2E7', '#94E2D5', '#BAC2DE', '#585B70', '#F38BA8', '#A6E3A1', '#F9E2AF', '#89B4FA', '#F5C2E7', '#94E2D5', '#A6ADC8']"
+        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" background-color "#1E1E2E"
+        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" foreground-color "#CDD6F4"
+        gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile/" use-theme-colors false
+    fi
+fi
+
+# Set Catppuccin Mocha theme for GNOME Ptyxis
+if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Ptyxis; then
+    profile=$(gsettings get org.gnome.Ptyxis default-profile-uuid | tr -d "'")
+    if [ -n "$profile" ]; then
+        gsettings set org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/"$profile"/ palette "Catppuccin Mocha"
+    fi
+
+    gsettings set org.gnome.Ptyxis use-system-font false
+    gsettings set org.gnome.Ptyxis font-name "JetBrainsMono Nerd Font Medium 12"
+fi
+
+echo "Terminal theme configuration complete."
