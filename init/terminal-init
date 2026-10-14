@@ -7,6 +7,14 @@
 
 set -euo pipefail
 
+msg() {
+    printf '%s\n' "$*"
+}
+
+warn() {
+    printf 'warning: %s\n' "$*" >&2
+}
+
 # Detect platform
 PLATFORM=""
 if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -26,8 +34,76 @@ SELECTION_BACKGROUND="#585B70"
 # GNOME Terminal palette (16 colors)
 PALETTE_GNOME="['#45475A', '#F38BA8', '#A6E3A1', '#F9E2AF', '#89B4FA', '#F5C2E7', '#94E2D5', '#BAC2DE', '#585B70', '#F38BA8', '#A6E3A1', '#F9E2AF', '#89B4FA', '#F5C2E7', '#94E2D5', '#A6ADC8']"
 
+# Install JetBrains Mono Nerd Font if it is not already available.
+install_nerd_fonts() {
+    if fc-list 2>/dev/null | grep -qi "JetBrainsMono Nerd Font"; then
+        msg "JetBrains Mono Nerd Font is already installed."
+        return 0
+    fi
+
+    if ! command -v curl >/dev/null 2>&1; then
+        warn "curl is not available; cannot download JetBrains Mono Nerd Font."
+        return 0
+    fi
+    if ! command -v unzip >/dev/null 2>&1; then
+        warn "unzip is not available; cannot install JetBrains Mono Nerd Font."
+        return 0
+    fi
+
+    local temp_dir font_dir url
+    temp_dir="$(mktemp -d)"
+    font_dir="$HOME/.local/share/fonts/JetBrainsMono"
+    mkdir -p "$font_dir"
+
+    url="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.0/JetBrainsMono.zip"
+    if curl -fsSL "$url" -o "$temp_dir/JetBrainsMono.zip"; then
+        if ! unzip -o -q "$temp_dir/JetBrainsMono.zip" -d "$font_dir" >/dev/null; then
+            warn "Failed to extract JetBrains Mono Nerd Font; continuing without installing it."
+        else
+            if command -v fc-cache >/dev/null 2>&1; then
+                fc-cache -f "$font_dir" >/dev/null || true
+            fi
+            msg "Installed JetBrains Mono Nerd Font."
+        fi
+    else
+        warn "Failed to download JetBrains Mono Nerd Font; continuing without installing it."
+    fi
+
+    rm -rf "$temp_dir"
+}
+
+# Ptyxis ships the Catppuccin palettes in its package. Make sure the terminal
+# is available so those themes are present before we select one.
+ensure_ptyxis_installed() {
+    if command -v ptyxis >/dev/null 2>&1; then
+        return 0
+    fi
+
+    if command -v apt-get >/dev/null 2>&1; then
+        if command -v sudo >/dev/null 2>&1; then
+            msg "Ptyxis is not installed; installing it so the Catppuccin themes are available."
+            if sudo apt-get -yqq update && sudo apt-get -yqq install ptyxis; then
+                return 0
+            fi
+            warn "Failed to install Ptyxis; Catppuccin theme configuration will be skipped."
+            return 0
+        fi
+        warn "Ptyxis is not installed and sudo is unavailable; cannot install its Catppuccin themes."
+        return 0
+    fi
+
+    warn "Ptyxis is not installed; cannot configure the Catppuccin Mocha theme."
+    return 0
+}
+
+# Install fonts on the platforms this script supports.
+if [[ "$PLATFORM" == "linux" || "$PLATFORM" == "mac" ]]; then
+    install_nerd_fonts
+fi
+
 # Configure Linux GNOME terminals
 if [[ "$PLATFORM" == "linux" ]]; then
+    ensure_ptyxis_installed
     # GNOME Terminal
     if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Terminal.ProfilesList; then
         profile=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
@@ -45,7 +121,13 @@ if [[ "$PLATFORM" == "linux" ]]; then
     if command -v gsettings >/dev/null 2>&1 && gsettings list-schemas 2>/dev/null | grep -q org.gnome.Ptyxis; then
         profile=$(gsettings get org.gnome.Ptyxis default-profile-uuid | tr -d "'")
         if [ -n "$profile" ]; then
-            gsettings set org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/"$profile"/ palette "Catppuccin Mocha"
+            if gsettings set "org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/$profile/" palette "Catppuccin Mocha"; then
+                msg "Configured Ptyxis to use the Catppuccin Mocha theme."
+            else
+                warn "Unable to set the Ptyxis palette to Catppuccin Mocha."
+            fi
+        else
+            warn "No default Ptyxis profile was found; skipping theme configuration."
         fi
         gsettings set org.gnome.Ptyxis use-system-font false
         gsettings set org.gnome.Ptyxis font-name "$FONT_NAME"
@@ -147,5 +229,4 @@ PLIST
     fi
 fi
 
-echo "Terminal theme configuration complete."
-
+msg "Terminal theme configuration complete."
