@@ -68,7 +68,7 @@ if [ -t 0 ]; then
     fi
 fi
 
-su - ${CONFIG_USER} <<EOF
+sudo -iu "${CONFIG_USER}" <<EOF
 # Configure certs
 # Place any local certs into ~/certs
 mkdir ~/certs
