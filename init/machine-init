@@ -11,8 +11,8 @@ sudo nala install -y locales sudo make curl ca-certificates git unzip slirp4netn
 sudo nala clean --lists
 sudo rm -rf /var/lib/apt/lists/*
 sudo update-ca-certificates
-sudo locale-gen en_US; locale-gen en_US.UTF-8
-sudo dpkg-reconfigure locales
+sudo locale-gen en_US.UTF-8
+sudo DEBIAN_FRONTEND=noninteractive dpkg-reconfigure -f noninteractive locales
 sudo update-locale LANG="en_US.UTF-8" LANGUAGE="en_US"
 sudo $(deluser ubuntu --remove-home || true)
 sudo $(delgroup ubuntu 2>/dev/null || true)
