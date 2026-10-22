@@ -170,6 +170,158 @@ let
     };
     shutdown = { };
   });
+
+  # ---------------------------------------------------------------------------
+  # Zen browser extensions and startup defaults
+  #
+  # Zen is Firefox-based and reads enterprise policies from
+  # `$SysConfD/policies/policies.json`. The Zen flatpak maps its
+  # `app.zen_browser.zen.systemconfig` extension point to `/app/etc/zen`, and
+  # user-installed extensions are honoured even for a system-installed flatpak.
+  # That makes the policy path writable without root:
+  #   ~/.local/share/flatpak/extension/app.zen_browser.zen.systemconfig/<arch>/stable
+  #
+  # Policies install the extensions and suppress Firefox's first-run and
+  # post-update pages. Zen's own welcome screen is gated by the `zen.` pref
+  # namespace, which the policy `Preferences` block does not allow, so that
+  # flag is seeded into the profile instead (prefs.js for a new profile,
+  # user.js for profiles that already exist).
+  # ---------------------------------------------------------------------------
+  zenAppId = "app.zen_browser.zen";
+  zenArch = pkgs.stdenv.hostPlatform.parsed.cpu.name;
+  zenSystemConfigDir = "${homeDir}/.local/share/flatpak/extension/${zenAppId}.systemconfig/${zenArch}/stable";
+  zenProfileRoot = "${homeDir}/.var/app/${zenAppId}/.zen";
+
+  zenExtensions = [
+    {
+      id = "KeeperFFStoreExtension@KeeperSecurityInc";
+      slug = "keeper-password-manager";
+    }
+    {
+      id = "jid0-adyhmvsP91nUO8pRv0Mn2VKeB84@jetpack";
+      slug = "raindropio";
+    }
+  ];
+
+  zenExtensionSettings = builtins.listToAttrs (map (ext: {
+    name = ext.id;
+    value = {
+      installation_mode = "force_installed";
+      install_url = "https://addons.mozilla.org/firefox/downloads/latest/${ext.slug}/latest.xpi";
+    };
+  }) zenExtensions);
+
+  zenPolicies = {
+    policies = {
+      DisableAppUpdate = true;
+      DontCheckDefaultBrowser = true;
+      OverrideFirstRunPage = "";
+      OverridePostUpdatePage = "";
+      DisableTelemetry = true;
+      ExtensionSettings = zenExtensionSettings;
+      Preferences = {
+        # Zen already defaults to restoring the previous session; pin it so
+        # startup behaviour does not depend on profile state.
+        "browser.startup.page" = {
+          Value = 3;
+          Status = "default";
+        };
+        "browser.startup.firstrunSkipsHomepage" = {
+          Value = true;
+          Status = "default";
+        };
+        # `OverrideFirstRunPage` already disables this; keep it explicit.
+        "browser.aboutwelcome.enabled" = {
+          Value = false;
+          Status = "default";
+        };
+      };
+    };
+  };
+
+  zenPoliciesFile = pkgs.writeText "zen-policies.json" (builtins.toJSON zenPolicies);
+
+  # `user.js` is re-applied on every start, so this stays effective even on a
+  # profile that was created before this configuration existed.
+  zenUserJs = pkgs.writeText "zen-user.js" ''
+    // Managed by home-manager: skip Zen's first-run welcome screen.
+    user_pref("zen.welcome-screen.seen", true);
+  '';
+
+  zenSetupScript = pkgs.writeShellScript "zen-setup" ''
+    set -eu
+
+    # Install the enterprise policy. Inside the sandbox Zen reads it from
+    # /app/etc/zen/policies/policies.json.
+    policies_dir="${zenSystemConfigDir}/policies"
+    mkdir -p "$policies_dir"
+    install -m 0644 "${zenPoliciesFile}" "$policies_dir/policies.json"
+
+    profile_root="${zenProfileRoot}"
+    mkdir -p "$profile_root"
+
+    # Find the installed Zen build. The welcome screen normally records the
+    # build/version prefs while it runs; because we skip it, seed them into a
+    # fresh profile so the first start does not report a phantom update.
+    app_ini=""
+    for candidate in \
+      "${homeDir}/.local/share/flatpak/app/${zenAppId}/current/active/files/zen/application.ini" \
+      "/var/lib/flatpak/app/${zenAppId}/current/active/files/zen/application.ini"; do
+      if [ -f "$candidate" ]; then
+        app_ini="$candidate"
+        break
+      fi
+    done
+    app_version=""
+    app_build_id=""
+    if [ -n "$app_ini" ]; then
+      app_version=$(sed -n 's/^Version=//p' "$app_ini" | head -n 1)
+      app_build_id=$(sed -n 's/^BuildID=//p' "$app_ini" | head -n 1)
+    fi
+
+    # Seed a default profile before the first launch. Without a profiles.ini
+    # Firefox invents a profile after activation has already run, so the
+    # welcome flag would be missing on the very first start.
+    if [ ! -f "$profile_root/profiles.ini" ]; then
+      mkdir -p "$profile_root/zen.default"
+      {
+        echo '// Managed by home-manager: skip Zen first-run welcome screen.'
+        echo 'user_pref("zen.welcome-screen.seen", true);'
+        if [ -n "$app_version" ] && [ -n "$app_build_id" ]; then
+          printf 'user_pref("zen.updates.last-version", "%s");\n' "$app_version"
+          printf 'user_pref("zen.updates.last-build-id", "%s");\n' "$app_build_id"
+        fi
+      } > "$profile_root/zen.default/prefs.js"
+      cat > "$profile_root/profiles.ini" <<'EOF'
+    [Profile0]
+    Name=default
+    IsRelative=1
+    Path=zen.default
+    Default=1
+
+    [General]
+    StartWithLastProfile=1
+    Version=2
+    EOF
+    fi
+
+    # Profiles created before this configuration still need the flag. Merge it
+    # instead of replacing an existing user.js on the user's behalf.
+    for profile in "$profile_root"/*/; do
+      [ -d "$profile" ] || continue
+      case "$(basename "$profile")" in
+        "Profile Groups") continue ;;
+      esac
+      if [ -f "$profile/times.json" ] || [ -f "$profile/prefs.js" ] || [ -f "$profile/compatibility.ini" ]; then
+        if [ ! -f "$profile/user.js" ]; then
+          install -m 0644 "${zenUserJs}" "$profile/user.js"
+        elif ! grep -q 'zen\.welcome-screen\.seen' "$profile/user.js"; then
+          printf '\n' >> "$profile/user.js"
+          cat "${zenUserJs}" >> "$profile/user.js"
+        fi
+      fi
+    done
+  '';
 in
 {
   home.username = username; 
@@ -405,6 +557,14 @@ in
       "${vivaldiSeedPrefs}" \
         "$VIVALDI_CONFIG/Default/Preferences" \
         "${vivaldiOnboardingPrefsFile}" || true
+    fi
+  '';
+
+  # Install Zen enterprise policies (extensions + startup) and seed the
+  # profile flag that disables Zen's own welcome screen
+  home.activation.zenSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ -x "${zenSetupScript}" ]; then
+      "${zenSetupScript}" || true
     fi
   '';
 
