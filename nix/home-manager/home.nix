@@ -59,12 +59,88 @@ let
     done
   '';
 
-  # Default Vivaldi preferences to skip first-run/setup wizards
-  vivaldiDefaultPreferences = pkgs.writeText "vivaldi-default-preferences" (builtins.toJSON {
+  # One-time onboarding flags. The Vivaldi setup wizard is gated by
+  # `vivaldi.startup.has_seen_welcome_page` (native, not `vivaldi.first_run`),
+  # and the Chromium welcome tab by `browser.has_seen_welcome_page`.
+  # `vivaldi.welcome.read_pages` is the per-page progress list used by the
+  # wizard, seeded with every page so it never restarts mid-flow.
+  vivaldiOnboardingPrefs = {
     browser = {
       check_default_browser = false;
       has_seen_welcome_page = true;
     };
+    vivaldi = {
+      startup = {
+        has_seen_welcome_page = true;
+      };
+      welcome = {
+        read_pages = [
+          "intro"
+          "a11y_settings"
+          "account"
+          "control"
+          "import_data"
+          "tracker_and_ad"
+          "layouts"
+          "personalize"
+          "panel_internal"
+          "panel_apps"
+          "welcome_feature_amount"
+          "mail_setup"
+        ];
+      };
+    };
+  };
+
+  vivaldiOnboardingPrefsFile = pkgs.writeText "vivaldi-onboarding-prefs"
+    (builtins.toJSON vivaldiOnboardingPrefs);
+
+  # Merge the onboarding flags into a profile Vivaldi has already initialised.
+  # Without this, seeding only works on a profile that does not exist yet.
+  vivaldiSeedPrefs = pkgs.writeScript "vivaldi-seed-prefs" ''
+    #!${pkgs.python3}/bin/python3
+    import json
+    import os
+    import sys
+    import tempfile
+
+    prefs_path, defaults_path = sys.argv[1], sys.argv[2]
+
+    try:
+        with open(prefs_path) as fh:
+            prefs = json.load(fh)
+    except (OSError, ValueError):
+        sys.exit(0)
+
+    startup = prefs.setdefault("vivaldi", {}).setdefault("startup", {})
+    if startup.get("has_seen_welcome_page") is True:
+        # User (or a previous run) already completed the wizard; do not touch it.
+        sys.exit(0)
+
+    with open(defaults_path) as fh:
+        defaults = json.load(fh)
+
+    def merge(dst, src):
+        for key, value in src.items():
+            if isinstance(value, dict) and isinstance(dst.get(key), dict):
+                merge(dst[key], value)
+            elif isinstance(value, list) and isinstance(dst.get(key), list):
+                for item in value:
+                    if item not in dst[key]:
+                        dst[key].append(item)
+            else:
+                dst[key] = value
+
+    merge(prefs, defaults)
+
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(prefs_path), prefix=".Preferences.")
+    with os.fdopen(fd, "w") as fh:
+        json.dump(prefs, fh)
+    os.replace(tmp, prefs_path)
+  '';
+
+  # Default Vivaldi preferences to skip first-run/setup wizards
+  vivaldiDefaultPreferences = pkgs.writeText "vivaldi-default-preferences" (builtins.toJSON (vivaldiOnboardingPrefs // {
     distribution = {
       import_bookmarks = false;
       import_bookmarks_from_file = "";
@@ -82,15 +158,7 @@ let
     sync = {
       suppress_startup_sync_promos = true;
     };
-    vivaldi = {
-      first_run = {
-        completed = true;
-      };
-      welcome = {
-        shown = true;
-      };
-    };
-  });
+  }));
 
   # Local State to skip first run
   vivaldiLocalState = pkgs.writeText "vivaldi-local-state" (builtins.toJSON {
@@ -321,6 +389,22 @@ in
     # Set Local State to skip first run
     if [ ! -f "$VIVALDI_CONFIG/Local State" ] || [ -n "''${VIVALDI_RESET_PREFS:-}" ]; then
       cp "${vivaldiLocalState}" "$VIVALDI_CONFIG/Local State" 2>/dev/null || true
+    fi
+
+    # Profiles created before the onboarding flags were correct still have the
+    # wizard pending. Patch them in place (Vivaldi rewrites Preferences on exit,
+    # so only do this while it is not running).
+    VIVALDI_RUNNING=0
+    ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+      if ${pkgs.procps}/bin/pgrep -f '/app/vivaldi/vivaldi' >/dev/null 2>&1 \
+        || ${pkgs.procps}/bin/pgrep -x vivaldi >/dev/null 2>&1; then
+        VIVALDI_RUNNING=1
+      fi
+    ''}
+    if [ -f "$VIVALDI_CONFIG/Default/Preferences" ] && [ "$VIVALDI_RUNNING" -eq 0 ]; then
+      "${vivaldiSeedPrefs}" \
+        "$VIVALDI_CONFIG/Default/Preferences" \
+        "${vivaldiOnboardingPrefsFile}" || true
     fi
   '';
 
