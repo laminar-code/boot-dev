@@ -6,29 +6,12 @@ let
   # Vivaldi browser extensions
   #
   # Vivaldi is managed as a *user* flatpak (nix-flatpak hardcodes
-  # `installation = "user"`), so the browser executable does not live in the
-  # Nix store but inside the flatpak deployment:
-  #
-  #   ~/.local/share/flatpak/app/com.vivaldi.Vivaldi/<arch>/stable/active/files/vivaldi/
-  #
-  # Chromium/Vivaldi pick up "external extensions" from an `extensions/`
-  # directory that sits next to the browser executable.  Every extension is
-  # described by a `<extension-id>.json` file; the browser then downloads the
-  # add-on itself from `update_url` the first time it starts, which means the
-  # extension is in place right after the very first launch.
+  # `installation = "user"`). Chromium/Vivaldi pick up "external extensions"
+  # from an `extensions/` directory next to the browser executable.
   # ---------------------------------------------------------------------------
   vivaldiAppId = "com.vivaldi.Vivaldi";
-
-  # Flatpak names deployments after the runtime architecture (`aarch64`,
-  # `x86_64`); Nix's `parsed.cpu.name` uses the exact same spelling.
   vivaldiArch = pkgs.stdenv.hostPlatform.parsed.cpu.name;
-
-  # Root of the Vivaldi deployment inside the user flatpak installation.
   vivaldiFlatpakDir = "${homeDir}/.local/share/flatpak/app/${vivaldiAppId}";
-
-  # Flatpak repoints `<arch>/stable/active` whenever the app is updated,
-  # which invalidates every file we drop into the deployment.
-  vivaldiStableDir = "${vivaldiFlatpakDir}/${vivaldiArch}/stable";
 
   # Update server the browser uses to download the extension payload.
   crxUpdateUrl = "https://clients2.google.com/service/update2/crx";
@@ -46,8 +29,6 @@ let
   ];
 
   vivaldiExtensionDefinitions = map (ext: {
-    # The file name has to be the extension id, that is how Chromium
-    # associates the definition with the add-on.
     file = "${ext.id}.json";
     source = pkgs.writeText "${ext.name}.json" (builtins.toJSON {
       external_update_url = crxUpdateUrl;
@@ -58,43 +39,69 @@ let
     });
   }) vivaldiExtensions;
 
-  # The `install` invocations that copy a definition into the target
-  # directory.  The indentation is part of the string so that the generated
-  # script stays readable.
-  vivaldiExtensionInstalls = lib.concatStringsSep "\n" (map (ext:
-    "    install -m 0644 \"${ext.source}\" \"$target/${ext.file}\""
-  ) vivaldiExtensionDefinitions);
+  # Script to install extensions into all current deployments
+  vivaldiExtensionInstallScript = pkgs.writeShellScript "vivaldi-extension-install" ''
+    app_dir="${vivaldiFlatpakDir}"
+    shopt -s nullglob
+    deployments=("$app_dir"/*/stable/active)
+    shopt -u nullglob
 
-  # Drop the declarative definitions into every Vivaldi deployment of the user
-  # flatpak installation.
-  vivaldiExtensionSync = pkgs.writeShellApplication {
-    name = "vivaldi-extension-sync";
-    runtimeInputs = [ pkgs.coreutils ];
-    text = ''
-      app_dir="${vivaldiFlatpakDir}"
+    if [ ''${#deployments[@]} -eq 0 ]; then
+      exit 0
+    fi
 
-      shopt -s nullglob
-      deployments=("$app_dir"/*/stable/active)
-      shopt -u nullglob
+    for deployment in "''${deployments[@]}"; do
+      [ -d "$deployment" ] || continue
+      target="$deployment/files/vivaldi/extensions"
+      mkdir -p "$target"
+      rm -f -- "$target"/*.json
+      ${lib.concatStringsSep "\n" (map (ext: "      install -m 0644 \"${ext.source}\" \"$target/${ext.file}\"") vivaldiExtensionDefinitions)}
+    done
+  '';
 
-      if [ ''${#deployments[@]} -eq 0 ]; then
-        echo "vivaldi-extension-sync: no Vivaldi deployment below $app_dir" >&2
-        exit 0
-      fi
+  # Default Vivaldi preferences to skip first-run/setup wizards
+  vivaldiDefaultPreferences = pkgs.writeText "vivaldi-default-preferences" (builtins.toJSON {
+    browser = {
+      check_default_browser = false;
+      has_seen_welcome_page = true;
+    };
+    distribution = {
+      import_bookmarks = false;
+      import_bookmarks_from_file = "";
+      import_history = false;
+      import_search_engine = false;
+      skip_first_run_ui = true;
+    };
+    first_run_tabs = [ ];
+    homepage = "about:blank";
+    homepage_is_newtabpage = false;
+    session = {
+      restore_on_startup = 1;
+      startup_urls = [ "about:blank" ];
+    };
+    sync = {
+      suppress_startup_sync_promos = true;
+    };
+    vivaldi = {
+      first_run = {
+        completed = true;
+      };
+      welcome = {
+        shown = true;
+      };
+    };
+  });
 
-      for deployment in "''${deployments[@]}"; do
-        [ -d "$deployment" ] || continue
-        target="$deployment/files/vivaldi/extensions"
-        mkdir -p "$target"
-
-        # This directory is fully managed by this configuration, so drop
-        # definitions that are no longer part of it.
-        rm -f -- "$target"/*.json
-
-      ${vivaldiExtensionInstalls}
-      done
-    '';
-  };
+  # Local State to skip first run
+  vivaldiLocalState = pkgs.writeText "vivaldi-local-state" (builtins.toJSON {
+    browser = {
+      enabled_labs_experiments = [];
+    };
+    profile = {
+      info_cache = { };
+    };
+    shutdown = { };
+  });
 in
 {
   home.username = username; 
@@ -295,38 +302,27 @@ in
     };
   };
 
-  # Install the Vivaldi extensions into the flatpak deployment and keep them
-  # there.  Flatpak replaces the whole deployment on every update, so the
-  # definitions have to be copied again afterwards.
-  systemd.user.services.vivaldi-extension-sync = {
-    Unit = {
-      Description = "Install declarative Vivaldi browser extensions";
-      # The flatpak has to be present before we can write into its deployment.
-      After = [ "flatpak-managed-install.service" ];
-      Wants = [ "flatpak-managed-install.service" ];
-    };
-    Service = {
-      Type = "oneshot";
-      ExecStart = "${vivaldiExtensionSync}";
-    };
-    Install.WantedBy = [ "default.target" ];
-  };
+  # Install Vivaldi extensions and pre-seed default settings for first run
+  home.activation.vivaldiSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    # Install extensions
+    if [ -x "${vivaldiExtensionInstallScript}" ]; then
+      "${vivaldiExtensionInstallScript}" || true
+    fi
 
-  systemd.user.paths.vivaldi-extension-sync = {
-    Unit = {
-      Description = "Watch the Vivaldi flatpak deployment for changes";
-    };
-    Path = {
-      # The stable directory is created when the flatpak is installed and
-      # modified whenever flatpak deploys a new revision of the application.
-      # Watching it therefore covers both the first installation and every
-      # later update.  `PathExists=` must not be used here: it re-triggers
-      # the unit in a loop as soon as the path is there.
-      PathChanged = "${vivaldiStableDir}";
-      Unit = "vivaldi-extension-sync.service";
-    };
-    Install.WantedBy = [ "default.target" ];
-  };
+    # Pre-seed Vivaldi profile with default settings to skip first-run prompts
+    VIVALDI_CONFIG="${homeDir}/.var/app/com.vivaldi.Vivaldi/config/vivaldi"
+    mkdir -p "$VIVALDI_CONFIG" "$VIVALDI_CONFIG/Default"
+
+    # Copy default preferences if they don't exist or to reset to defaults
+    if [ ! -f "$VIVALDI_CONFIG/Default/Preferences" ] || [ -n "''${VIVALDI_RESET_PREFS:-}" ]; then
+      cp "${vivaldiDefaultPreferences}" "$VIVALDI_CONFIG/Default/Preferences" 2>/dev/null || true
+    fi
+
+    # Set Local State to skip first run
+    if [ ! -f "$VIVALDI_CONFIG/Local State" ] || [ -n "''${VIVALDI_RESET_PREFS:-}" ]; then
+      cp "${vivaldiLocalState}" "$VIVALDI_CONFIG/Local State" 2>/dev/null || true
+    fi
+  '';
 
   # Configure Programs
   programs = {
