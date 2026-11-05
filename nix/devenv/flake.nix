@@ -144,6 +144,20 @@
       };
 
 
+      ai = devenv.lib.mkShell {
+        inherit inputs pkgs;
+        modules = [
+          ({ pkgs, config, ... }: {
+            packages = with pkgs; [ 
+              opencode
+            ];
+            enterShell = ''
+              echo Cloud shell...
+            '';
+          })
+        ];
+      };
+
       cloud = devenv.lib.mkShell {
         inherit inputs pkgs;
         modules = [
