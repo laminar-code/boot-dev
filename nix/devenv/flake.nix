@@ -148,6 +148,21 @@
         modules = [
           ({ pkgs, config, ... }: {
             packages = with pkgs; [ 
+              # javascript
+              bun
+              pnpm
+
+              # language packages
+              zulu
+              clojure
+              babashka
+
+              # database drivers
+              postgresql_jdbc
+              sqlite-jdbc
+              oracle-instantclient
+              
+              # ai tools
               opencode
             ];
             enterShell = ''
