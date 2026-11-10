@@ -1,0 +1,34 @@
+#!/bin/sh
+# Install Flatpak and Bazaar, the Flatpak application manager, on Ubuntu.
+
+set -euo pipefail
+
+FLATHUB_REPO="https://dl.flathub.org/repo/flathub.flatpakrepo"
+BAZAAR_APP="io.github.kolunmi.Bazaar"
+
+if ! command -v apt-get >/dev/null 2>&1; then
+  echo "error: apt-get is required (this script targets Ubuntu)" >&2
+  exit 1
+fi
+
+# Keep package management unattended: assume yes, keep existing config
+# files on conffile conflicts, and stop needrestart from prompting.
+apt_get() {
+  sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a \
+    apt-get -yqq \
+    -o Dpkg::Options::=--force-confdef \
+    -o Dpkg::Options::=--force-confold \
+    "$@"
+}
+
+apt_get update
+apt_get install flatpak
+
+# Flathub is the app source Bazaar browses and installs from.
+flatpak remote-add --if-not-exists flathub "$FLATHUB_REPO"
+
+# Install Bazaar for the current user so it can manage apps without
+# requiring elevated privileges.
+flatpak install -y --noninteractive flathub "$BAZAAR_APP"
+
+echo "Flatpak and Bazaar are installed."
