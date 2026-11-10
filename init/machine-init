@@ -211,8 +211,11 @@ echo "Initialization will require 2 minutes."
 echo "Please stand by..."
 echo
 
-# The bang makes Lazy wait until the sync (install/update/clean) has finished
-nvim --headless "+Lazy! restore" +qa
+# Install any missing plugins and pin every plugin to the commit recorded in
+# boot-dev's lazy-lock.json. BOOT_DEV_LAZY_LOCKFILE_READONLY keeps lazy from
+# rewriting the lock file while it is still discovering plugin specs.
+# The bang makes Lazy wait until restore has finished.
+BOOT_DEV_LAZY_LOCKFILE_READONLY=1 nvim --headless "+Lazy! restore" +qa
 
 # Set JetBrains Mono Nerd Font Medium as the GNOME Terminal default font.
 # Skipped when GNOME Terminal is unavailable (e.g. inside the container).

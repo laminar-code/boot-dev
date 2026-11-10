@@ -28,6 +28,15 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Keep the repository's lock file read-only during machine initialization.
+-- lazy.nvim rewrites the lock file after each install round, before every
+-- plugin spec has been imported. On a fresh machine that drops the entries for
+-- plugins that are still missing, so they get installed at their latest
+-- commits instead of the commits recorded in lazy-lock.json.
+if vim.env.BOOT_DEV_LAZY_LOCKFILE_READONLY == "1" then
+  require("lazy.manage.lock").update = function() end
+end
+
 require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins

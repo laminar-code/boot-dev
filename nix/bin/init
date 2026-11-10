@@ -18,12 +18,11 @@ ln -s /home/$USER/git/boot-dev/nix/devenv /home/$USER/devenv
 
 home-manager switch
 
-# Initialize Neovim plugins
-nvim -c "Lazy update" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
-nvim --headless "+Lazy! update" +qa
-nvim --headless "+Lazy! install" +qa
-nvim --headless "+Lazy! sync" +qa
-nvim -c "Lazy sync" -c "sleep 60" -c "call feedkeys(\":qa\\<cr>\")"
+# Install any missing plugins and pin every plugin to the commit recorded in
+# boot-dev's lazy-lock.json. BOOT_DEV_LAZY_LOCKFILE_READONLY keeps lazy from
+# rewriting the lock file while it is still discovering plugin specs.
+# The bang makes Lazy wait until restore has finished.
+BOOT_DEV_LAZY_LOCKFILE_READONLY=1 nvim --headless "+Lazy! restore" +qa
 
 echo
 echo
