@@ -37,6 +37,16 @@ start-dev was intended to start up the development container after it was built,
 
 go-dev logs you into the running dev container.
 
+### Machine initialization
+
+`init/machine-init [--user USER]` provisions a host machine for boot-dev, installing the base packages, locales, the `devx` user, nix, home-manager, and the editor and terminal configuration. The account to configure can be passed with `--user`; when it is omitted the script prompts before making any changes, using `devx` as the default.
+
+Package management runs unattended: apt is called with `DEBIAN_FRONTEND=noninteractive`, keeps existing configuration files when a package ships a conflicting conffile (`--force-confdef --force-confold`), and runs with `NEEDRESTART_MODE=a` so needrestart does not pause for input. As a result, services affected by upgraded libraries are restarted automatically during the run. Change `NEEDRESTART_MODE` to `l` in the script to only list affected services without restarting them.
+
+`init/flatpak-init` updates the apt package lists, installs Flatpak, adds the Flathub remote, and installs the Bazaar app store from Flathub.
+
+At the end of the run, `machine-init` copies the invoking user's `~/.ssh/authorized_keys` into the configured account. The new `~/.ssh` directory is owned by that account with mode `0700`, and `authorized_keys` gets mode `0600`.
+
 ## Certificates
 
 Any certificates that need to be installed into the ca bundle need to be stored in PEM format in ubuntu-nix-foundation/certs. They will be ignored by git, but will be copied into the new image and bundled with the system ca certs. 

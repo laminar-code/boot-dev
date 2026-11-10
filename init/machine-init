@@ -1,13 +1,76 @@
 #!/bin/sh
 # Machine init to enable boot-dev build and execution
 
-sudo apt-get -yqq update
-sudo apt-get -yqq upgrade
+usage() {
+  cat <<EOF
+Usage: $0 [--user USER]
+
+Provision this machine for boot-dev.
+
+Options:
+  --user USER  Account to configure (default: devx; prompts when omitted)
+  -h, --help   Show this help
+EOF
+}
+
+CONFIG_USER=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --user)
+      if [ $# -lt 2 ]; then
+        echo "error: --user requires a value" >&2
+        usage >&2
+        exit 1
+      fi
+      CONFIG_USER="$2"
+      shift 2
+      ;;
+    --user=*)
+      CONFIG_USER="${1#--user=}"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "error: unknown argument: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Prompt before doing anything else when --user was not supplied.
+if [ -z "$CONFIG_USER" ]; then
+  CONFIG_USER=devx
+  if [ -t 0 ]; then
+    printf 'Enter username for configuration [%s]: ' "$CONFIG_USER"
+    read -r CONFIG_USER_INPUT || true
+    if [ -n "$CONFIG_USER_INPUT" ]; then
+      CONFIG_USER="$CONFIG_USER_INPUT"
+    fi
+  fi
+fi
+export CONFIG_USER
+
+# Keep package management unattended: assume yes, keep existing config
+# files on conffile conflicts, and stop needrestart from prompting.
+apt_get() {
+  sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a \
+    apt-get -yqq \
+    -o Dpkg::Options::=--force-confdef \
+    -o Dpkg::Options::=--force-confold \
+    "$@"
+}
+
+apt_get update
+apt_get upgrade
 
 # Install nala for parallel downloads and updates
 # then install base level required packages
-sudo apt-get -yqq install nala
-sudo nala install -y locales sudo make curl ca-certificates git unzip slirp4netns uidmap buildah xz-utils nano neovim gcc flatpak xdg-desktop-portal util-linux-extra
+apt_get install nala
+sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a nala install -y locales sudo make curl ca-certificates git unzip slirp4netns uidmap buildah xz-utils nano neovim gcc flatpak xdg-desktop-portal util-linux-extra
 sudo nala clean --lists
 sudo rm -rf /var/lib/apt/lists/*
 sudo update-ca-certificates
@@ -48,25 +111,17 @@ Components: main
 Signed-By: /usr/share/keyrings/gnupg-keyring.gpg
 EOF
 
-sudo apt-get -yqq update
-sudo apt-get install gnupg
+apt_get update
+apt_get install gnupg
 
 # Install signal-cli
 sudo curl -sL -o /etc/apt/trusted.gpg.d/morph027-signal-cli.asc https://packaging.gitlab.io/signal-cli/gpg.key
 echo "deb https://packaging.gitlab.io/signal-cli signalcli main" | sudo tee /etc/apt/sources.list.d/morph027-signal-cli.list
-sudo apt-get -yqq update
-sudo apt-get install signal-cli-native
+apt_get update
+apt_get install signal-cli-native
 # signal-cli link -n "DevConsole" | xargs -L 1 qrencode -o signal_qr.png
 
 set -euo pipefail
-export CONFIG_USER=devx
-if [ -t 0 ]; then
-  echo -n "Enter username for configuration [${CONFIG_USER}]: "
-  read -r CONFIG_USER_INPUT || true
-  if [ -n "$CONFIG_USER_INPUT" ]; then
-    CONFIG_USER="$CONFIG_USER_INPUT"
-  fi
-fi
 
 sudo -iu "${CONFIG_USER}" <<EOF
 # Configure certs
@@ -113,8 +168,16 @@ mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${CONFIG_USER}/git/boot-dev
 mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${CONFIG_USER}/git/boot-dev/lazygit /home/${CONFIG_USER}/.config/lazygit
 
 # Remove system gnupg prior to installing nix and home-manager to avoid version conflicts
-sudo apt remove gnupg -yqq
-sudo apt autoremove -yqq
+sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a \
+  apt-get -yqq \
+  -o Dpkg::Options::=--force-confdef \
+  -o Dpkg::Options::=--force-confold \
+  remove gnupg
+sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a \
+  apt-get -yqq \
+  -o Dpkg::Options::=--force-confdef \
+  -o Dpkg::Options::=--force-confold \
+  autoremove
 
 # Install nix
 curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
@@ -174,4 +237,39 @@ fi
 echo
 echo
 echo "System ready. Logout and log back in to start a clean session."
+EOF
+
+# Copy the invoking user's SSH authorized_keys to the configured user so
+# the new account can log in with the same keys.
+SRC_USER="${SUDO_USER:-$(id -un)}"
+SRC_HOME="$(getent passwd "$SRC_USER" | cut -d: -f6 || true)"
+DST_HOME="$(getent passwd "$CONFIG_USER" | cut -d: -f6 || true)"
+DST_GROUP="$(id -gn "$CONFIG_USER" 2>/dev/null || printf '%s' "$CONFIG_USER")"
+
+if [ -z "$SRC_HOME" ] || [ -z "$DST_HOME" ]; then
+  echo "warning: could not resolve home directory; skipping authorized_keys copy." >&2
+elif [ ! -f "$SRC_HOME/.ssh/authorized_keys" ]; then
+  echo "No ~/.ssh/authorized_keys found for ${SRC_USER}; skipping copy."
+elif [ "$SRC_USER" = "$CONFIG_USER" ]; then
+  echo "Configured user is ${SRC_USER}; authorized_keys already in place."
+else
+  sudo install -d -m 0700 -o "$CONFIG_USER" -g "$DST_GROUP" "$DST_HOME/.ssh"
+  sudo install -m 0600 -o "$CONFIG_USER" -g "$DST_GROUP" \
+    "$SRC_HOME/.ssh/authorized_keys" "$DST_HOME/.ssh/authorized_keys"
+  echo "Copied ~/.ssh/authorized_keys from ${SRC_USER} to ${CONFIG_USER}."
+fi
+
+cat <<EOF
+
+Next steps
+----------
+Finish setting up credentials with one of the following, then log out and
+back in to start a clean session:
+
+  Restore existing credentials from Keeper:
+    dev keeper
+    Log in, then restore your tokens.
+
+  Or create new SSH, GPG, and pass credentials:
+    ~/git/boot-dev/init/keys-init
 EOF
