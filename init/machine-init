@@ -159,6 +159,8 @@ ln -s /home/${CONFIG_USER}/git/boot-dev/container/labels /home/${CONFIG_USER}/bi
 ln -s /home/${CONFIG_USER}/git/boot-dev/container/label-container /home/${CONFIG_USER}/bin/label-container
 ln -s /home/${CONFIG_USER}/git/boot-dev/nix/bin/dev /home/${CONFIG_USER}/bin/dev
 ln -s /home/${CONFIG_USER}/git/boot-dev/nix/bin/init /home/${CONFIG_USER}/bin/init
+ln -s /home/${CONFIG_USER}/git/boot-dev/bin/get-secure-script /home/${CONFIG_USER}/bin/get-secure-script
+ln -s /home/${CONFIG_USER}/git/boot-dev/bin/get-secure-file /home/${CONFIG_USER}/bin/get-secure-file
 
 # Link base config directories to boot-dev
 mkdir -p /home/${CONFIG_USER}/.config && ln -s /home/${CONFIG_USER}/git/boot-dev/nix/config /home/${CONFIG_USER}/.config/nix

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# Retrieve a secure note from Keeper and write it to a file next to this
+# script. The file is named after the requested key and is only accessible by
+# its owner (mode 700).
+# Usage: get-secure-script <key-name>
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: get-secure-script <key-name>
+
+Fetch the value of the Keeper secure note <key-name> and write it to a file
+with the same name in the directory containing this script. The file is
+created with mode 700.
+
+Example:
+  get-secure-script restore-tokens
+EOF
+}
+
+die() {
+    echo "error: $*" >&2
+    exit 1
+}
+
+case "${1:-}" in
+    -h|--help)
+        usage
+        exit 0
+        ;;
+esac
+
+if [ $# -ne 1 ]; then
+    usage >&2
+    exit 1
+fi
+
+KEY="$1"
+
+# Use the key as a filename, so reject anything that could escape the target
+# directory or be interpreted as an option.
+case "$KEY" in
+    ''|.*|-*|*/*)
+        die "invalid key name: $KEY"
+        ;;
+esac
+
+command -v keeper >/dev/null 2>&1 || die "keeper is not installed"
+command -v jq >/dev/null 2>&1 || die "jq is not installed"
+
+# Resolve the directory containing this script, including when invoked through
+# a symlink on PATH.
+SCRIPT_PATH="$(command -v -- "$0" 2>/dev/null || true)"
+[ -n "$SCRIPT_PATH" ] || SCRIPT_PATH="$0"
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+TARGET="$SCRIPT_DIR/$KEY"
+
+# Write to a private temporary file first and move it into place, so a failed
+# or interrupted fetch never leaves a partially written or world-readable file.
+umask 077
+TMP="$(mktemp "$SCRIPT_DIR/.${KEY}.XXXXXX")"
+trap 'rm -f "$TMP"' EXIT
+
+keeper get "$KEY" --format=json \
+    | jq --raw-output '(.fields[] | select(.type == "note") | .value[0]) // empty' > "$TMP"
+
+if [ ! -s "$TMP" ]; then
+    die "no note value found for '$KEY'"
+fi
+
+chmod 700 "$TMP"
+mv -f "$TMP" "$TARGET"
+trap - EXIT
+
+echo "Wrote $TARGET"
